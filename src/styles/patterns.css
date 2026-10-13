@@ -1,0 +1,75 @@
+/* App-level patterns on top of the demo's admin.css (which follows the kit's adding-a-component rules). */
+
+.ma-kpis {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.ma-brandmark {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.ma-brandmark svg {
+  color: var(--accent);
+}
+
+.ma-splash {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.ma-login {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: var(--space-6);
+}
+
+.ma-login .ma-panel {
+  width: min(400px, 100%);
+}
+
+/* Report date range control in the page head. */
+.ma-range {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.ma-range__inputs {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.ma-range__inputs .ma-input {
+  width: auto;
+  min-height: 40px;
+  padding-block: var(--space-1);
+}
+
+/* Animated search icon inside `.ma-search` (the wrapper div the animated icon renders). */
+.ma-search .ma-search__icon {
+  position: absolute;
+  inset-inline-start: var(--space-3);
+  top: 50%;
+  display: inline-flex;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+/* Sidebar header: title with a collapse control aligned to the inline end. */
+.ma-sidebar__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
