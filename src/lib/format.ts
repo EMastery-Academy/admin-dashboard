@@ -63,3 +63,34 @@ export function formatDateTime(iso: string | null | undefined): string {
   if (!iso) return "—";
   return new Intl.DateTimeFormat("en", { dateStyle: "medium", timeStyle: "short" }).format(new Date(iso));
 }
+
+/** Formats seconds into digital clock time `mm:ss` or `hh:mm:ss` (e.g. 63 → "1:03", 324 → "5:24"). */
+export function formatDurationSeconds(seconds: number | null | undefined): string {
+  if (seconds == null || Number.isNaN(seconds) || seconds < 0) return "—";
+  const s = Math.round(seconds);
+  const hrs = Math.floor(s / 3600);
+  const mins = Math.floor((s % 3600) / 60);
+  const secs = s % 60;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  if (hrs > 0) {
+    return `${hrs}:${pad(mins)}:${pad(secs)}`;
+  }
+  return `${mins}:${pad(secs)}`;
+}
+
+/** Formats duration into human string, e.g. "32 دقيقة" or "2 ساعة و 15 دقيقة" (or "32 mins"). */
+export function formatHumanDuration(seconds: number | null | undefined, isAr = true): string {
+  if (seconds == null || Number.isNaN(seconds) || seconds <= 0) return "";
+  const s = Math.round(seconds);
+  const hrs = Math.floor(s / 3600);
+  const mins = Math.floor((s % 3600) / 60);
+  if (hrs > 0) {
+    if (isAr) {
+      return mins > 0 ? `${hrs} ساعة و ${mins} دقيقة` : `${hrs} ساعة`;
+    }
+    return mins > 0 ? `${hrs}h ${mins}m` : `${hrs}h`;
+  }
+  const effectiveMins = mins > 0 ? mins : s > 0 ? 1 : 0;
+  return isAr ? `${effectiveMins} دقيقة` : `${effectiveMins} min${effectiveMins !== 1 ? "s" : ""}`;
+}
+

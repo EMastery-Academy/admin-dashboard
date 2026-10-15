@@ -1,47 +1,43 @@
 import { queryOptions } from "@tanstack/react-query";
 
 import { apiGet } from "@/lib/api/client";
-import type { QueryParams } from "@/lib/api/operation-types";
-import type { DashboardSummary, ProductSalesRow, SalesPoint } from "@/lib/api/contract";
+import type { QueryParams, SuccessResponse } from "@/lib/api/operation-types";
 
-type DashboardSalesOp = "dashboard_sales_api_v1_admin_backoffice_dashboard_sales_get";
-type ProductsReportOp = "product_sales_report_api_v1_admin_backoffice_reports_products_get";
+type SummaryOp = "dashboard_summary_api_v1_admin_dashboard_summary_get";
+type DashboardSalesOp = "dashboard_sales_api_v1_admin_dashboard_sales_get";
 
+/**
+ * Platform-wide counters over B2C and the legacy platform (paid orders, free enrollments, customers and
+ * revenue include legacy sales); certificates, videos, instructor applications and partners come from the LMS.
+ */
+export type DashboardSummary = SuccessResponse<SummaryOp>;
+export type DashboardSummaryParams = QueryParams<SummaryOp>;
 export type DashboardSalesParams = QueryParams<DashboardSalesOp>;
-export type ProductsReportParams = QueryParams<ProductsReportOp>;
 
 export const dashboardPaths = {
-  summary: "admin/backoffice/dashboard/summary",
-  sales: "admin/backoffice/dashboard/sales",
-  productsReport: "admin/backoffice/reports/products",
+  summary: "admin/dashboard/summary",
+  sales: "admin/dashboard/sales",
 } as const;
 
 export const dashboardKeys = {
   all: ["dashboard"] as const,
-  summary: () => [...dashboardKeys.all, "summary"] as const,
+  summary: (params?: DashboardSummaryParams) => [...dashboardKeys.all, "summary", params ?? {}] as const,
   sales: (params: DashboardSalesParams) => [...dashboardKeys.all, "sales", params] as const,
-  productsReport: (params?: ProductsReportParams) => [...dashboardKeys.all, "products-report", params ?? {}] as const,
 };
 
-/** `GET /admin/backoffice/dashboard/summary` — the platform-wide counters. */
-export function dashboardSummary(): Promise<DashboardSummary> {
-  return apiGet(dashboardPaths.summary);
+/** `GET /admin/dashboard/summary?report_currency` — the platform-wide counters. */
+export function dashboardSummary(params: DashboardSummaryParams = {}): Promise<DashboardSummary> {
+  return apiGet(dashboardPaths.summary, { query: params });
 }
 
-/** `GET /admin/backoffice/dashboard/sales?start&end` — one point per day. */
-export function dashboardSales(params: DashboardSalesParams): Promise<SalesPoint[]> {
+/** `GET /admin/dashboard/sales?start&end&report_currency&source` — one sales point per day. */
+export function dashboardSales(params: DashboardSalesParams): Promise<SuccessResponse<DashboardSalesOp>> {
   return apiGet(dashboardPaths.sales, { query: params });
 }
 
-/** `GET /admin/backoffice/reports/products?start&end` — per-product sales rows. */
-export function productsReport(params: ProductsReportParams): Promise<ProductSalesRow[]> {
-  return apiGet(dashboardPaths.productsReport, { query: params });
-}
-
 export const dashboardQueries = {
-  summary: () => queryOptions({ queryKey: dashboardKeys.summary(), queryFn: dashboardSummary }),
+  summary: (params?: DashboardSummaryParams) =>
+    queryOptions({ queryKey: dashboardKeys.summary(params), queryFn: () => dashboardSummary(params) }),
   sales: (params: DashboardSalesParams) =>
     queryOptions({ queryKey: dashboardKeys.sales(params), queryFn: () => dashboardSales(params) }),
-  productsReport: (params: ProductsReportParams) =>
-    queryOptions({ queryKey: dashboardKeys.productsReport(params), queryFn: () => productsReport(params) }),
 };

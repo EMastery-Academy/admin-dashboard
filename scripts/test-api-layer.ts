@@ -1,5 +1,10 @@
 import {
   ApiError,
+  getStudio,
+  getStudioPreviewBase,
+  listStudioAssets,
+  listStudioVersions,
+  saveStudioDraft,
   adminLogin,
   adminLogout,
   adminMe,
@@ -7,72 +12,85 @@ import {
   apiRequest,
   assignAdminRole,
   categoriesReport,
-  couponsReport,
   createAdminUser,
   createBundle,
   createRole,
   customersReport,
   dashboardSales,
   dashboardSummary,
-  getBackofficeCustomer,
   getBundle,
-  getCatalogProduct,
+  getConsultant,
+  getConsultationInfo,
+  getConsultationRevenue,
   getConsultationService,
   getCustomer,
   getCustomer360,
   getDatabaseHealth,
+  getFxRates,
   getHealth,
-  getLegacyResource,
+  getOffer,
   getOrder,
+  getPackageCourses,
+  getPackageSummary,
   getPaymentIntent,
+  getProduct,
+  getProductCertificates,
+  getProductCurriculum,
+  getProductInstructors,
+  getProductLearners,
+  getProductPrices,
+  getProductRules,
   getPromotion,
+  getReferralPartner,
   getRefundPreview,
   getSupportTicket,
   importCustomers,
-  legacyProductsReport,
-  legacyResources,
+  listAdminInstructors,
   listAdminUserRoles,
   listAdminUsers,
-  listAnnouncementBars,
+  listAnnouncements,
   listAuditLogs,
-  listBackofficeCustomers,
   listBanners,
-  listCatalog,
+  listCategories,
+  listCertificateTemplates,
+  listConsultants,
   listConsultationServices,
   listCountries,
+  listCustomerSegments,
   listCustomers,
+  listExtensionPackages,
   listImportIssues,
-  listLegacyPanelUsers,
-  listLegacyResource,
-  listLegacyTickets,
+  listInstructorApplications,
   listModules,
   listNotificationEmails,
   listOffers,
   listOrders,
   listPaymentFailures,
+  listPayments,
   listPriceLists,
+  listProducts,
   listPromotions,
+  listRatings,
+  listReferralCommissions,
   listReferralPartners,
   listReferralPayouts,
+  listReferralPolicies,
   listRefunds,
   listRoles,
   listSliders,
   listSocialLinks,
   listSupportTickets,
   listTags,
-  createLegacyResource,
-  deleteLegacyResource,
-  updateLegacyResource,
-  monthlyCharts,
-  productsReport,
-  publishProduct,
+  paymentsReport,
+  productSalesReport,
+  promotionsReport,
   reconcilePaymentIntent,
   removeAdminRole,
   replySupportTicket,
-  reportCounters,
   salesReport,
   setAdminUserStatus,
   setCustomerStatus,
+  setProductStatus,
   setPromotionActive,
   setReferralPartnerStatus,
   setSupportTicketStatus,
@@ -113,13 +131,20 @@ type TestContext = {
   adminUserId?: string;
   roleId?: string;
   roleCode?: string;
-  orderId?: string;
-  customerId?: string;
-  legacyUserId?: number;
-  intentId?: string;
-  courseKind?: "course" | "package";
-  courseLegacyId?: number;
-  coursePublished?: boolean;
+  /** Refs (`b2c:<uuid>` / `legacy:<kind>:<id>`) of federated resources. */
+  orderRef?: string;
+  legacyOrderRef?: string;
+  b2cOrderRef?: string;
+  customerRef?: string;
+  legacyCustomerRef?: string;
+  paymentRef?: string;
+  legacyProductRef?: string;
+  legacyProductStatus?: string;
+  packageRef?: string;
+  productRef?: string;
+  b2cProductId?: string;
+  consultantId?: number;
+  offerId?: number;
   promotionId?: number;
   promotionActive?: boolean;
   partnerId?: number;
@@ -130,7 +155,6 @@ type TestContext = {
   bundleId?: string;
   createdAdminId?: string;
   createdRoleId?: string;
-  resourceRecordId?: number;
 };
 
 class SkipTest extends Error {
@@ -337,12 +361,6 @@ function range(days: number): { start: string; end: string } {
   return { start: start.toISOString(), end: end.toISOString() };
 }
 
-function legacyRange(): { date1: string; date2: string } {
-  const end = new Date();
-  const start = new Date(end.getTime() - 30 * 24 * 60 * 60 * 1000);
-  return { date1: start.toISOString().slice(0, 10), date2: end.toISOString().slice(0, 10) };
-}
-
 // --------------------------------------------------------------------------- live endpoints
 
 function liveEndpointTests(): LiveTest[] {
@@ -375,166 +393,264 @@ function liveEndpointTests(): LiveTest[] {
     },
     { name: "GET /admin/audit-logs", run: async () => { await listAuditLogs({ limit: 5 }); } },
 
-    // -- dashboard
-    { name: "GET /admin/backoffice/dashboard/summary", run: async (ctx) => { const s = await dashboardSummary(); assert(typeof s.customers_total === "number", "expected numeric counters"); void ctx; } },
-    { name: "GET /admin/backoffice/dashboard/sales", run: async () => { await dashboardSales(range(30)); } },
-    { name: "GET /admin/backoffice/reports/products", run: async () => { await productsReport(range(30)); } },
+    // -- dashboard (B2C + legacy)
+    { name: "GET /admin/dashboard/summary", run: async () => { const s = await dashboardSummary(); assert(typeof s.customers_total === "number", "expected numeric counters"); } },
+    { name: "GET /admin/dashboard/sales", run: async () => { await dashboardSales({ ...range(30), report_currency: "AED" }); } },
 
-    // -- sales: orders
+    // -- sales reports (B2C + legacy; `source` filters) + FX
+    {
+      name: "GET /admin/reports/sales",
+      run: async () => {
+        const report = await salesReport({ ...range(30), report_currency: "USD" });
+        assert(typeof report.totals.net === "number", "expected numeric net");
+        assert(Array.isArray(report.days), "expected days array");
+        const daysOrders = report.days.reduce((sum, day) => sum + day.orders, 0);
+        assert(daysOrders === report.totals.orders, "daily orders must add up to the total");
+        const bySource = (report.sources ?? []).reduce((sum, item) => sum + item.orders, 0);
+        assert(bySource === report.totals.orders, "per-source orders must add up to the total");
+      },
+    },
+    {
+      name: "GET /admin/reports/sales?source=legacy",
+      run: async () => {
+        const report = await salesReport({ ...range(365), report_currency: "SAR", source: "legacy" });
+        assert((report.sources ?? []).every((item) => item.source === "legacy"), "expected legacy sales only");
+      },
+    },
+    { name: "GET /admin/reports/products", run: async () => { await productSalesReport({ ...range(30), report_currency: "SAR" }); } },
+    { name: "GET /admin/reports/categories", run: async () => { await categoriesReport(range(30)); } },
+    { name: "GET /admin/reports/promotions", run: async () => { await promotionsReport(range(30)); } },
+    { name: "GET /admin/reports/customers", run: async () => { await customersReport({ ...range(30), limit: 10 }); } },
+    { name: "GET /admin/reports/payments", run: async () => { await paymentsReport(range(30)); } },
+    {
+      name: "GET /admin/fx/rates",
+      run: async () => {
+        const rates = await getFxRates({ base: "USD", quotes: "AED,SAR" });
+        assert(rates.length === 2 && rates.every((rate) => rate.rate > 0), "expected two positive rates");
+      },
+    },
+
+    // -- orders (B2C + legacy)
     {
       name: "GET /admin/orders",
       run: async (ctx) => {
         const page = await listOrders({ limit: 5 });
-        ctx.orderId = page.items[0]?.order_id;
-        ctx.intentId = page.items[0]?.payment_intent_id ?? undefined;
+        assert(page.items.every((item) => item.ref && item.source), "expected ref and source on every order");
+        ctx.orderRef = page.items[0]?.ref;
       },
     },
-    { name: "GET /admin/orders/{id}", run: async (ctx) => { if (!ctx.orderId) throw new SkipTest("no order id"); await getOrder(ctx.orderId); } },
+    {
+      name: "GET /admin/orders?source=b2c",
+      run: async (ctx) => {
+        const page = await listOrders({ source: "b2c", limit: 5 });
+        assert(page.items.every((item) => item.source === "b2c"), "expected B2C orders only");
+        ctx.b2cOrderRef = page.items[0]?.ref;
+        ctx.paymentRef = page.items.find((item) => item.payment_ref)?.payment_ref ?? undefined;
+      },
+    },
+    {
+      name: "GET /admin/orders?source=legacy&status=paid",
+      run: async (ctx) => {
+        const page = await listOrders({ source: "legacy", status: "paid", limit: 5 });
+        assert(page.items.every((item) => item.source === "legacy" && item.status === "paid"), "expected paid legacy orders");
+        ctx.legacyOrderRef = page.items[0]?.ref;
+        ctx.legacyCustomerRef = page.items[0]?.customer_ref ?? undefined;
+      },
+    },
+    { name: "GET /admin/orders/{ref} (b2c)", run: async (ctx) => { if (!ctx.b2cOrderRef) throw new SkipTest("no B2C order"); await getOrder(ctx.b2cOrderRef); } },
+    {
+      name: "GET /admin/orders/{ref} (legacy)",
+      run: async (ctx) => {
+        if (!ctx.legacyOrderRef) throw new SkipTest("no legacy order");
+        const order = await getOrder(ctx.legacyOrderRef);
+        assert(order.source === "legacy", "expected a legacy order");
+      },
+    },
 
-    // -- sales: payments
+    // -- payments (B2C intents + legacy gateway orders)
+    { name: "GET /admin/payments", run: async () => { await listPayments({ limit: 5 }); } },
+    { name: "GET /admin/payments?source=legacy", run: async () => { await listPayments({ source: "legacy", status: "succeeded", limit: 5 }); } },
     { name: "GET /admin/payments/failures", run: async () => { await listPaymentFailures({ limit: 5 }); } },
     { name: "GET /admin/payments/refunds", run: async () => { await listRefunds({ limit: 5 }); } },
-    { name: "GET /admin/payments/orders/{id}/refund-preview", run: async (ctx) => { if (!ctx.orderId) throw new SkipTest("no order id"); await getRefundPreview(ctx.orderId); } },
-    { name: "GET /admin/payments/intents/{id}", run: async (ctx) => { if (!ctx.intentId) throw new SkipTest("no payment intent id"); await getPaymentIntent(ctx.intentId); } },
+    { name: "GET /admin/payments/orders/{ref}/refund-preview", run: async (ctx) => { if (!ctx.b2cOrderRef) throw new SkipTest("no B2C order"); await getRefundPreview(ctx.b2cOrderRef); } },
+    { name: "GET /admin/payments/{ref} (b2c)", run: async (ctx) => { if (!ctx.paymentRef) throw new SkipTest("no B2C payment"); await getPaymentIntent(ctx.paymentRef); } },
+    { name: "GET /admin/payments/{ref} (legacy)", run: async (ctx) => { if (!ctx.legacyOrderRef) throw new SkipTest("no legacy order"); await getPaymentIntent(ctx.legacyOrderRef); } },
 
-    // -- customers
+    // -- customers (B2C + legacy accounts not imported yet)
     {
       name: "GET /admin/customers",
       run: async (ctx) => {
         const page = await listCustomers({ limit: 5 });
-        ctx.customerId = page.items[0]?.customer_id;
+        ctx.customerRef = page.items.find((item) => item.source === "b2c")?.ref;
       },
     },
-    { name: "GET /admin/customers/{id}", run: async (ctx) => { if (!ctx.customerId) throw new SkipTest("no customer id"); await getCustomer(ctx.customerId); } },
-    { name: "GET /admin/customers/{id}/360", run: async (ctx) => { if (!ctx.customerId) throw new SkipTest("no customer id"); await getCustomer360(ctx.customerId); } },
-
-    // -- back-office directory
+    { name: "GET /admin/customers?source=legacy", run: async () => { await listCustomers({ source: "legacy", limit: 5 }); } },
+    { name: "GET /admin/customers/{ref}", run: async (ctx) => { if (!ctx.customerRef) throw new SkipTest("no customer"); await getCustomer(ctx.customerRef); } },
+    { name: "GET /admin/customers/{ref}/360", run: async (ctx) => { if (!ctx.customerRef) throw new SkipTest("no customer"); await getCustomer360(ctx.customerRef); } },
     {
-      name: "GET /admin/backoffice/customers",
+      name: "GET /admin/customers/{ref}/360 (buyer of a legacy order)",
       run: async (ctx) => {
-        const page = await listBackofficeCustomers({ limit: 5 });
-        const withLegacy = page.items.find((c) => c.legacy_user_id);
-        ctx.legacyUserId = withLegacy?.legacy_user_id ?? undefined;
+        if (!ctx.legacyCustomerRef) throw new SkipTest("no legacy buyer");
+        const snapshot = await getCustomer360(ctx.legacyCustomerRef);
+        assert((snapshot.legacy_orders_count ?? 0) > 0, "expected legacy orders");
       },
     },
-    { name: "GET /admin/backoffice/customers/{legacy_user_id}", run: async (ctx) => { if (!ctx.legacyUserId) throw new SkipTest("no legacy user id"); await getBackofficeCustomer(ctx.legacyUserId); } },
-    { name: "GET /admin/backoffice/customers/import/issues", run: async () => { await listImportIssues({ limit: 5 }); } },
+    { name: "GET /admin/customers/import/issues", run: async () => { await listImportIssues({ limit: 5 }); } },
+    { name: "GET /admin/customers/segments", run: async () => { await listCustomerSegments({ limit: 5 }); } },
 
-    // -- catalog
+    // -- catalog (B2C products + legacy courses/packages not migrated yet)
     {
-      name: "GET /admin/backoffice/catalog/{kind} (course)",
+      name: "GET /admin/catalog/products",
       run: async (ctx) => {
-        const page = await listCatalog("course", { limit: 5 });
-        ctx.courseKind = "course";
-        ctx.courseLegacyId = page.items[0]?.legacy_id;
-        ctx.coursePublished = page.items[0]?.status === "published";
+        const page = await listProducts({ product_type: "course", source: "b2c", limit: 5 });
+        ctx.productRef = page.items[0]?.ref ?? undefined;
+        ctx.b2cProductId = page.items[0]?.product_id ?? undefined;
       },
     },
-    { name: "GET /admin/backoffice/catalog/{kind} (package)", run: async () => { await listCatalog("package", { limit: 5 }); } },
-    { name: "GET /admin/backoffice/catalog/{kind}/{legacy_id}", run: async (ctx) => { if (!ctx.courseLegacyId || !ctx.courseKind) throw new SkipTest("no course"); await getCatalogProduct(ctx.courseKind, ctx.courseLegacyId); } },
+    {
+      name: "GET /admin/catalog/products?source=legacy",
+      run: async (ctx) => {
+        const courses = await listProducts({ source: "legacy", product_type: "course", limit: 5 });
+        ctx.legacyProductRef = courses.items[0]?.ref ?? undefined;
+        ctx.legacyProductStatus = courses.items[0]?.status;
+        const packages = await listProducts({ source: "legacy", product_type: "package", limit: 5 });
+        ctx.packageRef = packages.items[0]?.ref ?? undefined;
+      },
+    },
+    { name: "GET /admin/catalog/products/{ref} (b2c)", run: async (ctx) => { if (!ctx.productRef) throw new SkipTest("no product"); await getProduct(ctx.productRef); } },
+    { name: "GET /admin/catalog/products/{ref} (legacy)", run: async (ctx) => { if (!ctx.legacyProductRef) throw new SkipTest("no legacy product"); await getProduct(ctx.legacyProductRef); } },
+    {
+      name: "GET /admin/catalog/products/{ref}/* (legacy content)",
+      run: async (ctx) => {
+        const ref = ctx.legacyProductRef;
+        if (!ref) throw new SkipTest("no legacy product");
+        await getProductCurriculum(ref);
+        await getProductPrices(ref);
+        await getProductRules(ref);
+        await getProductCertificates(ref);
+        await getProductInstructors(ref);
+        await getProductLearners(ref, 5);
+      },
+    },
+    {
+      name: "GET /admin/catalog/products/{ref}/summary|courses (package)",
+      run: async (ctx) => {
+        if (!ctx.packageRef) throw new SkipTest("no legacy package");
+        await getPackageSummary(ctx.packageRef);
+        await getPackageCourses(ctx.packageRef);
+      },
+    },
+    // -- course studio (page drafts, versions, assets, preview data)
+    {
+      name: "GET /admin/catalog/products/{ref}/studio (legacy)",
+      run: async (ctx) => {
+        if (!ctx.legacyProductRef) throw new SkipTest("no legacy product");
+        const page = await getStudio(ctx.legacyProductRef);
+        assert(page.draft.schema_version === 1, "expected a v1 page document");
+        assert(page.draft_revision > 0 || page.seeded, "an unsaved page must be seeded");
+        await listStudioVersions(ctx.legacyProductRef);
+        await listStudioAssets(ctx.legacyProductRef, { limit: 5 });
+      },
+    },
+    { name: "GET /admin/catalog/products/{ref}/studio (b2c)", run: async (ctx) => { if (!ctx.productRef) throw new SkipTest("no product"); await getStudio(ctx.productRef); } },
+    {
+      name: "GET /admin/catalog/products/{ref}/studio/preview-base",
+      run: async (ctx) => {
+        if (!ctx.legacyProductRef) throw new SkipTest("no legacy product");
+        const base = await getStudioPreviewBase(ctx.legacyProductRef);
+        assert(base.course.id > 0, "expected the legacy course");
+      },
+    },
+    { name: "GET /admin/catalog/categories", run: async () => { await listCategories({ limit: 5 }); } },
+    { name: "GET /admin/catalog/price-lists", run: async () => { await listPriceLists({ limit: 5 }); } },
+    { name: "GET /admin/catalog/extension-packages", run: async () => { await listExtensionPackages({ limit: 5 }); } },
+    { name: "GET /admin/catalog/certificates", run: async () => { await listCertificateTemplates({ limit: 5 }); } },
+    { name: "GET /admin/catalog/ratings", run: async () => { await listRatings({ limit: 5 }); } },
 
     // -- bundles
     { name: "GET /admin/bundles/{product_id}", run: async (ctx) => { if (!ctx.bundleId) throw new SkipTest("no bundle created in this run"); await getBundle(ctx.bundleId); } },
 
-    // -- consultations
+    // -- instructors and consultations
+    { name: "GET /admin/instructors", run: async () => { await listAdminInstructors({ limit: 5 }); } },
+    { name: "GET /admin/instructors/applications", run: async () => { await listInstructorApplications({ limit: 5 }); } },
     {
-      name: "GET /admin/backoffice/consultations/services",
+      name: "GET /admin/consultations/services",
       run: async (ctx) => {
         const page = await listConsultationServices({ limit: 5 });
         ctx.consultationId = page.items[0]?.legacy_consultancy_id;
       },
     },
-    { name: "GET /admin/backoffice/consultations/services/{id}", run: async (ctx) => { if (!ctx.consultationId) throw new SkipTest("no consultation service"); await getConsultationService(ctx.consultationId); } },
+    {
+      name: "GET /admin/consultations/services/{id}[/info|/revenue]",
+      run: async (ctx) => {
+        if (!ctx.consultationId) throw new SkipTest("no consultation service");
+        await getConsultationService(ctx.consultationId);
+        await getConsultationInfo(ctx.consultationId);
+        await getConsultationRevenue(ctx.consultationId);
+      },
+    },
+    {
+      name: "GET /admin/consultations/consultants[/{id}]",
+      run: async (ctx) => {
+        const page = await listConsultants({ limit: 5 });
+        ctx.consultantId = page.items[0]?.legacy_consultant_id;
+        if (ctx.consultantId) await getConsultant(ctx.consultantId);
+      },
+    },
 
     // -- promotions
     {
-      name: "GET /admin/backoffice/promotions",
+      name: "GET /admin/promotions",
       run: async (ctx) => {
         const page = await listPromotions({ limit: 5 });
         ctx.promotionId = page.items[0]?.legacy_coupon_id;
         ctx.promotionActive = page.items[0]?.active;
       },
     },
-    { name: "GET /admin/backoffice/promotions/{id}", run: async (ctx) => { if (!ctx.promotionId) throw new SkipTest("no promotion"); await getPromotion(ctx.promotionId); } },
+    { name: "GET /admin/promotions/{id}", run: async (ctx) => { if (!ctx.promotionId) throw new SkipTest("no promotion"); await getPromotion(ctx.promotionId); } },
+    {
+      name: "GET /admin/promotions/offers[/{id}]",
+      run: async (ctx) => {
+        const page = await listOffers({ limit: 5 });
+        ctx.offerId = page.items[0]?.legacy_offer_id;
+        if (ctx.offerId) await getOffer(ctx.offerId);
+      },
+    },
 
     // -- referrals
     {
-      name: "GET /admin/backoffice/referrals/partners",
+      name: "GET /admin/referrals/partners",
       run: async (ctx) => {
         const page = await listReferralPartners({ limit: 5 });
         ctx.partnerId = page.items[0]?.legacy_affiliate_id;
         ctx.partnerStatus = page.items[0]?.status;
       },
     },
-    { name: "GET /admin/backoffice/referrals/payouts", run: async () => { await listReferralPayouts({ limit: 5 }); } },
+    { name: "GET /admin/referrals/partners/{id}", run: async (ctx) => { if (!ctx.partnerId) throw new SkipTest("no partner"); await getReferralPartner(ctx.partnerId); } },
+    { name: "GET /admin/referrals/payouts", run: async () => { await listReferralPayouts({ limit: 5 }); } },
+    { name: "GET /admin/referrals/commissions", run: async () => { await listReferralCommissions({ limit: 5 }); } },
+    { name: "GET /admin/referrals/policies", run: async () => { await listReferralPolicies(); } },
 
     // -- support
     {
-      name: "GET /admin/backoffice/support/tickets",
+      name: "GET /admin/support/tickets",
       run: async (ctx) => {
         const page = await listSupportTickets({ limit: 5 });
         ctx.ticketId = page.items[0]?.legacy_ticket_id;
-        ctx.ticketStatus = page.items[0]?.status;
+        ctx.ticketStatus = page.items[0]?.status ?? undefined;
       },
     },
-    { name: "GET /admin/backoffice/support/tickets/{id}", run: async (ctx) => { if (!ctx.ticketId) throw new SkipTest("no ticket"); await getSupportTicket(ctx.ticketId); } },
+    { name: "GET /admin/support/tickets/{id}", run: async (ctx) => { if (!ctx.ticketId) throw new SkipTest("no ticket"); await getSupportTicket(ctx.ticketId); } },
 
-    // -- analytics reports (read-only POSTs)
-    { name: "POST /legacy-admin/report/monthlycharts", run: async () => { await monthlyCharts(legacyRange()); } },
-    {
-      name: "POST /legacy-admin/report/salesreport",
-      run: async () => {
-        const report = await salesReport(legacyRange());
-        assert(typeof report.totalOrders === "number", "expected totalOrders number");
-        assert(typeof report.totalSales === "number", "expected totalSales number");
-        assert(Array.isArray(report.days), "expected days array");
-      },
-    },
-    { name: "POST /legacy-admin/report/productsreport", run: async () => { await legacyProductsReport(legacyRange()); } },
-    { name: "POST /legacy-admin/report/categoriessellingreport", run: async () => { await categoriesReport(legacyRange()); } },
-    { name: "POST /legacy-admin/report/couponsellingreport", run: async () => { await couponsReport(legacyRange()); } },
-    { name: "POST /legacy-admin/report/customersreport", run: async () => { await customersReport(legacyRange()); } },
-    { name: "GET /legacy-admin/report/counters", run: async () => { await reportCounters(); } },
-
-    // -- settings (legacy reads)
-    { name: "GET /legacy-admin/settings/social", run: async () => { await listSocialLinks(); } },
-    { name: "GET /legacy-admin/settings/emailnotified", run: async () => { await listNotificationEmails(); } },
-    { name: "GET /legacy-admin/settings/alltags", run: async () => { await listTags(); } },
-    { name: "GET /legacy-admin/settings/countries", run: async () => { await listCountries(); } },
-    { name: "GET /legacy-admin/settings/allmodules", run: async () => { await listModules(); } },
-    { name: "GET /legacy-admin/marketing/offers", run: async () => { await listOffers(); } },
-    { name: "GET /legacy-admin/courses/price_lists", run: async () => { await listPriceLists(); } },
-
-    // -- legacy panels
-    { name: "GET /legacy-admin/v2/banners", run: async () => { await listBanners(); } },
-    { name: "GET /legacy-admin/v2/sliders", run: async () => { await listSliders(); } },
-    { name: "GET /legacy-admin/marketing/ads", run: async () => { await listAnnouncementBars(); } },
-    { name: "GET /legacy-admin/users/panelusers", run: async () => { await listLegacyPanelUsers(); } },
-    { name: "GET /legacy-admin/settings/tickets", run: async () => { await listLegacyTickets({ limit: 5 }); } },
-
-    // -- generic legacy resources
-    { name: "GET /legacy-admin/resources", run: async () => { await legacyResources(); } },
-    {
-      name: "GET /legacy-admin/resources/certificates",
-      run: async (ctx) => {
-        const page = await listLegacyResource("certificates", { limit: 5 });
-        ctx.resourceRecordId = (page.items[0] as { id?: number } | undefined)?.id;
-      },
-    },
-    {
-      name: "GET /legacy-admin/resources/certificates/{id}",
-      run: async (ctx) => {
-        if (!ctx.resourceRecordId) throw new SkipTest("no certificate row");
-        await getLegacyResource("certificates", ctx.resourceRecordId);
-      },
-    },
-    {
-      name: "GET /legacy-admin/resources/trainers?search&filter=active",
-      run: async () => {
-        const page = await listLegacyResource("trainers", { search: "محمد", filter: ["active:true"], limit: 5 });
-        assert(Array.isArray(page.items), "expected items array");
-      },
-    },
+    // -- marketing content and settings
+    { name: "GET /admin/marketing/announcements", run: async () => { await listAnnouncements({ limit: 5 }); } },
+    { name: "GET /admin/marketing/banners", run: async () => { await listBanners({ limit: 5 }); } },
+    { name: "GET /admin/marketing/sliders", run: async () => { await listSliders({ limit: 5 }); } },
+    { name: "GET /admin/settings/social-links", run: async () => { await listSocialLinks(); } },
+    { name: "GET /admin/settings/notification-emails", run: async () => { await listNotificationEmails(); } },
+    { name: "GET /admin/settings/tracking-tags", run: async () => { await listTags({ limit: 5 }); } },
+    { name: "GET /admin/settings/permission-modules", run: async () => { await listModules(); } },
+    { name: "GET /admin/settings/countries", run: async () => { await listCountries(); } },
 
     // ----------------------------------------------------------------- mutations
     { name: "POST /admin/auth/refresh", mutates: true, run: async () => { await adminRefresh({}); } },
@@ -563,19 +679,37 @@ function liveEndpointTests(): LiveTest[] {
       },
     },
     {
-      name: "POST /admin/backoffice/customers/import (dry run)",
+      name: "POST /admin/customers/import (dry run)",
       mutates: true,
       run: async () => {
         await importCustomers({ batch_size: 50, dry_run: true, restart: false });
       },
     },
     {
-      name: "POST /admin/backoffice/catalog/{kind}/{id}/publish (no-op toggle)",
+      name: "PUT /admin/catalog/products/{ref}/studio/draft (resave + stale 409)",
       mutates: true,
       run: async (ctx) => {
-        if (!ctx.courseLegacyId || !ctx.courseKind) throw new SkipTest("no course");
+        if (!ctx.legacyProductRef) throw new SkipTest("no legacy product");
+        // Saves the current (or seeded) draft unchanged; nothing is published.
+        const page = await getStudio(ctx.legacyProductRef);
+        const saved = await saveStudioDraft(ctx.legacyProductRef, { document: page.draft, base_revision: page.draft_revision });
+        assert(saved.draft_revision === page.draft_revision + 1, "expected the revision to advance");
         try {
-          await publishProduct(ctx.courseKind, ctx.courseLegacyId, { published: ctx.coursePublished ?? true });
+          await saveStudioDraft(ctx.legacyProductRef, { document: page.draft, base_revision: page.draft_revision });
+        } catch (error) {
+          assert(error instanceof ApiError && error.status === 409, `expected 409, got ${String(error)}`);
+          return;
+        }
+        throw new Error("a stale save must be rejected with 409");
+      },
+    },
+    {
+      name: "POST /admin/catalog/products/{legacy ref}/status (no-op toggle)",
+      mutates: true,
+      run: async (ctx) => {
+        if (!ctx.legacyProductRef) throw new SkipTest("no legacy product");
+        try {
+          await setProductStatus(ctx.legacyProductRef, ctx.legacyProductStatus === "published" ? "published" : "draft");
         } catch (error) {
           if (isLegacyWritesDisabled(error)) throw new SkipTest("backend has legacy writes disabled");
           throw error;
@@ -583,7 +717,7 @@ function liveEndpointTests(): LiveTest[] {
       },
     },
     {
-      name: "POST /admin/backoffice/promotions/{id}/active (no-op toggle)",
+      name: "POST /admin/promotions/{id}/active (no-op toggle)",
       mutates: true,
       run: async (ctx) => {
         if (!ctx.promotionId) throw new SkipTest("no promotion");
@@ -596,7 +730,7 @@ function liveEndpointTests(): LiveTest[] {
       },
     },
     {
-      name: "POST /admin/backoffice/referrals/partners/{id}/status (no-op toggle)",
+      name: "POST /admin/referrals/partners/{id}/status (no-op toggle)",
       mutates: true,
       run: async (ctx) => {
         if (!ctx.partnerId || (ctx.partnerStatus !== "approved" && ctx.partnerStatus !== "pending")) {
@@ -611,7 +745,7 @@ function liveEndpointTests(): LiveTest[] {
       },
     },
     {
-      name: "POST /admin/backoffice/support/tickets/{id}/status (no-op toggle)",
+      name: "POST /admin/support/tickets/{id}/status (no-op toggle)",
       mutates: true,
       run: async (ctx) => {
         if (!ctx.ticketId || ctx.ticketStatus === undefined) throw new SkipTest("no ticket");
@@ -624,7 +758,7 @@ function liveEndpointTests(): LiveTest[] {
       },
     },
     {
-      name: "POST /admin/backoffice/support/tickets/{id}/replies",
+      name: "POST /admin/support/tickets/{id}/replies",
       mutates: true,
       run: async (ctx) => {
         if (!ctx.ticketId) throw new SkipTest("no ticket");
@@ -637,31 +771,29 @@ function liveEndpointTests(): LiveTest[] {
       },
     },
     {
-      name: "POST /admin/customers/{id}/status (no-op, keeps current status)",
+      name: "POST /admin/customers/{ref}/status (no-op, keeps current status)",
       mutates: true,
       run: async (ctx) => {
-        if (!ctx.customerId) throw new SkipTest("no customer");
-        const detail = await getCustomer(ctx.customerId);
-        await setCustomerStatus(ctx.customerId, { status: detail.status });
+        if (!ctx.customerRef) throw new SkipTest("no customer");
+        const detail = await getCustomer(ctx.customerRef);
+        await setCustomerStatus(ctx.customerRef, { status: detail.status });
       },
     },
     {
-      name: "PATCH /admin/customers/{id} (no-op, re-sends current name)",
+      name: "PATCH /admin/customers/{ref} (no-op, re-sends current name)",
       mutates: true,
       run: async (ctx) => {
-        if (!ctx.customerId) throw new SkipTest("no customer");
-        const detail = await getCustomer(ctx.customerId);
-        await updateCustomer(ctx.customerId, { full_name: detail.full_name ?? undefined });
+        if (!ctx.customerRef) throw new SkipTest("no customer");
+        const detail = await getCustomer(ctx.customerRef);
+        await updateCustomer(ctx.customerRef, { full_name: detail.full_name ?? undefined });
       },
     },
     {
       name: "POST /admin/bundles + PUT /admin/bundles/{id}",
       mutates: true,
       run: async (ctx) => {
-        if (!ctx.courseLegacyId) throw new SkipTest("no catalog product to build a bundle from");
-        const detail = await getCatalogProduct("course", ctx.courseLegacyId);
-        const productId = typeof detail.product_id === "string" ? detail.product_id : undefined;
-        if (!productId) throw new SkipTest("catalog detail has no b2c product_id");
+        const productId = ctx.b2cProductId;
+        if (!productId) throw new SkipTest("no B2C product to build a bundle from");
         const slug = `api-layer-bundle-${Date.now()}`;
         const created = await createBundle({
           slug,
@@ -685,28 +817,11 @@ function liveEndpointTests(): LiveTest[] {
       },
     },
     {
-      name: "POST /admin/payments/intents/{id}/reconcile",
+      name: "POST /admin/payments/{ref}/reconcile",
       mutates: true,
       run: async (ctx) => {
-        if (!ctx.intentId) throw new SkipTest("no payment intent id");
-        await reconcilePaymentIntent(ctx.intentId);
-      },
-    },
-    {
-      name: "POST/PATCH/DELETE /legacy-admin/resources/{resource}",
-      mutates: true,
-      run: async () => {
-        let created: unknown;
-        try {
-          created = await createLegacyResource("certificates", { name: `API Layer ${Date.now()}`, description: "smoke test" });
-        } catch (error) {
-          if (isLegacyWritesDisabled(error)) throw new SkipTest("backend has legacy writes disabled");
-          throw error;
-        }
-        const id = (created as { id?: number }).id;
-        if (id == null) throw new SkipTest("created row has no id");
-        await updateLegacyResource("certificates", id, { name: "API Layer updated" });
-        await deleteLegacyResource("certificates", id);
+        if (!ctx.paymentRef) throw new SkipTest("no B2C payment");
+        await reconcilePaymentIntent(ctx.paymentRef);
       },
     },
     { name: "POST /admin/auth/logout (ends session)", mutates: true, run: async () => { await adminLogout({}); } },

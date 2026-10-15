@@ -8,6 +8,8 @@
 @import "./charts.css" layer(components);
 /* App-level patterns (KPI grid, login, range control) — kit rules, no shadows. */
 @import "./patterns.css" layer(components);
+/* Course / product details revamp styling. */
+@import "./product-detail.css" layer(components);
 
 /* Kit breakpoints: mobile-first 600 · 900 · 1200. */
 @theme {

@@ -1,25 +1,24 @@
 import { queryOptions } from "@tanstack/react-query";
 
 import { apiGet, apiPost } from "@/lib/api/client";
-import type { PathParams, QueryParams, RequestBody } from "@/lib/api/operation-types";
-import type { Page, SupportTicket } from "@/lib/api/contract";
+import type { PathParams, QueryParams, RequestBody, SuccessResponse } from "@/lib/api/operation-types";
 
-type ListTicketsOp = "list_support_tickets_api_v1_admin_backoffice_support_tickets_get";
-type GetTicketOp = "get_support_ticket_api_v1_admin_backoffice_support_tickets__legacy_ticket_id__get";
-type SetTicketStatusOp = "set_support_ticket_status_api_v1_admin_backoffice_support_tickets__legacy_ticket_id__status_post";
-type ReplyTicketOp = "reply_support_ticket_api_v1_admin_backoffice_support_tickets__legacy_ticket_id__replies_post";
+type ListTicketsOp = "list_tickets_api_v1_admin_support_tickets_get";
+type GetTicketOp = "get_ticket_api_v1_admin_support_tickets__legacy_ticket_id__get";
+type SetTicketStatusOp = "set_ticket_status_api_v1_admin_support_tickets__legacy_ticket_id__status_post";
+type ReplyTicketOp = "reply_ticket_api_v1_admin_support_tickets__legacy_ticket_id__replies_post";
 
 export type SupportTicketsParams = QueryParams<ListTicketsOp>;
-export type SupportTicketPage = Page<SupportTicket>;
-export type SupportTicketDetail = SupportTicket;
+export type SupportTicketPage = SuccessResponse<ListTicketsOp>;
+export type SupportTicketDetail = SuccessResponse<GetTicketOp>;
 export type TicketStatusRequest = RequestBody<SetTicketStatusOp>;
 export type TicketReplyRequest = RequestBody<ReplyTicketOp>;
 
 export const ticketsPaths = {
-  tickets: "admin/backoffice/support/tickets",
-  ticket: "admin/backoffice/support/tickets/{legacy_ticket_id}",
-  ticketStatus: "admin/backoffice/support/tickets/{legacy_ticket_id}/status",
-  ticketReplies: "admin/backoffice/support/tickets/{legacy_ticket_id}/replies",
+  tickets: "admin/support/tickets",
+  ticket: "admin/support/tickets/{legacy_ticket_id}",
+  ticketStatus: "admin/support/tickets/{legacy_ticket_id}/status",
+  ticketReplies: "admin/support/tickets/{legacy_ticket_id}/replies",
 } as const;
 
 export const ticketsKeys = {
@@ -29,7 +28,7 @@ export const ticketsKeys = {
 };
 
 export function listSupportTickets(params: SupportTicketsParams = {}): Promise<SupportTicketPage> {
-  return apiGet<SupportTicketPage>(ticketsPaths.tickets, { query: params });
+  return apiGet(ticketsPaths.tickets, { query: params });
 }
 
 export function getSupportTicket(
@@ -38,7 +37,7 @@ export function getSupportTicket(
   return apiGet(ticketsPaths.ticket, { path: { legacy_ticket_id } });
 }
 
-/** `POST .../tickets/{id}/status` — legacy ticket status (1 open, 3 closed, …). Audited. */
+/** `POST /admin/support/tickets/{id}/status` — ticket status (1 open, 3 closed, …). Audited. */
 export function setSupportTicketStatus(
   legacy_ticket_id: PathParams<SetTicketStatusOp>["legacy_ticket_id"],
   body: TicketStatusRequest,
@@ -46,7 +45,7 @@ export function setSupportTicketStatus(
   return apiPost(ticketsPaths.ticketStatus, { path: { legacy_ticket_id }, body });
 }
 
-/** `POST .../tickets/{id}/replies` — posts a reply as the signed-in admin. Audited. */
+/** `POST /admin/support/tickets/{id}/replies` — posts a reply as the signed-in admin. Audited. */
 export function replySupportTicket(
   legacy_ticket_id: PathParams<ReplyTicketOp>["legacy_ticket_id"],
   body: TicketReplyRequest,

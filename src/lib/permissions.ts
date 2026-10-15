@@ -15,6 +15,8 @@ const AREA_SCOPE: Record<string, string> = {
   courses: "admin:catalog:read",
   packages: "admin:catalog:read",
   categories: "admin:catalog:read",
+  // Course Studio: editing and publishing product pages.
+  studio: "admin:catalog:write",
   consultations: "admin:consultations:read",
   instructors: "admin:catalog:read",
   certificates: "admin:operations:read",

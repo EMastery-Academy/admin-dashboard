@@ -5,7 +5,7 @@ import type { ComponentProps, ReactNode } from "react";
 import { AppLink } from "@/components/ui/app-link";
 
 /** Kit `.ma-btn` variants and sizes. Port of mastery-front's `ui/button.tsx` onto react-router. */
-export type ButtonVariant = "primary" | "secondary" | "soft" | "ghost" | "bare" | "on-color";
+export type ButtonVariant = "primary" | "secondary" | "soft" | "ghost" | "bare" | "on-color" | "danger";
 export type ButtonSize = "sm" | "md" | "lg";
 
 type ButtonStyleProps = {

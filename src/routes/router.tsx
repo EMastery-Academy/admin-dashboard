@@ -2,31 +2,47 @@ import { Navigate, createBrowserRouter } from "react-router-dom";
 
 import { Shell } from "@/components/layout/shell";
 import { RequireAdmin } from "@/routes/guard";
-import DashboardPage from "@/pages/dashboard";
-import InboxPage from "@/pages/inbox";
-import SalesOverviewPage from "@/pages/sales-overview";
-import OrdersPage from "@/pages/orders";
-import PaymentsPage from "@/pages/payments";
-import RefundsPage from "@/pages/refunds";
-import CouponsPage from "@/pages/coupons";
-import CustomersPage from "@/pages/customers";
-import TicketsPage from "@/pages/tickets";
-import TeamPage from "@/pages/team";
-import AuditPage from "@/pages/audit";
-import AffiliatesPage from "@/pages/affiliates";
-import PayoutsPage from "@/pages/payouts";
-import CoursesPage, { PackagesPage } from "@/pages/catalog";
-import ConsultationsPage from "@/pages/consultations";
+import DashboardPage from "@/features/dashboard/pages/dashboard-page";
+import InboxPage from "@/features/dashboard/pages/inbox-page";
+import SalesOverviewPage from "@/features/sales/pages/sales-overview-page";
+import OrdersPage from "@/features/sales/pages/orders-page";
+import OrderDetailPage from "@/features/sales/pages/order-detail-page";
+import PaymentsPage from "@/features/sales/pages/payments-page";
+import PaymentDetailPage from "@/features/sales/pages/payment-detail-page";
+import RefundsPage from "@/features/sales/pages/refunds-page";
+import InvoicesPage from "@/features/sales/pages/invoices-page";
+import CouponsPage from "@/features/marketing/pages/coupons-page";
+import CouponNewPage from "@/features/marketing/pages/coupon-new-page";
+import CustomersPage from "@/features/customers/pages/customers-page";
+import CustomerDetailPage from "@/features/customers/pages/customer-detail-page";
+import AccountsPage from "@/features/customers/pages/accounts-page";
+import TicketsPage from "@/features/customers/pages/tickets-page";
+import TeamPage from "@/features/settings/pages/team-page";
+import AuditPage from "@/features/settings/pages/audit-page";
+import GeneralSettingsPage from "@/features/settings/pages/general-settings-page";
+import AffiliatesPage from "@/features/marketing/pages/affiliates-page";
+import PayoutsPage from "@/features/marketing/pages/payouts-page";
+import CoursesPage, { PackagesPage } from "@/features/learning/pages/catalog-page";
+import CourseNewPage from "@/features/learning/pages/course-new-page";
+import ProductDetailPage from "@/features/learning/pages/product-detail-page";
+import CourseStudioPage from "@/features/learning/studio/pages/course-studio-page";
+import ConsultationsPage from "@/features/learning/pages/consultations-page";
+import ConsultationDetailPage from "@/features/learning/pages/consultation-detail-page";
+import ConsultantsPage from "@/features/learning/pages/consultants-page";
+import ConsultantDetailPage from "@/features/learning/pages/consultant-detail-page";
+import InstructorsPage from "@/features/learning/pages/instructors-page";
+import InstructorDetailPage from "@/features/learning/pages/instructor-detail-page";
 import AnalyticsSalesPage, {
   CouponsReportPage,
   CustomersReportPage,
   ProductsReportPage,
-} from "@/pages/reports";
-import BannersPage from "@/pages/banners";
-import InvoicesPage from "@/pages/invoices";
-import CouponNewPage from "@/pages/coupon-new";
-import CourseNewPage from "@/pages/course-new";
-import GeneralSettingsPage from "@/pages/general-settings";
+} from "@/features/analytics/pages/reports-page";
+import BannersPage from "@/features/marketing/pages/banners-page";
+import PoliciesPage from "@/features/marketing/pages/policies-page";
+import BehaviorOverviewPage from "@/features/analytics/pages/behavior-page";
+import FunnelsPage from "@/features/analytics/pages/funnels-page";
+import BehaviorMapPage from "@/features/analytics/pages/behavior-map-page";
+import SearchPage from "@/features/dashboard/pages/search-page";
 import {
   AffiliatesReportPage,
   AnnouncementsPage,
@@ -40,14 +56,15 @@ import {
   RatingsPage,
   SegmentsPage,
 } from "@/pages/panels";
-import InstructorsPage from "@/pages/instructors";
+import LegacyCatalogRedirect from "@/pages/legacy-catalog-redirect";
 import PlaceholderPage from "@/pages/placeholder";
 import LoginPage from "@/pages/login";
+import NotFoundPage, { RouteErrorPage } from "@/pages/not-found";
 
 const ph = (ar: string, en: string) => <PlaceholderPage titleAr={ar} titleEn={en} />;
 
 export const ROUTER = createBrowserRouter([
-  { path: "/login", element: <LoginPage /> },
+  { path: "/login", element: <LoginPage />, errorElement: <RouteErrorPage /> },
   {
     path: "/",
     element: (
@@ -55,17 +72,21 @@ export const ROUTER = createBrowserRouter([
         <Shell />
       </RequireAdmin>
     ),
+    errorElement: <RouteErrorPage />,
     children: [
       { index: true, element: <Navigate to="/dashboard" replace /> },
 
       // Home
       { path: "dashboard", element: <DashboardPage /> },
       { path: "dashboard/inbox", element: <InboxPage /> },
+      { path: "search", element: <SearchPage /> },
 
       // Sales
       { path: "sales/overview", element: <SalesOverviewPage /> },
       { path: "sales/orders", element: <OrdersPage /> },
+      { path: "sales/orders/:id", element: <OrderDetailPage /> },
       { path: "sales/payments", element: <PaymentsPage /> },
+      { path: "sales/payments/:id", element: <PaymentDetailPage /> },
       { path: "sales/refunds", element: <RefundsPage /> },
       { path: "sales/invoices", element: <InvoicesPage /> },
       { path: "sales/coupons", element: <CouponsPage /> },
@@ -77,15 +98,26 @@ export const ROUTER = createBrowserRouter([
       { path: "learning/courses", element: <CoursesPage /> },
       { path: "learning/courses/new", element: <CourseNewPage /> },
       { path: "learning/packages", element: <PackagesPage /> },
+      { path: "learning/catalog/:productId", element: <ProductDetailPage /> },
+      // Full-width workspace: the shell hides its sidebar for routes with `handle.studio`.
+      { path: "learning/catalog/:productId/studio", element: <CourseStudioPage />, handle: { studio: true } },
+      { path: "learning/backoffice", element: <Navigate to="/learning/courses" replace /> },
+      { path: "learning/backoffice/:kind/:legacyId", element: <LegacyCatalogRedirect /> },
       { path: "learning/categories", element: <CategoriesPage /> },
       { path: "learning/consultations", element: <ConsultationsPage /> },
+      { path: "learning/consultations/:id", element: <ConsultationDetailPage /> },
+      { path: "learning/consultants", element: <ConsultantsPage /> },
+      { path: "learning/consultants/:id", element: <ConsultantDetailPage /> },
       { path: "learning/instructors", element: <InstructorsPage /> },
+      { path: "learning/instructors/:trainerId", element: <InstructorDetailPage /> },
       { path: "learning/applications", element: <InstructorApplicationsPage /> },
       { path: "learning/certificates", element: <CertificatesPage /> },
       { path: "learning/qa", element: ph("أسئلة المتدربين", "Q&A inbox") },
 
       // Customers
       { path: "customers", element: <CustomersPage /> },
+      { path: "customers/:id", element: <CustomerDetailPage /> },
+      { path: "customers/accounts", element: <AccountsPage /> },
       { path: "customers/segments", element: <SegmentsPage /> },
       { path: "customers/tickets", element: <TicketsPage /> },
 
@@ -94,6 +126,7 @@ export const ROUTER = createBrowserRouter([
       { path: "marketing/commissions", element: <CommissionsPage /> },
       { path: "marketing/payouts", element: <PayoutsPage /> },
       { path: "marketing/announcements", element: <AnnouncementsPage /> },
+      { path: "marketing/policies", element: <PoliciesPage /> },
       { path: "marketing/banners", element: <BannersPage /> },
 
       // Analytics
@@ -104,6 +137,9 @@ export const ROUTER = createBrowserRouter([
       { path: "analytics/affiliates", element: <AffiliatesReportPage /> },
       { path: "analytics/ratings", element: <RatingsPage /> },
       { path: "analytics/certificates", element: <CertificatesPage /> },
+      { path: "analytics/behavior", element: <BehaviorOverviewPage /> },
+      { path: "analytics/funnels", element: <FunnelsPage /> },
+      { path: "analytics/behavior-map", element: <BehaviorMapPage /> },
 
       // Settings
       { path: "settings/general", element: <GeneralSettingsPage /> },
@@ -112,7 +148,8 @@ export const ROUTER = createBrowserRouter([
       { path: "settings/notifications", element: <NotificationsPage /> },
       { path: "settings/audit", element: <AuditPage /> },
 
-      { path: "*", element: <Navigate to="/dashboard" replace /> },
+      // Unknown paths stay in the shell and say so, instead of silently bouncing to the dashboard.
+      { path: "*", element: <NotFoundPage /> },
     ],
   },
 ]);

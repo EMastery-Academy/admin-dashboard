@@ -60,9 +60,10 @@ export async function apiRequest<T>(method: string, path: string, options: ApiRe
   const headers = buildHeaders(requestHeaders);
   const url = buildUrl(path, pathParams, query);
 
-  if (body !== undefined && !isFormData(body) && !headers.has("Content-Type")) {
+  if (body !== undefined && !isFormData(body) && !isBlob(body) && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
+
 
   const send = () =>
     fetch(url, {
@@ -183,12 +184,18 @@ function appendQueryParam(url: URL, key: string, value: QueryValue | QueryValue[
 }
 
 function serializeBody(body: unknown): BodyInit {
-  return isFormData(body) ? body : JSON.stringify(body);
+  if (isFormData(body) || isBlob(body)) return body as BodyInit;
+  return JSON.stringify(body);
 }
 
 function isFormData(value: unknown): value is FormData {
   return typeof FormData !== "undefined" && value instanceof FormData;
 }
+
+function isBlob(value: unknown): value is Blob {
+  return typeof Blob !== "undefined" && value instanceof Blob;
+}
+
 
 function hasJsonBody(response: Response): boolean {
   return response.headers.get("Content-Type")?.includes("application/json") ?? false;

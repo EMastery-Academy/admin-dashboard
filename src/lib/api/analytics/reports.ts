@@ -1,102 +1,105 @@
 import { queryOptions } from "@tanstack/react-query";
 
-import { apiGet, apiPost } from "@/lib/api/client";
-import type { RequestBody } from "@/lib/api/operation-types";
-import type { LegacyRow } from "@/lib/api/contract";
+import { apiGet } from "@/lib/api/client";
+import type { QueryParams, Schemas, SuccessResponse } from "@/lib/api/operation-types";
 
-type SalesReportOp = "sales_report_api_v1_legacy_admin_report_salesreport_post";
-
-/** The legacy reports all take the same `{ date1, date2 }` window. */
-export type DateRangeRequest = RequestBody<SalesReportOp>;
-
-/** One day in a legacy sales report / monthly chart. Amounts are major currency units. */
-export type DailySalesPoint = {
-  date: string;
-  amount: number;
-  numberOfOrders: number;
-};
-
-/** `POST /legacy-admin/report/monthlycharts`. */
-export type MonthlyChartPoint = DailySalesPoint;
-
-/** `POST /legacy-admin/report/salesreport`. */
-export type SalesReport = {
-  totalOrders: number;
-  totalSales: number;
-  days: DailySalesPoint[];
-};
-
-export type LegacyProductsReportRow = LegacyRow;
-export type CategoriesReportRow = LegacyRow;
-export type CouponsReportRow = LegacyRow;
-export type CustomersReportRow = LegacyRow;
-
-/**
- * The legacy reporting endpoints are POSTs that take a date window and return legacy-shaped rows.
- * Reads only — they never mutate — but the HTTP verb is POST.
+/*
+ * Sales reports over B2C and the legacy platform (`/admin/reports/*`). B2C sales come from the commerce
+ * tables (`b2c.orders`, `payment_intents`, `refunds`), legacy sales from the legacy orders; `source`
+ * (`all` | `b2c` | `legacy`) restricts a report. Rows list the `sources` they came from (legacy sales of a
+ * migrated course add up in its B2C row) and `SalesReport.sources` splits the totals per system. Amounts
+ * are kept per original currency (`*_by_currency`) and converted to `report_currency` with daily rates (`fx`).
  */
+
+type SalesOp = "sales_report_api_v1_admin_reports_sales_get";
+type ProductsOp = "product_sales_report_api_v1_admin_reports_products_get";
+type CategoriesOp = "category_sales_report_api_v1_admin_reports_categories_get";
+type PromotionsOp = "promotion_sales_report_api_v1_admin_reports_promotions_get";
+type CustomersOp = "customer_sales_report_api_v1_admin_reports_customers_get";
+type PaymentsOp = "payment_breakdown_report_api_v1_admin_reports_payments_get";
+
+/** `{ start, end, report_currency, source }` — `end` is inclusive; a date covers that whole day. */
+export type ReportParams = QueryParams<SalesOp>;
+export type ReportCurrency = NonNullable<ReportParams["report_currency"]>;
+export type ReportSource = NonNullable<ReportParams["source"]>;
+export const REPORT_CURRENCIES: ReportCurrency[] = ["USD", "AED", "SAR"];
+
+export type MoneyAmount = Schemas["MoneyAmount"];
+export type FxInfo = Schemas["FxInfo"];
+export type SalesReport = SuccessResponse<SalesOp>;
+export type SalesTotals = SalesReport["totals"];
+export type SourceSales = Schemas["SourceSales"];
+/** One day: paid `orders`, gross `revenue`, `refunds`, `net` in the report currency. */
+export type SalesPoint = Schemas["SalesPoint"];
+export type ProductSalesReport = SuccessResponse<ProductsOp>;
+export type ProductSalesRow = Schemas["ProductSalesRow"];
+export type CategorySalesReport = SuccessResponse<CategoriesOp>;
+export type CategorySalesRow = Schemas["CategorySalesRow"];
+export type PromotionSalesReport = SuccessResponse<PromotionsOp>;
+export type PromotionSalesRow = Schemas["PromotionSalesRow"];
+export type CustomerSalesReport = SuccessResponse<CustomersOp>;
+export type CustomerSalesRow = Schemas["CustomerSalesRow"];
+export type CustomerReportParams = QueryParams<CustomersOp>;
+export type PaymentBreakdownReport = SuccessResponse<PaymentsOp>;
+export type PaymentBreakdownRow = Schemas["PaymentBreakdownRow"];
+
 export const reportPaths = {
-  monthlyCharts: "legacy-admin/report/monthlycharts",
-  salesReport: "legacy-admin/report/salesreport",
-  products: "legacy-admin/report/productsreport",
-  categories: "legacy-admin/report/categoriessellingreport",
-  coupons: "legacy-admin/report/couponsellingreport",
-  customers: "legacy-admin/report/customersreport",
-  counters: "legacy-admin/report/counters",
+  sales: "admin/reports/sales",
+  products: "admin/reports/products",
+  categories: "admin/reports/categories",
+  promotions: "admin/reports/promotions",
+  customers: "admin/reports/customers",
+  payments: "admin/reports/payments",
 } as const;
 
 export const reportKeys = {
   all: ["analytics", "reports"] as const,
-  monthlyCharts: (body: DateRangeRequest) => [...reportKeys.all, "monthlycharts", body] as const,
-  sales: (body: DateRangeRequest) => [...reportKeys.all, "sales", body] as const,
-  products: (body: DateRangeRequest) => [...reportKeys.all, "products", body] as const,
-  categories: (body: DateRangeRequest) => [...reportKeys.all, "categories", body] as const,
-  coupons: (body: DateRangeRequest) => [...reportKeys.all, "coupons", body] as const,
-  customers: (body: DateRangeRequest) => [...reportKeys.all, "customers", body] as const,
-  counters: () => [...reportKeys.all, "counters"] as const,
+  sales: (params: ReportParams) => [...reportKeys.all, "sales", params] as const,
+  products: (params: ReportParams) => [...reportKeys.all, "products", params] as const,
+  categories: (params: ReportParams) => [...reportKeys.all, "categories", params] as const,
+  promotions: (params: ReportParams) => [...reportKeys.all, "promotions", params] as const,
+  customers: (params: CustomerReportParams) => [...reportKeys.all, "customers", params] as const,
+  payments: (params: ReportParams) => [...reportKeys.all, "payments", params] as const,
 };
 
-export function monthlyCharts(body: DateRangeRequest): Promise<MonthlyChartPoint[]> {
-  return apiPost(reportPaths.monthlyCharts, { body });
+/** `GET /admin/reports/sales` — totals (gross, refunds, net, paid orders), per day and per system. */
+export function salesReport(params: ReportParams): Promise<SalesReport> {
+  return apiGet(reportPaths.sales, { query: params });
 }
 
-export function salesReport(body: DateRangeRequest): Promise<SalesReport> {
-  return apiPost(reportPaths.salesReport, { body });
+/** `GET /admin/reports/products` — revenue per product, highest first. */
+export function productSalesReport(params: ReportParams): Promise<ProductSalesReport> {
+  return apiGet(reportPaths.products, { query: params });
 }
 
-export function legacyProductsReport(body: DateRangeRequest): Promise<LegacyProductsReportRow[]> {
-  return apiPost(reportPaths.products, { body });
+export function categoriesReport(params: ReportParams): Promise<CategorySalesReport> {
+  return apiGet(reportPaths.categories, { query: params });
 }
 
-export function categoriesReport(body: DateRangeRequest): Promise<CategoriesReportRow[]> {
-  return apiPost(reportPaths.categories, { body });
+/** `GET /admin/reports/promotions` — uses, discount and revenue per promotion / legacy coupon. */
+export function promotionsReport(params: ReportParams): Promise<PromotionSalesReport> {
+  return apiGet(reportPaths.promotions, { query: params });
 }
 
-export function couponsReport(body: DateRangeRequest): Promise<CouponsReportRow[]> {
-  return apiPost(reportPaths.coupons, { body });
+export function customersReport(params: CustomerReportParams): Promise<CustomerSalesReport> {
+  return apiGet(reportPaths.customers, { query: params });
 }
 
-export function customersReport(body: DateRangeRequest): Promise<CustomersReportRow[]> {
-  return apiPost(reportPaths.customers, { body });
-}
-
-/** `GET /legacy-admin/report/counters` — all legacy dashboard counters in one call. */
-export function reportCounters(): Promise<Record<string, number>> {
-  return apiGet(reportPaths.counters);
+/** `GET /admin/reports/payments` — payments by system, gateway and status. */
+export function paymentsReport(params: ReportParams): Promise<PaymentBreakdownReport> {
+  return apiGet(reportPaths.payments, { query: params });
 }
 
 export const reportQueries = {
-  monthlyCharts: (body: DateRangeRequest) =>
-    queryOptions({ queryKey: reportKeys.monthlyCharts(body), queryFn: () => monthlyCharts(body) }),
-  sales: (body: DateRangeRequest) =>
-    queryOptions({ queryKey: reportKeys.sales(body), queryFn: () => salesReport(body) }),
-  legacyProducts: (body: DateRangeRequest) =>
-    queryOptions({ queryKey: reportKeys.products(body), queryFn: () => legacyProductsReport(body) }),
-  categories: (body: DateRangeRequest) =>
-    queryOptions({ queryKey: reportKeys.categories(body), queryFn: () => categoriesReport(body) }),
-  coupons: (body: DateRangeRequest) =>
-    queryOptions({ queryKey: reportKeys.coupons(body), queryFn: () => couponsReport(body) }),
-  customers: (body: DateRangeRequest) =>
-    queryOptions({ queryKey: reportKeys.customers(body), queryFn: () => customersReport(body) }),
-  counters: () => queryOptions({ queryKey: reportKeys.counters(), queryFn: reportCounters }),
+  sales: (params: ReportParams) => queryOptions({ queryKey: reportKeys.sales(params), queryFn: () => salesReport(params) }),
+  products: (params: ReportParams) =>
+    queryOptions({ queryKey: reportKeys.products(params), queryFn: () => productSalesReport(params) }),
+  categories: (params: ReportParams) =>
+    queryOptions({ queryKey: reportKeys.categories(params), queryFn: () => categoriesReport(params) }),
+  promotions: (params: ReportParams) =>
+    queryOptions({ queryKey: reportKeys.promotions(params), queryFn: () => promotionsReport(params) }),
+  customers: (params: CustomerReportParams) =>
+    queryOptions({ queryKey: reportKeys.customers(params), queryFn: () => customersReport(params) }),
+  payments: (params: ReportParams) =>
+    queryOptions({ queryKey: reportKeys.payments(params), queryFn: () => paymentsReport(params) }),
 };

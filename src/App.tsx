@@ -4,10 +4,15 @@ import { RouterProvider } from "react-router-dom";
 import { dirOf, useLangStore } from "@/lib/i18n";
 import { resolvedTheme, useThemeStore } from "@/lib/theme";
 import { ROUTER } from "@/routes/router";
+import { ToastProvider } from "@/components/ui/toast";
 
 export default function App() {
   usePrefsSync();
-  return <RouterProvider router={ROUTER} />;
+  return (
+    <ToastProvider>
+      <RouterProvider router={ROUTER} />
+    </ToastProvider>
+  );
 }
 
 /** Keeps `<html lang dir data-theme>` in step with the language and theme stores. */

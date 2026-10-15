@@ -28,6 +28,7 @@ export const navigation: NavModule[] = [
         items: [
           { title: { ar: "لوحة المؤشرات", en: "Dashboard" }, href: "/dashboard", permission: "dashboard.read" },
           { title: { ar: "صندوق المهام", en: "Ops inbox" }, href: "/dashboard/inbox", permission: "dashboard.read", badge: "inbox" },
+          { title: { ar: "البحث", en: "Search" }, href: "/search", permission: "dashboard.read" },
         ],
       },
     ],
@@ -69,6 +70,7 @@ export const navigation: NavModule[] = [
           { title: { ar: "الحزم والدبلومات", en: "Packages & diplomas" }, href: "/learning/packages", permission: "packages.read" },
           { title: { ar: "التصنيفات", en: "Categories" }, href: "/learning/categories", permission: "categories.read" },
           { title: { ar: "الاستشارات", en: "Consultations" }, href: "/learning/consultations", permission: "consultations.read" },
+          { title: { ar: "المستشارون", en: "Consultants" }, href: "/learning/consultants", permission: "consultations.read" },
         ],
       },
       {
@@ -91,6 +93,7 @@ export const navigation: NavModule[] = [
         title: { ar: "الأشخاص", en: "People" },
         items: [
           { title: { ar: "العملاء", en: "Customers" }, href: "/customers", permission: "customers.read" },
+          { title: { ar: "الاستعلام عن مشترك", en: "Account lookup" }, href: "/customers/accounts", permission: "customers.read" },
           { title: { ar: "الشرائح", en: "Segments" }, href: "/customers/segments", permission: "customers.read" },
         ],
       },
@@ -111,6 +114,7 @@ export const navigation: NavModule[] = [
           { title: { ar: "المسوقون بالعمولة", en: "Affiliates" }, href: "/marketing/affiliates", permission: "affiliates.read" },
           { title: { ar: "العمولات", en: "Commissions" }, href: "/marketing/commissions", permission: "affiliates.read" },
           { title: { ar: "طلبات الصرف", en: "Payout requests" }, href: "/marketing/payouts", permission: "affiliates.read", badge: "payouts" },
+          { title: { ar: "سياسة البرنامج", en: "Program policy" }, href: "/marketing/policies", permission: "affiliates.read" },
           { title: { ar: "أشرطة الإعلانات", en: "Announcement bars" }, href: "/marketing/announcements", permission: "marketing.read" },
         ],
       },
@@ -135,6 +139,14 @@ export const navigation: NavModule[] = [
           { title: { ar: "المسوقون", en: "Affiliates" }, href: "/analytics/affiliates", permission: "reports.affiliates" },
           { title: { ar: "التقييمات", en: "Ratings" }, href: "/analytics/ratings", permission: "reports.ratings" },
           { title: { ar: "الشهادات", en: "Certificates" }, href: "/analytics/certificates", permission: "reports.certificates" },
+        ],
+      },
+      {
+        title: { ar: "السلوك", en: "Behavior" },
+        items: [
+          { title: { ar: "سلوك المستخدمين", en: "User behavior" }, href: "/analytics/behavior", permission: "reports.sales" },
+          { title: { ar: "المسار التحويلي", en: "Conversion funnel" }, href: "/analytics/funnels", permission: "reports.sales" },
+          { title: { ar: "مخطط السلوك", en: "Behavior map" }, href: "/analytics/behavior-map", permission: "reports.sales" },
         ],
       },
     ],

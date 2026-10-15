@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAdminAuth } from "@/lib/auth/store";
 import { ApiError } from "@/lib/api/client";
 import { useT } from "@/lib/i18n";
-import { Button } from "@/components/ui/kit";
+import { Alert, Button, Field } from "@/components/ui/kit";
 
 export default function LoginPage() {
   const { login } = useAdminAuth();
@@ -16,18 +16,17 @@ export default function LoginPage() {
   const [busy, setBusy] = useState(false);
 
   return (
-    <div className="ma-login">
-      <div className="ma-panel">
-        <span className="ma-brandmark">
-          <svg width="34" height="15" role="img" aria-label="ماستري أكاديمي">
-            <use href="/sprite.svg#ma-mark" />
+    <main className="ma-login">
+      <div className="ma-login__card">
+        <header>
+          <svg className="ma-logo" width="168" height="19" role="img" aria-label={t("ماستري أكاديمي", "Mastery Academy")}>
+            <use href="#ma-logo" />
           </svg>
-          <span>{t("ماستري أكاديمي", "Mastery Academy")}</span>
-        </span>
-        <h1>{t("تسجيل الدخول", "Sign in")}</h1>
-        <p className="ma-muted">
-          {t("لمشرفي لوحة الإدارة فقط. حسابات العملاء لا تعمل هنا.", "Back-office admins only. Customer accounts don't work here.")}
-        </p>
+          <h1 className="ma-login__title">{t("تسجيل الدخول إلى لوحة الإدارة", "Sign in to the admin")}</h1>
+          <p className="ma-login__lead">
+            {t("لمشرفي لوحة الإدارة فقط. حسابات العملاء لا تعمل هنا.", "Back-office admins only. Customer accounts don't work here.")}
+          </p>
+        </header>
         <form
           className="ma-form"
           onSubmit={async (event) => {
@@ -40,7 +39,7 @@ export default function LoginPage() {
             } catch (err) {
               setError(
                 err instanceof ApiError && err.status === 401
-                  ? t("البريد الإلكتروني أو كلمة المرور غير صحيحة.", "Wrong email or password.")
+                  ? t("البريد الإلكتروني أو كلمة المرور غير صحيحة. تحقق منهما وحاول مرة أخرى.", "Wrong email or password. Check both and try again.")
                   : err instanceof Error
                     ? err.message
                     : t("فشل تسجيل الدخول.", "Sign-in failed."),
@@ -50,44 +49,20 @@ export default function LoginPage() {
             }
           }}
         >
-          <div className="ma-fieldblock">
-            <label className="ma-label" htmlFor="email">
-              {t("البريد الإلكتروني", "Email")}
-            </label>
-            <input
-              className="ma-input"
-              id="email"
-              type="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-            />
-          </div>
-          <div className="ma-fieldblock">
-            <label className="ma-label" htmlFor="password">
-              {t("كلمة المرور", "Password")}
-            </label>
-            <input
-              className="ma-input"
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-            />
-          </div>
-          {error ? (
-            <div className="ma-alert ma-alert--danger" role="alert">
-              <div>
-                <p className="ma-alert__title">{error}</p>
-              </div>
-            </div>
-          ) : null}
-          <Button kind="primary" block type="submit" disabled={busy} label={busy ? t("جارٍ الدخول…", "Signing in…") : t("دخول", "Sign in")} />
+          <Field id="email" type="email" label={t("البريد الإلكتروني", "Email")} autoComplete="email" dir="ltr" required value={email} onChange={setEmail} />
+          <Field id="password" type="password" label={t("كلمة المرور", "Password")} autoComplete="current-password" dir="ltr" required value={password} onChange={setPassword} />
+          {error ? <Alert kind="danger" title={t("تعذّر تسجيل الدخول", "Couldn't sign in")}>{error}</Alert> : null}
+          <Button
+            kind="primary"
+            block
+            type="submit"
+            disabled={busy}
+            className={busy ? "is-loading" : undefined}
+            aria-busy={busy || undefined}
+            label={busy ? t("جارٍ الدخول…", "Signing in…") : t("دخول", "Sign in")}
+          />
         </form>
       </div>
-    </div>
+    </main>
   );
 }

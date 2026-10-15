@@ -21,7 +21,7 @@ export function DropdownMenuContent({
       <DropdownMenuPrimitive.Content
         sideOffset={sideOffset}
         align={align}
-        className={cn("ma-menu", className)}
+        className={cn("ma-dropdown", className)}
         {...props}
       />
     </DropdownMenuPrimitive.Portal>
@@ -32,7 +32,7 @@ export function DropdownMenuItem({
   className,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Item>) {
-  return <DropdownMenuPrimitive.Item className={cn("ma-menu__item", className)} {...props} />;
+  return <DropdownMenuPrimitive.Item className={cn("ma-dropdown__item", className)} {...props} />;
 }
 
 export function DropdownMenuCheckboxItem({
@@ -43,11 +43,11 @@ export function DropdownMenuCheckboxItem({
 }: React.ComponentProps<typeof DropdownMenuPrimitive.CheckboxItem>) {
   return (
     <DropdownMenuPrimitive.CheckboxItem
-      className={cn("ma-menu__item", className)}
+      className={cn("ma-dropdown__item", className)}
       checked={checked}
       {...props}
     >
-      <span className="ma-menu__indicator">
+      <span className="ma-dropdown__indicator">
         <DropdownMenuPrimitive.ItemIndicator>
           <Icon name="check" />
         </DropdownMenuPrimitive.ItemIndicator>
@@ -61,12 +61,12 @@ export function DropdownMenuLabel({
   className,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Label>) {
-  return <DropdownMenuPrimitive.Label className={cn("ma-menu__label", className)} {...props} />;
+  return <DropdownMenuPrimitive.Label className={cn("ma-dropdown__label", className)} {...props} />;
 }
 
 export function DropdownMenuSeparator({
   className,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Separator>) {
-  return <DropdownMenuPrimitive.Separator className={cn("ma-menu__sep", className)} {...props} />;
+  return <DropdownMenuPrimitive.Separator className={cn("ma-dropdown__sep", className)} {...props} />;
 }

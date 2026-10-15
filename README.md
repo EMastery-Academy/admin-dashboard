@@ -13,6 +13,9 @@ npm run dev        # http://localhost:5173 (or any free port)
 
 - The Vite dev server proxies `/api/*` to the backend (`vite.config.ts`), so the backend's
   httpOnly admin cookies work first-party — no tokens in JS, no CORS.
+- The dashboard has **one backend API**: the admin module (`/api/v1/admin/*`), which serves B2C and
+  legacy-platform data together (items carry `source` and a `ref`). How the two sides talk, and why,
+  is in [ADMIN_API.md](ADMIN_API.md).
 - Production: serve behind a reverse proxy on the backend's domain.
 - Sign in at `/login` (`admin@masteryacademy.site` / `Admin@12345` in dev). Session store:
   `src/lib/auth/store.ts` (zustand, silent refresh, cross-tab BroadcastChannel).
@@ -46,13 +49,14 @@ src/
     api/                 typed service layer, one folder per category:
                            client.ts            fetch wrapper (same-origin, path/query interpolation)
                            operation-types.ts   SuccessResponse/RequestBody/QueryParams by operationId
-                           contract.ts          hand-written shapes the spec leaves as `object`
+                           contract.ts          aliases of generated schemas + UI helpers (Page, Row)
                            auth/ iam/ dashboard/ sales/ customers/ learning/
-                           marketing/ analytics/ settings/ system/ legacy/
+                           marketing/ analytics/ settings/ system/ search/
                          each module exports services, `<area>Keys` and `<area>Queries` (queryOptions)
     auth/store.ts        admin session store
     i18n.ts theme.ts     language + theme stores
     permissions.ts       scope checks (presentation only; the API enforces)
+    refs.ts              links and short ids from refs (`b2c:<uuid>`, `legacy:<kind>:<id>`), isLegacy
     format.ts dates.ts status.ts
   types/openapi.ts       generated from openapi.json (npm run api:types)
   components/

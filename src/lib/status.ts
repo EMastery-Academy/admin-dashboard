@@ -13,6 +13,14 @@ export function orderStatusBadge(status: string | null | undefined): BadgeDef | 
       return { label: { ar: "مكتمل", en: "Fulfilled" }, tone: "success" };
     case "cancelled":
       return { label: { ar: "ملغى", en: "Cancelled" }, tone: "danger" };
+    case "payment_failed":
+      return { label: { ar: "فشل الدفع", en: "Payment failed" }, tone: "danger" };
+    case "refunded":
+      return { label: { ar: "مُسترد", en: "Refunded" }, tone: "info" };
+    case "partially_refunded":
+      return { label: { ar: "مُسترد جزئيًا", en: "Partially refunded" }, tone: "info" };
+    case "expired":
+      return { label: { ar: "منتهي", en: "Expired" }, tone: "neutral" };
     default:
       return status ? { label: { ar: status, en: status } } : null;
   }
@@ -28,6 +36,10 @@ export function paymentStatusBadge(status: string | null | undefined): BadgeDef 
       return { label: { ar: "فاشل", en: "Failed" }, tone: "danger" };
     case "refunded":
       return { label: { ar: "مُسترد", en: "Refunded" }, tone: "info" };
+    case "partially_refunded":
+      return { label: { ar: "مُسترد جزئيًا", en: "Partially refunded" }, tone: "info" };
+    case "cancelled":
+      return { label: { ar: "ملغى", en: "Cancelled" }, tone: "neutral" };
     default:
       return status ? { label: { ar: status, en: status } } : null;
   }
@@ -51,7 +63,11 @@ export function productStatusBadge(status: string | null | undefined): BadgeDef 
     case "published":
       return { label: { ar: "منشور", en: "Published" }, tone: "success" };
     case "draft":
-      return { label: { ar: "غير منشور", en: "Draft" }, tone: "warning" };
+      return { label: { ar: "مسودة", en: "Draft" }, tone: "warning" };
+    case "unpublished":
+      return { label: { ar: "غير منشور", en: "Unpublished" }, tone: "warning" };
+    case "archived":
+      return { label: { ar: "مؤرشف", en: "Archived" }, tone: "neutral" };
     default:
       return status ? { label: { ar: status, en: status } } : null;
   }

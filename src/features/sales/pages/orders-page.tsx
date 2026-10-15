@@ -1,0 +1,138 @@
+import { useState } from "react";
+
+import { listOrders, type AdminOrder } from "@/lib/api";
+import { formatAmount, formatDateTime } from "@/lib/format";
+import { useT } from "@/lib/i18n";
+import { customerHref, orderHref, shortRef } from "@/lib/refs";
+import { SourceBadge } from "@/components/ui/source-badge";
+import { initialsOf, orderStatusBadge, paymentStatusBadge } from "@/lib/status";
+import { AppLink } from "@/components/ui/app-link";
+import { type Column } from "@/components/ui/data-table";
+import { Avatar, Badge, DateRange, PageHead } from "@/components/ui/kit";
+import { PagedList, type ListFilter } from "@/components/ui/paged-list";
+
+const STATUSES: { value: string; ar: string; en: string }[] = [
+  { value: "pending_payment", ar: "بانتظار الدفع", en: "Pending payment" },
+  { value: "paid", ar: "مدفوع", en: "Paid" },
+  { value: "payment_failed", ar: "فشل الدفع", en: "Payment failed" },
+  { value: "cancelled", ar: "ملغى", en: "Cancelled" },
+  { value: "partially_refunded", ar: "مُسترد جزئيًا", en: "Partially refunded" },
+  { value: "refunded", ar: "مُسترد", en: "Refunded" },
+  { value: "expired", ar: "منتهي", en: "Expired" },
+];
+
+const PROVIDERS = ["stripe", "tamara", "free"];
+
+const PAYMENT_STATUSES: { value: string; ar: string; en: string }[] = [
+  { value: "pending", ar: "بانتظار", en: "Pending" },
+  { value: "succeeded", ar: "ناجح", en: "Succeeded" },
+  { value: "failed", ar: "فاشل", en: "Failed" },
+  { value: "refunded", ar: "مُسترد", en: "Refunded" },
+  { value: "incomplete", ar: "غير مكتمل (قديم)", en: "Incomplete (legacy)" },
+];
+
+export default function OrdersPage() {
+  const t = useT();
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+
+  const columns: Column<AdminOrder>[] = [
+    {
+      key: "order",
+      header: t("الطلب", "Order"),
+      sortable: true,
+      sortValue: (row) => row.created_at,
+      cell: (row) => (
+        <AppLink className="ma-link ma-link--plain" to={orderHref(row.ref)}>
+          <span className="ma-cell-main"><bdi>{shortRef(row.ref)}</bdi></span>
+          <span className="ma-cell-sub">{formatDateTime(row.created_at)}</span>
+        </AppLink>
+      ),
+    },
+    {
+      key: "customer",
+      header: t("العميل", "Customer"),
+      sortable: true,
+      sortValue: (row) => row.customer_email ?? "",
+      cell: (row) => (
+        row.customer_ref ? (
+          <AppLink className="ma-cell-flex ma-link ma-link--plain" to={customerHref(row.customer_ref)}>
+            <Avatar initials={initialsOf(row.customer_email ?? "?")} color="var(--sky)" />
+            <span className="ma-cell-main"><bdi>{row.customer_email ?? "—"}</bdi></span>
+          </AppLink>
+        ) : (
+          "—"
+        )
+      ),
+    },
+    { key: "source", header: t("النظام", "System"), cell: (row) => <SourceBadge source={row.source} /> },
+    { key: "status", header: t("الحالة", "Status"), sortable: true, cell: (row) => <Badge def={orderStatusBadge(row.status)} /> },
+    {
+      key: "payment",
+      header: t("الدفع", "Payment"),
+      cell: (row) => (
+        <>
+          <Badge def={paymentStatusBadge(row.payment_status)} />
+          {row.payment_provider ? <span className="ma-cell-sub">{row.payment_provider}</span> : null}
+        </>
+      ),
+    },
+    {
+      key: "total",
+      header: t("الإجمالي", "Total"),
+      align: "end",
+      sortable: true,
+      sortValue: (row) => row.amount_minor,
+      cell: (row) => <span className="ma-num">{formatAmount(row.amount_minor / 100, row.currency_code)}</span>,
+    },
+  ];
+
+  const filters: ListFilter[] = [
+    {
+      key: "source",
+      label: t("كل الأنظمة", "All systems"),
+      options: [
+        { value: "b2c", label: t("المتجر (B2C)", "B2C") },
+        { value: "legacy", label: t("النظام القديم", "Legacy") },
+      ],
+    },
+    { key: "status", label: t("كل الحالات", "All statuses"), options: STATUSES.map((item) => ({ value: item.value, label: t(item.ar, item.en) })) },
+    { key: "payment_status", label: t("كل حالات الدفع", "All payments"), options: PAYMENT_STATUSES.map((item) => ({ value: item.value, label: t(item.ar, item.en) })) },
+    { key: "provider", label: t("كل البوابات", "All gateways"), options: PROVIDERS.map((value) => ({ value, label: value })) },
+  ];
+
+  return (
+    <>
+      <PageHead
+        title={t("الطلبات", "Orders")}
+        sub={t("طلبات المتجر الجديد والنظام القديم مع الفلاتر والبحث وفترة التاريخ.", "Orders of B2C and the legacy platform, with filters and date range.")}
+      />
+
+      <PagedList
+        queryKeyBase={["orders", { from, to }]}
+        fetchPage={({ query, offset, limit, filters: selected }) =>
+          listOrders({
+            source: (selected.source || "all") as "all" | "b2c" | "legacy",
+            status: selected.status || undefined,
+            payment_status: selected.payment_status || undefined,
+            provider: selected.provider || undefined,
+            start: from || undefined,
+            end: to || undefined,
+            query,
+            limit,
+            offset,
+          })
+        }
+        toolbar={<DateRange from={from} to={to} onFrom={setFrom} onTo={setTo} onClear={() => { setFrom(""); setTo(""); }} />}
+        columns={columns}
+        searchPlaceholder={t("ابحث ببريد العميل…", "Search customer email…")}
+        filters={filters}
+        empty={t("لا طلبات.", "No orders.")}
+      />
+
+      <p className="ma-note">
+        {t("استرداد الطلب متاح من صفحة الطلب بعد اكتمال تكامل بوابة الدفع.", "Issuing a refund is available from the order page once the gateway integration is complete.")}
+      </p>
+    </>
+  );
+}

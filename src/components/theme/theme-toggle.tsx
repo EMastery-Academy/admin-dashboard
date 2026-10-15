@@ -2,6 +2,7 @@ import { useRef } from "react";
 
 import { MoonIcon, SunIcon, type AnimatedIconHandle } from "@/components/icons/animated";
 import { cn } from "@/lib/cn";
+import { useT } from "@/lib/i18n";
 import { useThemeStore, resolvedTheme } from "@/lib/theme";
 
 /**
@@ -15,6 +16,8 @@ export function ThemeToggle({ className }: { className?: string }) {
   const theme = useThemeStore((state) => state.theme);
   const setTheme = useThemeStore((state) => state.setTheme);
   const isDark = resolvedTheme(theme) === "dark";
+  const t = useT();
+  const label = isDark ? t("الوضع الفاتح", "Light mode") : t("الوضع الداكن", "Dark mode");
 
   const play = () => {
     sun.current?.startAnimation();
@@ -33,8 +36,8 @@ export function ThemeToggle({ className }: { className?: string }) {
       onMouseLeave={stop}
       onFocus={play}
       onBlur={stop}
-      aria-label="تبديل الوضع الفاتح والداكن"
-      title="تبديل المظهر"
+      aria-label={label}
+      title={label}
       className={cn("ma-btn ma-btn--bare ma-btn--icon", className)}
     >
       {isDark ? <SunIcon ref={sun} size={20} /> : <MoonIcon ref={moon} size={20} />}

@@ -11,9 +11,9 @@ export function ViewAllLink({ to, label }: { to: string; label: string }) {
   const play = () => icon.current?.startAnimation();
   const stop = () => icon.current?.stopAnimation();
   return (
-    <AppLink to={to} onMouseEnter={play} onMouseLeave={stop} onFocus={play} onBlur={stop} className={buttonClass({ variant: "ghost" })}>
+    <AppLink to={to} onMouseEnter={play} onMouseLeave={stop} onFocus={play} onBlur={stop} className={buttonClass({ variant: "ghost", size: "sm" })}>
       {label}
-      <ArrowLeftIcon ref={icon} size={20} />
+      <ArrowLeftIcon ref={icon} size={18} className="ma-icon-fwd" />
     </AppLink>
   );
 }

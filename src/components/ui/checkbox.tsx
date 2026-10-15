@@ -6,7 +6,7 @@ import { Icon } from "@/components/ui/icon";
 
 export function Checkbox({ className, ...props }: React.ComponentProps<typeof CheckboxPrimitive.Root>) {
   return (
-    <CheckboxPrimitive.Root className={cn("ma-check", className)} {...props}>
+    <CheckboxPrimitive.Root className={cn("ma-checkbox", className)} {...props}>
       <CheckboxPrimitive.Indicator>
         <Icon name="check" />
       </CheckboxPrimitive.Indicator>

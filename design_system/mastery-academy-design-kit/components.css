@@ -112,9 +112,11 @@
 .ma-link:hover { text-decoration-thickness: 4px; }
 
 /* ---------- Tag ---------- */
-.ma-tag { display: inline-flex; align-items: center; gap: var(--space-1); padding: var(--space-1) var(--space-2); font-size: 12px; line-height: 16px; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); background: var(--surface-alt); border-radius: var(--radius-tag); }
+.ma-tag { display: inline-flex; align-items: center; gap: var(--space-1); padding: var(--space-1) var(--space-2); font-size: 12px; line-height: 16px; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; color: var(--text); background: var(--surface-alt); border-radius: var(--radius-tag); }
 [dir="rtl"] .ma-tag { letter-spacing: 0; text-transform: none; font-size: 13px; }
 .ma-tag--soft { background: var(--fill-soft); color: var(--text); }
+/* Brand-colour tags keep ink text in both themes (rule 5: ink on every brand colour). */
+.ma-tag--coral, .ma-tag--yellow, .ma-tag--purple, .ma-tag--sky, .ma-tag--pink, .ma-tag--teal, .ma-tag--lilac, .ma-tag--green, .ma-tag--cream { color: var(--ink); }
 .ma-tag--coral { background: var(--coral); } .ma-tag--yellow { background: var(--yellow); } .ma-tag--purple { background: var(--purple); }
 .ma-tag--sky { background: var(--sky); } .ma-tag--pink { background: var(--pink); } .ma-tag--teal { background: var(--teal); }
 .ma-tag--lilac { background: var(--lilac); } .ma-tag--green { background: var(--green); } .ma-tag--cream { background: var(--cream); }

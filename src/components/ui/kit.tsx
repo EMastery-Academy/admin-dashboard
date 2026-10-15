@@ -5,6 +5,7 @@ import { Icon } from "./icon";
 import { AppLink } from "./app-link";
 import { buttonClass, type ButtonSize, type ButtonVariant } from "./button";
 import { useT } from "@/lib/i18n";
+import { SelectField } from "./select";
 
 // ---------------------------------------------------------------- badge / avatar / flag
 
@@ -30,13 +31,14 @@ export function Unconfirmed() {
 
 /**
  * Round avatar. Pass `src` to render a photo; it falls back to `initials` on a missing/broken URL,
- * so legacy rows with a `profileImage` never show a broken image.
+ * so legacy rows with a `profileImage` never show a broken image. `square` gives a rounded-square
+ * crop used for product thumbnails (courses, diplomas, packages, consultations).
  */
-export function Avatar({ initials, src, color = "var(--yellow)", lg = false, alt }: { initials: string; src?: string | null; color?: string; lg?: boolean; alt?: string }) {
+export function Avatar({ initials, src, color = "var(--yellow)", lg = false, square = false, alt }: { initials: string; src?: string | null; color?: string; lg?: boolean; square?: boolean; alt?: string }) {
   const [failed, setFailed] = useState(false);
   const showImage = Boolean(src) && !failed;
   return (
-    <span className={cn("ma-avatar", lg && "ma-avatar--lg")} style={{ background: showImage ? undefined : color }} aria-hidden={showImage ? undefined : true}>
+    <span className={cn("ma-avatar", lg && "ma-avatar--lg", square && "ma-avatar--square")} style={{ background: showImage ? undefined : color }} aria-hidden={showImage ? undefined : true}>
       {showImage ? <img src={src as string} alt={alt ?? ""} loading="lazy" decoding="async" onError={() => setFailed(true)} /> : initials}
     </span>
   );
@@ -44,7 +46,7 @@ export function Avatar({ initials, src, color = "var(--yellow)", lg = false, alt
 
 // ---------------------------------------------------------------- button
 
-type ButtonKind = "primary" | "ink" | "secondary" | "ghost" | "soft" | "bare";
+type ButtonKind = "primary" | "ink" | "secondary" | "ghost" | "soft" | "bare" | "danger";
 const BUTTON_VARIANT: Record<ButtonKind, ButtonVariant> = {
   primary: "primary",
   ink: "secondary",
@@ -52,6 +54,7 @@ const BUTTON_VARIANT: Record<ButtonKind, ButtonVariant> = {
   ghost: "ghost",
   soft: "soft",
   bare: "bare",
+  danger: "danger",
 };
 
 export type ButtonProps = {
@@ -61,6 +64,10 @@ export type ButtonProps = {
   icon?: string;
   /** Pre-built icon node (e.g. an animated icon from `@/components/icons/animated`). */
   iconNode?: ReactNode;
+  /** Mirror the icon in RTL (directional chevrons/arrows). */
+  iconDir?: boolean;
+  /** Put the icon after the label (e.g. "Next ›"). */
+  iconEnd?: boolean;
   href?: string;
   size?: ButtonSize;
   sm?: boolean;
@@ -71,14 +78,17 @@ export type ButtonProps = {
   className?: string;
   children?: ReactNode;
   "aria-label"?: string;
+  "aria-busy"?: boolean;
 };
 
-export function Button({ label, kind = "soft", icon, iconNode, href, size, sm, block, children, type = "button", disabled, onClick, className, ...rest }: ButtonProps) {
+export function Button({ label, kind = "soft", icon, iconNode, iconDir, iconEnd, href, size, sm, block, children, type = "button", disabled, onClick, className, ...rest }: ButtonProps) {
   const cls = cn(buttonClass({ variant: BUTTON_VARIANT[kind], size: size ?? (sm ? "sm" : "md"), block }), className);
+  const glyph = iconNode ?? (icon ? <Icon name={icon} className={iconDir ? "ma-icon-dir" : undefined} /> : null);
   const inner = children ?? (
     <>
-      {iconNode ?? (icon ? <Icon name={icon} /> : null)}
+      {iconEnd ? null : glyph}
       {label ? <span>{label}</span> : null}
+      {iconEnd ? glyph : null}
     </>
   );
   if (href) {
@@ -165,6 +175,7 @@ export function Kpi({
   delta,
   icon,
   field,
+  bare = false,
 }: {
   label: ReactNode;
   value: ReactNode;
@@ -172,6 +183,8 @@ export function Kpi({
   delta?: number;
   icon?: string;
   field?: string;
+  /** No panel around the figure (for KPIs grouped inside another panel). */
+  bare?: boolean;
 }) {
   const d =
     delta == null ? null : (
@@ -194,6 +207,7 @@ export function Kpi({
       ) : null}
     </div>
   );
+  if (bare) return inner;
   return field ? (
     <div className="ma-fieldblock" style={{ background: field }}>
       {inner}
@@ -248,6 +262,63 @@ export function Empty({ text, icon = "inbox", action }: { text: ReactNode; icon?
   );
 }
 
+/** Loading placeholder inside a panel or table body. */
+export function Loading({ label }: { label?: ReactNode }) {
+  const t = useT();
+  return (
+    <div className="ma-loading" role="status" aria-live="polite">
+      {label ?? t("جارٍ التحميل…", "Loading…")}
+    </div>
+  );
+}
+
+/** A failed request or mutation as the kit danger alert: what failed + the server's message. */
+export function ErrorAlert({ error, title }: { error: unknown; title?: ReactNode }) {
+  const t = useT();
+  if (!error) return null;
+  const message = error instanceof Error ? error.message : typeof error === "string" ? error : t("حدث خطأ غير متوقع.", "Something went wrong.");
+  return (
+    <Alert kind="danger" title={title ?? t("تعذّر إكمال الطلب", "Couldn't complete the request")}>
+      {message}
+    </Alert>
+  );
+}
+
+/** Form footer: the primary submit first, then a ghost cancel. */
+export function FormActions({ children }: { children: ReactNode }) {
+  return <div className="ma-form__actions">{children}</div>;
+}
+
+/** Inline "From [date] To [date]" range for toolbars and page heads (40px row). */
+export function DateRange({
+  from,
+  to,
+  onFrom,
+  onTo,
+  onClear,
+}: {
+  from: string;
+  to: string;
+  onFrom: (value: string) => void;
+  onTo: (value: string) => void;
+  onClear?: () => void;
+}) {
+  const t = useT();
+  return (
+    <div className="ma-range" role="group" aria-label={t("النطاق الزمني", "Date range")}>
+      <label className="ma-range__field">
+        {t("من", "From")}
+        <input className="ma-input" type="date" value={from} max={to || undefined} onChange={(event) => onFrom(event.target.value)} />
+      </label>
+      <label className="ma-range__field">
+        {t("إلى", "To")}
+        <input className="ma-input" type="date" value={to} min={from || undefined} onChange={(event) => onTo(event.target.value)} />
+      </label>
+      {onClear && (from || to) ? <Button kind="ghost" sm icon="x" label={t("مسح", "Clear")} className="ma-range__clear" onClick={onClear} /> : null}
+    </div>
+  );
+}
+
 export function Alert({ kind, title, children, icon }: { kind: "success" | "warning" | "danger" | "info"; title: ReactNode; children?: ReactNode; icon?: string }) {
   const glyph = icon ?? (kind === "success" ? "check" : kind === "info" ? "info" : "alert");
   return (
@@ -255,8 +326,9 @@ export function Alert({ kind, title, children, icon }: { kind: "success" | "warn
       <Icon name={glyph} />
       <div>
         <p className="ma-alert__title">{title}</p>
-        {children ? <p className="ma-alert__text">{children}</p> : null}
+        {children ? <div className="ma-alert__text">{children}</div> : null}
       </div>
+
     </div>
   );
 }
@@ -304,17 +376,17 @@ export function Field({
   onChange?: (value: string) => void;
   name?: string;
 } & Record<string, unknown>) {
-  const shared = { id, name: name ?? id, required, ...rest };
+  const shared = { id, name: name ?? id, required, "aria-describedby": hint ? `${id}-hint` : undefined, ...rest };
   let control;
   if (options) {
     control = (
-      <select className="ma-select" value={value} onChange={(event) => onChange?.(event.target.value)} {...shared}>
-        {options.map(([v, l]) => (
-          <option key={v} value={v}>
-            {l}
-          </option>
-        ))}
-      </select>
+      <SelectField
+        label={typeof label === "string" ? label : id}
+        size="md"
+        value={String(value ?? options[0]?.[0] ?? "")}
+        onChange={(next) => onChange?.(next)}
+        options={options.map(([v, l]) => ({ value: v, label: l }))}
+      />
     );
   } else if (type === "textarea") {
     control = <textarea className="ma-input ma-textarea" rows={rows ?? 4} value={value} onChange={(event) => onChange?.(event.target.value)} {...shared} />;
@@ -325,10 +397,14 @@ export function Field({
     <div className="ma-field">
       <label className="ma-label" htmlFor={id}>
         {label}
-        {required ? <span aria-hidden="true" className="ma-muted"> *</span> : null}
+        {required ? <span aria-hidden="true" className="ma-req"> *</span> : null}
       </label>
       {control}
-      {hint ? <span className="ma-help">{hint}</span> : null}
+      {hint ? (
+        <span className="ma-help" id={`${id}-hint`}>
+          {hint}
+        </span>
+      ) : null}
     </div>
   );
 }

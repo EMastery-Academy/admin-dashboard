@@ -26,6 +26,8 @@ const PATHS: Record<string, string> = {
   globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 010 18a14 14 0 010-18z"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
   filter: '<path d="M3 5h18l-7 8v6l-4 2v-8z"/>',
+  sortAsc: '<path d="M7 20V4"/><path d="M3 8l4-4 4 4"/><path d="M14 6h3M14 12h5M14 18h7"/>',
+  sortDesc: '<path d="M7 4v16"/><path d="M3 16l4 4 4-4"/><path d="M14 6h7M14 12h5M14 18h3"/>',
   download: '<path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/>',
   upload: '<path d="M12 21V9"/><path d="M7 14l5-5 5 5"/><path d="M4 3h16"/>',
   x: '<path d="M6 6l12 12M18 6L6 18"/>',

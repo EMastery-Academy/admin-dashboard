@@ -1,8 +1,9 @@
 /**
  * Admin API layer — one module per back-office category. Every module exports plain service
  * functions, React Query key factories (`<area>Keys`) and `queryOptions` factories (`<area>Queries`).
- * Types are derived from `@/types/openapi` via `operation-types` wherever the spec models them
- * exactly, and from `contract` for the legacy/`dict` shapes the spec leaves untyped.
+ * Types are derived from `@/types/openapi` via `operation-types`. Every back-office resource is served by
+ * the admin module (`/api/v1/admin/*`) over B2C and the legacy platform; federated items carry `source`
+ * (`b2c` | `legacy`) and a `ref`.
  */
 
 export * from "@/lib/api/client";
@@ -22,25 +23,31 @@ export * from "@/lib/api/sales/payments";
 
 // Customers
 export * from "@/lib/api/customers/customers";
-export * from "@/lib/api/customers/directory";
 export * from "@/lib/api/customers/tickets";
 
 // Learning
 export * from "@/lib/api/learning/catalog";
+export * from "@/lib/api/learning/studio";
+export * from "@/lib/api/learning/curriculum";
 export * from "@/lib/api/learning/bundles";
 export * from "@/lib/api/learning/consultations";
+export * from "@/lib/api/learning/consultants";
+export * from "@/lib/api/learning/experts";
+export * from "@/lib/api/learning/instructors";
 
 // Marketing
 export * from "@/lib/api/marketing/promotions";
 export * from "@/lib/api/marketing/referrals";
+export * from "@/lib/api/marketing/content";
 
 // Analytics & reporting
 export * from "@/lib/api/analytics/reports";
+export * from "@/lib/api/analytics/behavior";
+
+// Search
+export * from "@/lib/api/search/search";
 
 // Settings & system
-export * from "@/lib/api/settings/legacy-settings";
+export * from "@/lib/api/settings/settings";
 export * from "@/lib/api/system/health";
-
-// Legacy mirror gateway
-export * from "@/lib/api/legacy/legacy";
-export * from "@/lib/api/legacy/resources";
+export * from "@/lib/api/system/fx";

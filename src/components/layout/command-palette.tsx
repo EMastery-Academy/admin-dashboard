@@ -1,12 +1,15 @@
 /* oxlint-disable react/only-export-components, react/set-state-in-effect, react-hooks/exhaustive-deps */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { create } from "zustand";
 
 import { flatItems, navigation } from "@/config/navigation";
+import { search, searchKeys, searchOptions } from "@/lib/api";
 import { translate, useLang } from "@/lib/i18n";
 import { can } from "@/lib/permissions";
 import { Icon } from "@/components/ui/icon";
+import { SearchIcon, type AnimatedIconHandle } from "@/components/icons/animated";
 
 type PaletteState = { open: boolean; setOpen: (open: boolean) => void };
 
@@ -38,7 +41,20 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
   const [query, setQuery] = useState("");
   const [sel, setSel] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const searchIcon = useRef<AnimatedIconHandle>(null);
   const t = (ar: string, en: string) => translate(lang, ar, en);
+
+  const term = query.trim();
+  const catalogSearch = useQuery({
+    queryKey: searchKeys.results({ q: term, limit: 6 }),
+    queryFn: () => search({ q: term, limit: 6 }),
+    enabled: open && term.length >= 2,
+  });
+  const instructorOptions = useQuery({
+    queryKey: searchKeys.options(),
+    queryFn: () => searchOptions(),
+    enabled: open && term.length >= 2,
+  });
 
   const groups = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -58,11 +74,28 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
       href: a.href,
       icon: a.icon,
     }));
+    const products = (catalogSearch.data?.items ?? []).map<Result>((item) => ({
+      label: item.title ?? item.slug ?? item.id.slice(0, 8),
+      path: [item.product_type, item.status].filter(Boolean).join(" · "),
+      href: `/learning/catalog/${item.id}`,
+      icon: "book",
+    }));
+    const instructors = (instructorOptions.data?.instructors ?? [])
+      .filter((row) => q.length >= 2 && row.display_name.toLowerCase().includes(q))
+      .slice(0, 4)
+      .map<Result>((row) => ({
+        label: row.display_name,
+        path: row.specialized ?? translate(lang, "مدرّب", "Instructor"),
+        href: `/learning/instructors/${row.legacy_trainer_id}`,
+        icon: "user",
+      }));
     const out: [string, Result[]][] = [];
+    if (products.length) out.push([t("المنتجات", "Products"), products]);
+    if (instructors.length) out.push([t("المدرّبون", "Instructors"), instructors]);
     if (pages.length) out.push([t("الصفحات", "Pages"), pages]);
     if (actions.length) out.push([t("إجراءات", "Actions"), actions]);
     return out;
-  }, [query, lang]);
+  }, [query, lang, catalogSearch.data, instructorOptions.data]);
 
   const flat = useMemo(() => groups.flatMap(([, items]) => items), [groups]);
 
@@ -89,36 +122,43 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
   return (
     <div className="ma-backdrop" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
       <div className="ma-palette" role="dialog" aria-modal="true" aria-label={t("البحث الشامل", "Command search")}>
-        <input
-          ref={inputRef}
-          className="ma-palette__input"
-          type="text"
-          role="combobox"
-          aria-expanded="true"
-          aria-controls="pal-list"
-          aria-autocomplete="list"
-          placeholder={t("اكتب صفحة أو إجراء أو رقم طلب أو اسم عميل…", "Type a page, action, order number or customer…")}
-          value={query}
-          onChange={(event) => {
-            setQuery(event.target.value);
-            setSel(0);
-          }}
-          onKeyDown={(event) => {
-            if (event.key === "ArrowDown") {
-              setSel((v) => (v + 1) % Math.max(flat.length, 1));
-              event.preventDefault();
-            } else if (event.key === "ArrowUp") {
-              setSel((v) => (v - 1 + flat.length) % Math.max(flat.length, 1));
-              event.preventDefault();
-            } else if (event.key === "Enter" && flat[sel]) {
-              go(flat[sel].href);
-            } else if (event.key === "Escape") {
-              onClose();
-            } else if (event.key === "Tab") {
-              event.preventDefault();
-            }
-          }}
-        />
+        <div className="ma-palette__search">
+          <SearchIcon ref={searchIcon} size={20} className="ma-palette__icon" />
+          <input
+            ref={inputRef}
+            className="ma-palette__input"
+            type="text"
+            role="combobox"
+            aria-expanded="true"
+            aria-controls="pal-list"
+            aria-autocomplete="list"
+            aria-label={t("البحث الشامل", "Command search")}
+            onFocus={() => searchIcon.current?.startAnimation()}
+            onBlur={() => searchIcon.current?.stopAnimation()}
+            placeholder={t("اكتب صفحة أو إجراء أو رقم طلب أو اسم عميل…", "Type a page, action, order number or customer…")}
+            value={query}
+            onChange={(event) => {
+              setQuery(event.target.value);
+              setSel(0);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "ArrowDown") {
+                setSel((v) => (v + 1) % Math.max(flat.length, 1));
+                event.preventDefault();
+              } else if (event.key === "ArrowUp") {
+                setSel((v) => (v - 1 + flat.length) % Math.max(flat.length, 1));
+                event.preventDefault();
+              } else if (event.key === "Enter" && flat[sel]) {
+                go(flat[sel].href);
+              } else if (event.key === "Escape") {
+                onClose();
+              } else if (event.key === "Tab") {
+                event.preventDefault();
+              }
+            }}
+          />
+          <span className="ma-kbd" aria-hidden="true">Esc</span>
+        </div>
         <ul className="ma-palette__list" id="pal-list" role="listbox">
           {flat.length ? (
             groups.map(([group, items]) => (

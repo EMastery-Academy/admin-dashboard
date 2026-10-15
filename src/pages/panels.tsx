@@ -1,134 +1,158 @@
-import { LegacyPanel } from "@/pages/legacy-panel";
-import { ResourceListPage } from "@/pages/resource-list";
+import type { QueryKey, UseQueryOptions } from "@tanstack/react-query";
+
+import {
+  contentQueries,
+  instructorsQueries,
+  productQueries,
+  promotionsQueries,
+  referralsQueries,
+  settingsQueries,
+  customersQueries,
+} from "@/lib/api";
+import { AdminListPanel } from "@/components/ui/admin-list-panel";
+
+/** Admin API query options as the panel's untyped `query` (the panel renders any page/array/object). */
+const q = (options: unknown) => options as UseQueryOptions<unknown, Error, unknown, QueryKey>;
 
 export function AnnouncementsPage() {
   return (
-    <LegacyPanel
+    <AdminListPanel
       titleAr="أشرطة الإعلانات"
       titleEn="Announcement bars"
-      subAr="أشرطة الإعلانات من النظام القديم."
-      subEn="Announcement bars from the legacy system."
-      path="marketing/ads"
+      subAr="أشرطة الإعلانات المعروضة على الموقع."
+      subEn="Announcement bars shown on the site."
+      query={q(contentQueries.announcements({ limit: 200 }))}
+      columns={["title", "body", "placement", "active", "published_at", "link"]}
     />
   );
 }
 
 export function InstructorApplicationsPage() {
   return (
-    <LegacyPanel
+    <AdminListPanel
       titleAr="طلبات المدربين"
       titleEn="Instructor applications"
-      subAr="طلبات انضمام المدربين."
-      subEn="Instructor onboarding applications."
-      path="trainers/trainerapplications"
+      subAr="طلبات الانضمام كمدرب، الأحدث أولاً."
+      subEn="Applications to become an instructor, newest first."
+      query={q(instructorsQueries.applications({ limit: 200 }))}
+      columns={["name", "email", "mobile", "country", "specialization", "status", "submitted_at"]}
     />
   );
 }
 
 export function CommissionsPage() {
   return (
-    <LegacyPanel
+    <AdminListPanel
       titleAr="العمولات"
       titleEn="Commissions"
-      subAr="عمولات المسوقين بالعمولة."
-      subEn="Affiliate commissions."
-      path="affiliates/commissions"
+      subAr="نسبة عمولة الإحالة لكل منتج."
+      subEn="Referral commission per product."
+      query={q(referralsQueries.commissions({ limit: 200 }))}
+      columns={["product_kind", "product_ref", "commission"]}
     />
   );
 }
 
 export function AffiliatesReportPage() {
   return (
-    <LegacyPanel
+    <AdminListPanel
       titleAr="تقرير المسوقين"
       titleEn="Affiliates report"
-      subAr="أداء المسوقين بالعمولة."
-      subEn="Affiliate performance."
-      path="affiliates/all"
+      subAr="شركاء الإحالة وحالتهم."
+      subEn="Referral partners and their status."
+      query={q(referralsQueries.partners({ limit: 200 }))}
+      columns={["name", "email", "referral_code", "status", "country", "joined_at"]}
     />
   );
 }
 
 export function OffersPage() {
   return (
-    <LegacyPanel
+    <AdminListPanel
       titleAr="العروض"
       titleEn="Offers"
-      subAr="عروض التسويق من النظام القديم."
-      subEn="Marketing offers from the legacy system."
-      path="marketing/offers"
+      subAr="عروض المتجر وشروطها."
+      subEn="Storefront offers and their rules."
+      query={q(promotionsQueries.offers({ limit: 200 }))}
+      columns={["title", "type", "starts_at", "ends_at", "active"]}
     />
   );
 }
 
 export function PriceListsPage() {
   return (
-    <LegacyPanel
+    <AdminListPanel
       titleAr="قوائم الأسعار"
       titleEn="Price lists"
       subAr="قوائم الأسعار والحملات."
       subEn="Price lists and campaigns."
-      path="courses/price_lists"
+      query={q(productQueries.priceLists({ limit: 200 }))}
+      columns={["name", "price", "starts_at", "ends_at"]}
     />
   );
 }
 
 export function CategoriesPage() {
   return (
-    <LegacyPanel
+    <AdminListPanel
       titleAr="التصنيفات"
       titleEn="Categories"
       subAr="تصنيفات الدورات."
       subEn="Course categories."
-      path="courses/categories"
+      query={q(productQueries.categories({ limit: 200 }))}
+      columns={["name", "description", "order", "category_id"]}
     />
   );
 }
 
 export function NotificationsPage() {
   return (
-    <LegacyPanel
+    <AdminListPanel
       titleAr="الإشعارات"
       titleEn="Notifications"
       subAr="بُرد الإشعارات الإدارية."
       subEn="Admin notification emails."
-      path="settings/emailnotified"
+      query={q(settingsQueries.notificationEmails())}
+      columns={["type", "email"]}
     />
   );
 }
 
 export function CertificatesPage() {
   return (
-    <ResourceListPage
-      resource="certificates"
+    <AdminListPanel
       titleAr="الشهادات"
       titleEn="Certificates"
-      subAr="الشهادات المعرّفة في النظام القديم."
-      subEn="Certificates defined in the legacy system."
+      subAr="قوالب الشهادات التي تمنحها الدورات."
+      subEn="Certificate templates awarded by courses."
+      query={q(productQueries.certificateTemplates({ limit: 200 }))}
+      columns={["legacy_certificate_id", "name", "description"]}
     />
   );
 }
 
 export function RatingsPage() {
   return (
-    <ResourceListPage
-      resource="course_ratings"
+    <AdminListPanel
       titleAr="التقييمات"
       titleEn="Ratings"
       subAr="تقييمات الدورات ومراجعاتها."
       subEn="Course ratings and reviews."
+      query={q(productQueries.allRatings({ limit: 200 }))}
+      columns={["product_ref", "rating", "review", "legacy_user_id", "created_at"]}
     />
   );
 }
 
 export function SegmentsPage() {
   return (
-    <ResourceListPage
-      resource="groups"
+    <AdminListPanel
       titleAr="الشرائح"
       titleEn="Segments"
-      subAr="مجموعات المستخدمين من النظام القديم."
-      subEn="User groups from the legacy system."
+      subAr="مجموعات المستخدمين."
+      subEn="User groups."
+      query={q(customersQueries.segments({ limit: 200 }))}
+      columns={["legacy_group_id", "name", "notes", "created_at"]}
     />
   );
 }

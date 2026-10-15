@@ -1,6 +1,6 @@
 /* oxlint-disable react/set-state-in-effect */
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation, useMatches, useNavigate } from "react-router-dom";
 
 import { navigation, flatItems, matchActive, type NavModule } from "@/config/navigation";
 import { cn } from "@/lib/cn";
@@ -11,6 +11,16 @@ import { Icon } from "@/components/ui/icon";
 import { IconButton } from "@/components/ui/kit";
 import { Button as BaseButton } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { Avatar } from "@/components/ui/kit";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { initialsOf } from "@/lib/status";
 import { CommandPalette, useCommandPalette, usePaletteStore } from "./command-palette";
 
 const COLLAPSED_KEY = "admin.sidebarCollapsed";
@@ -29,8 +39,8 @@ export function Shell() {
   const [collapsed, setCollapsed] = useState(readCollapsed);
   const [navOpen, setNavOpen] = useState(false);
   const [previewId, setPreviewId] = useState<string | null>(null);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const palette = useCommandPalette();
+  const studio = useMatches().some((match) => (match.handle as { studio?: boolean } | undefined)?.studio);
 
   useEffect(() => {
     localStorage.setItem(COLLAPSED_KEY, collapsed ? "1" : "0");
@@ -73,7 +83,7 @@ export function Shell() {
   }, [active, lang]);
 
   return (
-    <div className={cn("ma-shell", collapsed && "is-sidebar-collapsed", collapsed && previewId && !navOpen && "is-peek", navOpen && "is-nav-open")}>
+    <div className={cn("ma-shell", studio && "is-studio", collapsed && "is-sidebar-collapsed", collapsed && previewId && !navOpen && "is-peek", navOpen && "is-nav-open")}>
       <CommandPalette open={palette.open} onClose={palette.close} />
 
       <div className="ma-nav-drawer" id="nav-drawer" onMouseLeave={() => setPreviewId(null)}>
@@ -151,47 +161,17 @@ export function Shell() {
               })}
             </ol>
           </nav>
-          <SearchButton label={t("بحث أو أمر", "Search or jump to")} onClick={palette.show} />
-          <LangToggle />
-          <ThemeToggle />
-          <div className="ma-menu">
-            <button
-              type="button"
-              className="ma-btn ma-btn--bare ma-btn--icon"
-              aria-haspopup="true"
-              aria-expanded={userMenuOpen}
-              aria-label={t("حسابي", "My account")}
-              onClick={() => setUserMenuOpen((v) => !v)}
-            >
-              <span className="ma-avatar" style={{ background: "var(--yellow)", margin: 0 }}>
-                MA
-              </span>
-            </button>
-            {userMenuOpen ? (
-              <div className="ma-menu__pop" role="menu">
-                <p className="ma-menu__label">{admin?.email ?? ""}</p>
-                <Link className="ma-menu__item" role="menuitem" to="/settings/audit" onClick={() => setUserMenuOpen(false)}>
-                  <Icon name="history" />
-                  {t("سجل التدقيق", "Audit log")}
-                </Link>
-                <button
-                  type="button"
-                  className="ma-menu__item"
-                  role="menuitem"
-                  onClick={async () => {
-                    setUserMenuOpen(false);
-                    await logout();
-                    navigate("/login");
-                  }}
-                >
-                  <Icon name="logout" />
-                  {t("تسجيل الخروج", "Sign out")}
-                </button>
-              </div>
-            ) : null}
+          <div className="ma-topbar__actions">
+            <SearchButton label={t("بحث أو أمر", "Search or jump to")} onClick={palette.show} />
+            <LangToggle />
+            <ThemeToggle />
+            <AccountMenu email={admin?.email ?? ""} onSignOut={async () => {
+              await logout();
+              navigate("/login");
+            }} />
           </div>
         </header>
-        <main id="main" className="ma-content" tabIndex={-1}>
+        <main id="main" className={cn("ma-content", studio && "ma-content--wide")} tabIndex={-1}>
           <Outlet />
         </main>
       </div>
@@ -312,4 +292,41 @@ function LangToggle() {
   const lang = useLang();
   const setLang = useLangStore((state) => state.setLang);
   return <IconButton icon="globe" label={lang === "ar" ? "English" : "العربية"} onClick={() => setLang(lang === "ar" ? "en" : "ar")} />;
+}
+
+function AccountMenu({ email, onSignOut }: { email: string; onSignOut: () => void }) {
+  const t = useT();
+  const navigate = useNavigate();
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button type="button" className="ma-btn ma-btn--bare ma-btn--icon ma-usermenu" aria-label={t("حسابي", "My account")}>
+          <Avatar initials={email ? initialsOf(email) : "MA"} />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        {email ? (
+          <>
+            <DropdownMenuLabel>
+              <bdi>{email}</bdi>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+          </>
+        ) : null}
+        <DropdownMenuItem onSelect={() => navigate("/settings/team")}>
+          <Icon name="users" />
+          {t("الفريق والأدوار", "Team & roles")}
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => navigate("/settings/audit")}>
+          <Icon name="history" />
+          {t("سجل التدقيق", "Audit log")}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onSelect={onSignOut}>
+          <Icon name="logout" className="ma-icon-dir" />
+          {t("تسجيل الخروج", "Sign out")}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 }
