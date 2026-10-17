@@ -1,7 +1,9 @@
 import { queryOptions } from "@tanstack/react-query";
 
 import { apiDelete, apiGet, apiPost, apiPut } from "@/lib/api/client";
+import type { PreviewKind } from "@/lib/api/contract";
 import type { RequestBody, SuccessResponse } from "@/lib/api/operation-types";
+import type { components } from "@/types/openapi";
 
 /*
  * Course Studio (`/admin/catalog/products/{ref}/studio`): a product's page as a document (`meta` + BlockNote
@@ -17,7 +19,6 @@ type VersionsOp = "list_versions_api_v1_admin_catalog_products__product_ref__stu
 type VersionOp = "get_version_api_v1_admin_catalog_products__product_ref__studio_versions__version_id__get";
 type RestoreOp =
   "restore_version_api_v1_admin_catalog_products__product_ref__studio_versions__version_id__restore_post";
-type PreviewBaseOp = "preview_base_api_v1_admin_catalog_products__product_ref__studio_preview_base_get";
 type AssetsOp = "list_assets_api_v1_admin_catalog_products__product_ref__studio_assets_get";
 type UploadUrlOp = "asset_upload_url_api_v1_admin_catalog_products__product_ref__studio_assets_upload_url_post";
 type CompleteUploadOp = "complete_asset_upload_api_v1_admin_catalog_products__product_ref__studio_assets_post";
@@ -32,7 +33,13 @@ export type StudioPublishResult = SuccessResponse<PublishOp>;
 export type StudioVersion = SuccessResponse<VersionsOp>[number];
 export type StudioVersionDetail = SuccessResponse<VersionOp>;
 /** Storefront data of the product's legacy course (same shape as the public `GET /legacy/courses/{id}`). */
-export type StudioPreviewBase = SuccessResponse<PreviewBaseOp>;
+export type StudioPreviewCourseBase = components["schemas"]["CourseDetailResponse"];
+/**
+ * The storefront data the live preview renders under the draft, tagged with its `kind`. `base` is the
+ * kind-specific payload (`StudioPreviewCourseBase` for course/diploma, a package/bundle/live-diploma payload
+ * otherwise) or `null` when the product has no storefront page of its own.
+ */
+export type StudioPreviewPayload = { kind: PreviewKind; base: unknown };
 export type StudioAssetPage = SuccessResponse<AssetsOp>;
 export type StudioAsset = StudioAssetPage["items"][number];
 export type StudioUploadIntent = SuccessResponse<UploadUrlOp>;
@@ -55,12 +62,26 @@ export const studioPaths = {
 
 export const studioKeys = {
   all: ["learning", "studio"] as const,
+  readme: (productRef: string) => [...studioKeys.all, "readme", productRef] as const,
   page: (productRef: string) => [...studioKeys.all, "page", productRef] as const,
   versions: (productRef: string) => [...studioKeys.all, "versions", productRef] as const,
   version: (productRef: string, versionId: string) => [...studioKeys.all, "version", productRef, versionId] as const,
   previewBase: (productRef: string) => [...studioKeys.all, "preview-base", productRef] as const,
   assets: (productRef: string) => [...studioKeys.all, "assets", productRef] as const,
 };
+
+/** Product README (markdown) — replaces the HTML "about" sections; `source` says where the text came from. */
+export type ProductReadme = components["schemas"]["ReadmeResponse"];
+
+/** `GET .../readme` — the saved README, or one generated from the legacy HTML sections until it is first saved. */
+export function getProductReadme(product_ref: string): Promise<ProductReadme> {
+  return apiGet("admin/catalog/products/{product_ref}/readme", { path: { product_ref } });
+}
+
+/** `PUT .../readme` — saves the README; raw HTML and unsafe URLs are stripped server-side. */
+export function putProductReadme(product_ref: string, markdown: string): Promise<ProductReadme> {
+  return apiPut("admin/catalog/products/{product_ref}/readme", { path: { product_ref }, body: { markdown } });
+}
 
 /** `GET .../studio` — the draft (seeded from the current page when never saved) and the published state. */
 export function getStudio(product_ref: string): Promise<StudioContent> {
@@ -91,8 +112,8 @@ export function restoreStudioVersion(product_ref: string, version_id: string): P
   return apiPost(studioPaths.restore, { path: { product_ref, version_id } });
 }
 
-/** `GET .../studio/preview-base` — storefront data the live preview renders under the draft (legacy courses). */
-export function getStudioPreviewBase(product_ref: string): Promise<StudioPreviewBase> {
+/** `GET .../studio/preview-base` — storefront data the live preview renders under the draft, tagged with its kind. */
+export function getStudioPreviewBase(product_ref: string): Promise<StudioPreviewPayload> {
   return apiGet(studioPaths.previewBase, { path: { product_ref } });
 }
 
@@ -171,6 +192,8 @@ export async function uploadStudioAsset(product_ref: string, file: File, alt_tex
 
 
 export const studioQueries = {
+  readme: (productRef: string) =>
+    queryOptions({ queryKey: studioKeys.readme(productRef), queryFn: () => getProductReadme(productRef), staleTime: Infinity }),
   page: (productRef: string) =>
     queryOptions({ queryKey: studioKeys.page(productRef), queryFn: () => getStudio(productRef), staleTime: Infinity }),
   versions: (productRef: string) =>

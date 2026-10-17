@@ -29,9 +29,7 @@ function usePrefsSync() {
   useEffect(() => {
     const root = document.documentElement;
     const apply = () => {
-      // `system` removes the attribute so the kit's tokens follow the OS preference.
-      if (theme === "system") root.removeAttribute("data-theme");
-      else root.setAttribute("data-theme", resolvedTheme(theme));
+      root.setAttribute("data-theme", resolvedTheme(theme));
     };
     apply();
     if (theme !== "system") return;

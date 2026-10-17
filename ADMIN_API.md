@@ -87,6 +87,12 @@ Use `isLegacy(item)` from `src/lib/refs.ts` to disable or hide them.
 - referral partner and payout status;
 - ticket status and replies.
 
+**Packages.** Packages are **B2C-owned** (`b2c.products` with `product_type = "package"` + member rows in
+`b2c.package_items`); the legacy `MAS_CUR_Courses` mirror was only read by the one-off backfill
+(`migrations/20261017_package_items_backfill.sql`). `/admin/catalog/products/{ref}/{summary,courses}` and
+`/admin/catalog/products/{ref}/package*` read and write B2C. A legacy-only package (no B2C product) stays
+read-only and falls back to the legacy content tabs.
+
 **Products.** `/learning/catalog/:ref` serves every product. `GET /admin/catalog/products/{ref}` returns:
 - `product` (the list item);
 - `b2c` (B2C detail, if there is a B2C product);
@@ -94,6 +100,8 @@ Use `isLegacy(item)` from `src/lib/refs.ts` to disable or hide them.
 - `links` (both ids).
 
 The legacy content tabs (`features/learning/components/legacy-product-content.tsx`) call `/admin/catalog/products/{ref}/{curriculum,prices,rules,certificates,ratings,instructors,learners,summary,courses}`, which accept either ref.
+
+The product's analytics panels read `/admin/catalog/products/{ref}/{sales,behavior,transactions}`: sales/students, page views + wishlist/cart events, and B2C payment transactions (each with a per-bucket series).
 
 ## 5. API modules
 
@@ -105,7 +113,7 @@ The legacy content tabs (`features/learning/components/legacy-product-content.ts
 | `sales/orders.ts`, `sales/payments.ts` | `/admin/orders`, `/admin/payments` | Merged; refs in paths |
 | `customers/customers.ts` | `/admin/customers` (+ `/{ref}/360`, `/import`, `/segments`) | B2C customers and legacy accounts not imported yet |
 | `customers/tickets.ts` | `/admin/support/tickets` | |
-| `learning/catalog.ts` | `/admin/catalog/*` | Products by ref, legacy content, categories, price lists, extension packages, certificates, ratings |
+| `learning/catalog.ts` | `/admin/catalog/*` | Products by ref, legacy content, categories, price lists, extension packages, certificates, ratings, and the per-product analytics sub-resources (`sales`, `behavior`, `transactions`) |
 | `learning/instructors.ts` | `/admin/instructors` (+ public `/legacy/instructors/*` for profiles) | |
 | `learning/consultations.ts`, `learning/consultants.ts` | `/admin/consultations/*` | |
 | `marketing/promotions.ts`, `marketing/referrals.ts`, `marketing/content.ts` | `/admin/promotions`, `/admin/referrals`, `/admin/marketing` | |

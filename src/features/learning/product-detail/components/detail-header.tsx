@@ -4,13 +4,15 @@ import { Icon } from "@/components/ui/icon";
 import { formatAmount, formatDateTime, formatNumber } from "@/lib/format";
 import { useT } from "@/lib/i18n";
 import { studioHref } from "@/lib/refs";
-import type { CurriculumUnit, ProductSalesSeries, ProductView } from "@/lib/api";
+import { productTypeLabel } from "@/lib/product-types";
+import type { CurriculumUnit, PackageCourse, ProductSalesSeries, ProductView } from "@/lib/api";
 import { longDur, flattenLessons } from "../model";
 
 export interface DetailHeaderProps {
   productRef: string;
   data: ProductView;
   units: CurriculumUnit[];
+  packageCourses?: PackageCourse[];
   sales?: ProductSalesSeries;
   onTogglePublish: () => void;
   isPublishing?: boolean;
@@ -20,6 +22,7 @@ export function DetailHeader({
   productRef,
   data,
   units,
+  packageCourses,
   sales,
   onTogglePublish,
   isPublishing,
@@ -28,25 +31,36 @@ export function DetailHeader({
   const item = data.product;
   const published = item.status === "published";
   const b2c = data.b2c;
+  const isPackage = item.product_type === "package";
 
   const allLessons = useMemo(() => flattenLessons(units), [units]);
   const totalSec = useMemo(
     () => allLessons.reduce((acc, l) => acc + (l.duration || 0), 0),
     [allLessons]
   );
+  const courses = useMemo(() => packageCourses ?? [], [packageCourses]);
+  // A package has no units/lessons of its own; its curriculum is the courses it bundles, and its
+  // duration is the sum of theirs.
+  const packageDuration = useMemo(
+    () => courses.reduce((acc, course) => acc + (course.duration || 0), 0),
+    [courses]
+  );
 
   const priceValue = item.price ?? 0;
   const currency = item.price_currency ?? "USD";
   const audience = "B2C";
   const category = item.category || t("غير مصنف", "Uncategorized");
-  const kindLabel = item.product_type === "package" ? t("حزمة", "Package") : t("دورة", "Course");
+  const kindLabel = (() => {
+    const label = productTypeLabel(item.product_type);
+    return t(label.ar, label.en);
+  })();
 
   // Determine external catalog URL if available
-  const catalogHref = b2c ? `/learning/courses` : undefined;
+  const catalogHref = b2c ? `/learning/catalog` : undefined;
 
   return (
     <section className="cd-head">
-      <AppLink className="cd-crumb" to="/learning/courses">
+      <AppLink className="cd-crumb" to="/learning/catalog">
         <span>{t("الكتالوج", "Catalog")}</span>
         <span className="cd-flip">
           <Icon name="arrowBack" className="cd-ic--sm" />
@@ -133,17 +147,17 @@ export function DetailHeader({
           </span>
         </div>
 
-        {/* KPI 3: Curriculum counts */}
+        {/* KPI 3: Curriculum counts (a package's curriculum is its courses) */}
         <div className="cd-kpi" role="listitem">
           <span className="cd-kpi__l">
             <Icon name="layers" className="cd-ic--sm" />
-            {t("المنهج", "Curriculum")}
+            {isPackage ? t("الدورات", "Courses") : t("المنهج", "Curriculum")}
           </span>
           <span className="cd-kpi__v">
-            {units.length} / {allLessons.length}
+            {isPackage ? formatNumber(courses.length) : `${units.length} / ${allLessons.length}`}
           </span>
           <span className="cd-kpi__m">
-            {t("أقسام", "sections")} / {t("دروس", "lessons")}
+            {isPackage ? t("دورة داخل الحزمة", "courses in the package") : `${t("أقسام", "sections")} / ${t("دروس", "lessons")}`}
           </span>
         </div>
 
@@ -153,9 +167,11 @@ export function DetailHeader({
             <Icon name="clock" className="cd-ic--sm" />
             {t("المدة الكلية", "Total duration")}
           </span>
-          <span className="cd-kpi__v">{longDur(totalSec, t("ar", "en") === "ar")}</span>
+          <span className="cd-kpi__v">{longDur(isPackage ? packageDuration : totalSec, t("ar", "en") === "ar")}</span>
           <span className="cd-kpi__m">
-            {allLessons.length} {t("درساً", "lessons")}
+            {isPackage
+              ? `${courses.length} ${t("دورة", "courses")}`
+              : `${allLessons.length} ${t("درساً", "lessons")}`}
           </span>
         </div>
 

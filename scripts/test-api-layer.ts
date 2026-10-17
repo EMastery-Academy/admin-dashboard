@@ -34,6 +34,8 @@ import {
   getPackageSummary,
   getPaymentIntent,
   getProduct,
+  getProductBehavior,
+  getProductTransactions,
   getProductCertificates,
   getProductCurriculum,
   getProductInstructors,
@@ -141,6 +143,7 @@ type TestContext = {
   legacyProductRef?: string;
   legacyProductStatus?: string;
   packageRef?: string;
+  b2cPackageRef?: string;
   productRef?: string;
   b2cProductId?: string;
   consultantId?: number;
@@ -515,6 +518,8 @@ function liveEndpointTests(): LiveTest[] {
         ctx.legacyProductStatus = courses.items[0]?.status;
         const packages = await listProducts({ source: "legacy", product_type: "package", limit: 5 });
         ctx.packageRef = packages.items[0]?.ref ?? undefined;
+        const b2cPackages = await listProducts({ source: "b2c", product_type: "package", limit: 5 });
+        ctx.b2cPackageRef = b2cPackages.items[0]?.ref ?? undefined;
       },
     },
     { name: "GET /admin/catalog/products/{ref} (b2c)", run: async (ctx) => { if (!ctx.productRef) throw new SkipTest("no product"); await getProduct(ctx.productRef); } },
@@ -533,11 +538,35 @@ function liveEndpointTests(): LiveTest[] {
       },
     },
     {
+      name: "GET /admin/catalog/products/{ref}/behavior",
+      run: async (ctx) => {
+        if (!ctx.productRef) throw new SkipTest("no product");
+        const stats = await getProductBehavior(ctx.productRef, { bucket: "month" });
+        assert(Array.isArray(stats.points), "expected behaviour points");
+        assert(typeof stats.views === "number", "expected numeric views");
+        assert(typeof stats.unique_viewers === "number", "expected numeric unique viewers");
+      },
+    },
+    {
+      name: "GET /admin/catalog/products/{ref}/transactions",
+      run: async (ctx) => {
+        if (!ctx.productRef) throw new SkipTest("no product");
+        const page = await getProductTransactions(ctx.productRef, { bucket: "month", limit: 5 });
+        assert(Array.isArray(page.items), "expected transaction rows");
+        assert(Array.isArray(page.points), "expected transaction points");
+        assert(typeof page.total === "number", "expected a total count");
+        for (const row of page.items) {
+          assert(row.payment_intent_id, "a transaction must name its payment intent");
+          assert(row.order_id, "a transaction must name its order");
+        }
+      },
+    },
+    {
       name: "GET /admin/catalog/products/{ref}/summary|courses (package)",
       run: async (ctx) => {
-        if (!ctx.packageRef) throw new SkipTest("no legacy package");
-        await getPackageSummary(ctx.packageRef);
-        await getPackageCourses(ctx.packageRef);
+        if (!ctx.b2cPackageRef) throw new SkipTest("no B2C package");
+        await getPackageSummary(ctx.b2cPackageRef);
+        await getPackageCourses(ctx.b2cPackageRef);
       },
     },
     // -- course studio (page drafts, versions, assets, preview data)
@@ -557,8 +586,12 @@ function liveEndpointTests(): LiveTest[] {
       name: "GET /admin/catalog/products/{ref}/studio/preview-base",
       run: async (ctx) => {
         if (!ctx.legacyProductRef) throw new SkipTest("no legacy product");
-        const base = await getStudioPreviewBase(ctx.legacyProductRef);
-        assert(base.course.id > 0, "expected the legacy course");
+        const payload = await getStudioPreviewBase(ctx.legacyProductRef);
+        assert(payload.kind, "expected a product kind");
+        if (payload.kind === "course" || payload.kind === "diploma") {
+          const base = payload.base as { course?: { id?: number } } | null;
+          assert(base?.course?.id && base.course.id > 0, "expected the legacy course in the base payload");
+        }
       },
     },
     { name: "GET /admin/catalog/categories", run: async () => { await listCategories({ limit: 5 }); } },

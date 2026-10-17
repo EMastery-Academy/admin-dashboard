@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 
-import type { StudioDocument, StudioPreviewBase } from "@/lib/api";
+import type { PreviewKind, StudioDocument } from "@/lib/api";
 import { useT } from "@/lib/i18n";
 
 /*
  * Live preview: the storefront's real product page (mastery-front `/preview/product`) in an iframe. The frame
- * says `ready`, then the studio posts the draft (and the course's storefront data) on every change. Messages are
+ * says `ready`, then the studio posts the draft (and the product's storefront data) on every change. Messages are
  * only sent to, and accepted from, the storefront origin.
  */
 
@@ -23,13 +23,16 @@ export function PreviewFrame({
   kind,
   device,
   focusBlockId,
+  readme,
 }: {
-  base: StudioPreviewBase | null;
+  base: unknown;
   document: StudioDocument;
-  kind: "course" | "diploma" | "package";
+  kind: PreviewKind;
   device: PreviewDevice;
   /** Scrolls the preview to this block (outline clicks). */
   focusBlockId?: { id: string; at: number } | null;
+  /** The product README (markdown) being edited; the storefront renders it live in place of the about sections. */
+  readme?: string | null;
 }) {
   const t = useT();
   const frame = useRef<HTMLIFrameElement>(null);
@@ -61,7 +64,7 @@ export function PreviewFrame({
     const send = () => {
       last.current = Date.now();
       frame.current?.contentWindow?.postMessage(
-        { source: "mastery-studio", type: "render", kind, base, document },
+        { source: "mastery-studio", type: "render", kind, base, document, readme: readme ?? null },
         new URL(PREVIEW_URL).origin,
       );
     };
@@ -70,7 +73,7 @@ export function PreviewFrame({
     if (wait <= 0) send();
     else timer.current = window.setTimeout(send, wait);
     return () => window.clearTimeout(timer.current);
-  }, [ready, base, document, kind]);
+  }, [ready, base, document, kind, readme]);
 
   useEffect(() => {
     if (!ready || !focusBlockId) return;

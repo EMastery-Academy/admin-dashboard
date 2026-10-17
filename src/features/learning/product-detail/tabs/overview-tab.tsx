@@ -5,16 +5,18 @@ import { Icon } from "@/components/ui/icon";
 import { SelectField } from "@/components/ui/select";
 import { formatAmount, formatDateTime, formatNumber } from "@/lib/format";
 import { useT } from "@/lib/i18n";
-import { studioHref } from "@/lib/refs";
-import type { CurriculumUnit, ProductPrice, ProductView, SearchProductDetail } from "@/lib/api";
+import { productTypeLabel } from "@/lib/product-types";
+import { productHref, studioHref } from "@/lib/refs";
+import type { CurriculumUnit, PackageCourse, ProductPrice, ProductView, SearchProductDetail } from "@/lib/api";
 import { detectQualityIssues, longDur, flattenLessons } from "../model";
-import { StudentsChart } from "../components/students-chart";
+import { ProductStatsPanels } from "../components/product-stats-panels";
 
 interface OverviewTabProps {
   productRef: string;
   data: ProductView;
   searchDetail?: SearchProductDetail | null;
   units: CurriculumUnit[];
+  packageCourses?: PackageCourse[];
   onGoToContent?: () => void;
   onSelectLesson?: (lessonId: number) => void;
 }
@@ -24,6 +26,7 @@ export function OverviewTab({
   data,
   searchDetail: _searchDetail,
   units,
+  packageCourses,
   onGoToContent,
   onSelectLesson,
 }: OverviewTabProps) {
@@ -31,11 +34,18 @@ export function OverviewTab({
   const item = data.product;
   const b2c = data.b2c;
   const isAr = t("ar", "en") === "ar";
+  const isPackage = item.product_type === "package";
 
   const allLessons = useMemo(() => flattenLessons(units), [units]);
   const issues = useMemo(
     () => detectQualityIssues(data, units, allLessons, t),
     [data, units, allLessons, t]
+  );
+
+  const courses = useMemo(() => packageCourses ?? [], [packageCourses]);
+  const packageDuration = useMemo(
+    () => courses.reduce((acc, course) => acc + (course.duration || 0), 0),
+    [courses]
   );
 
   // Maximum section duration for relative percentage bar fills
@@ -48,6 +58,8 @@ export function OverviewTab({
   }, [units]);
 
   const prices = b2c?.prices || [];
+  // The package/course artwork. Legacy packages carry it on the legacy detail; B2C products on the item.
+  const artwork = data.legacy?.product.image ?? data.product.image ?? null;
 
   return (
     <div className="cd-bento">
@@ -67,15 +79,48 @@ export function OverviewTab({
           </AppLink>
         </div>
         <div className="cd-card__b">
+          {artwork ? (
+            <div className="cd-media" style={{ marginBlockEnd: 16 }}>
+              <img className="cd-media__img" src={artwork} alt={item.title ?? ""} />
+            </div>
+          ) : null}
           <dl className="cd-dl">
             <div>
               <dt>{t("النوع", "Type")}</dt>
-              <dd>{item.product_type === "package" ? t("حزمة", "Package") : t("دورة", "Course")}</dd>
+              <dd>
+                {(() => {
+                  const label = productTypeLabel(item.product_type);
+                  return t(label.ar, label.en);
+                })()}
+              </dd>
             </div>
             <div>
               <dt>{t("المُعرّف", "ID")}</dt>
               <dd className="cd-ltr">{item.slug || item.product_id || String(item.legacy_id || "")}</dd>
             </div>
+            {isPackage ? (
+              <div>
+                <dt>{t("عدد الدورات", "Courses")}</dt>
+                <dd>
+                  <span className="cd-num">{courses.length}</span> {t("دورة", "courses")}
+                  {packageDuration > 0 ? ` · ${longDur(packageDuration, isAr)}` : ""}
+                </dd>
+              </div>
+            ) : null}
+            {isPackage ? (
+              <div>
+                <dt>{t("الوصف", "Description")}</dt>
+                <dd>
+                  {(data.legacy?.description || data.b2c?.short_description) ? (
+                    <span className="cd-richtext" style={{ fontSize: 14 }}>
+                      {plain(data.legacy?.description || data.b2c?.short_description || "")}
+                    </span>
+                  ) : (
+                    <span className="cd-unset">{t("لا يوجد وصف", "No description")}</span>
+                  )}
+                </dd>
+              </div>
+            ) : null}
             <div>
               <dt>{t("المدرّب", "Instructor")}</dt>
               <dd>{item.instructor || "—"}</dd>
@@ -173,9 +218,9 @@ export function OverviewTab({
         </div>
       </section>
 
-      {/* Real Students Acquisition Chart */}
+      {/* Behaviour, orders, sales and transaction charts */}
       <div className="cd-s12" style={{ gridColumn: "1 / -1" }}>
-        <StudentsChart productRef={productRef} />
+        <ProductStatsPanels productRef={productRef} />
       </div>
 
       {/* Timeline */}
@@ -238,7 +283,41 @@ export function OverviewTab({
           )}
         </div>
         <div className="cd-card__b">
-          {!units.length ? (
+          {isPackage ? (
+            courses.length ? (
+              <div className="cd-bars">
+                {courses.map((course) => {
+                  const dur = course.duration || 0;
+                  const pct = Math.round((dur / Math.max(packageDuration, 1)) * 100);
+                  return (
+                    <div key={course.product_id ?? course.course_ref} className="cd-bar">
+                      <span className="cd-bar__t">
+                        <AppLink className="cd-link" to={productHref(course.course_ref)}>
+                          {course.title ?? course.course_ref}
+                        </AppLink>
+                      </span>
+                      <span className="cd-bar__track">
+                        <span className="cd-bar__fill" style={{ width: `${pct}%` }} />
+                      </span>
+                      <span className="cd-bar__v">
+                        {dur > 0 ? longDur(dur, isAr) : "—"}
+                        {course.required ? "" : ` · ${t("اختيارية", "optional")}`}
+                      </span>
+                    </div>
+                  );
+                })}
+                <div className="cd-muted" style={{ marginBlockStart: 10, fontSize: 13 }}>
+                  {t("إجمالي المدة", "Total duration")}: <b className="cd-num">{longDur(packageDuration, isAr)}</b>
+                </div>
+              </div>
+            ) : (
+              <div className="cd-empty">
+                <Icon name="layers" />
+                <strong>{t("لا دورات في الحزمة بعد", "No courses in this package yet")}</strong>
+                <span>{t("أضف دورات من تبويب الحزمة.", "Add courses from the Package tab.")}</span>
+              </div>
+            )
+          ) : !units.length ? (
             <div className="cd-empty">
               <Icon name="layers" />
               <strong>{t("لا توجد وحدات أو دروس بعد", "No sections or lessons yet")}</strong>
@@ -346,6 +425,15 @@ export function OverviewTab({
       </section>
     </div>
   );
+}
+
+/** Legacy descriptions are HTML; show a readable single line. */
+function plain(html: string): string {
+  return html
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function PricesList({ prices }: { prices: ProductPrice[] }) {

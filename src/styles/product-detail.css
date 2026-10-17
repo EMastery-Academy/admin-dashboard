@@ -212,6 +212,34 @@
 .cd-addtile { min-height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; border: 1px dashed var(--line-strong); border-radius: var(--radius-card); background: transparent; color: var(--text-muted); cursor: pointer; }
 .cd-addtile:hover { background: var(--fill-soft); color: var(--text); }
 
+/* ---------- Product analytics panels + data tables ---------- */
+/* Records in data tables read as plain text: no link underline until hovered. */
+.cd-table a { text-decoration: none; color: var(--text); }
+.cd-table a:hover, .cd-table a:focus-visible { color: var(--accent); }
+.cd-table td { padding-block: 12px; }
+.cd-table th { padding-block: 10px; }
+
+/* KPI cards: more air around the label and the number. */
+.cd-stat-kpi { display: flex; flex-direction: column; gap: 10px; padding: 16px 18px; }
+.cd-stat-kpi__label { display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: 13px; }
+.cd-stat-kpi__value { font-size: 24px; font-weight: 700; line-height: 1.2; }
+
+/* Panel titles with an info affordance that explains the chart, its axes and units. */
+.cd-panel-title { display: flex; align-items: center; gap: 8px; margin-block-end: 12px; font-size: 14px; font-weight: 600; color: var(--text-muted); }
+
+/* Info icon + tooltip: hover or keyboard focus reveals the explanation. */
+.cd-info { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; flex: none; border-radius: var(--radius-full); border: 1px solid var(--line-strong); color: var(--text-muted); background: transparent; cursor: help; font-size: 11px; font-weight: 700; line-height: 1; }
+.cd-info:hover, .cd-info:focus-visible { color: var(--text); border-color: var(--accent); outline: none; }
+.cd-info__tip { position: absolute; z-index: 30; inset-inline-end: 0; inset-block-start: calc(100% + 8px); width: min(300px, 78vw); padding: 12px 14px; border-radius: var(--radius-control); background: var(--surface); border: 1px solid var(--line-strong); box-shadow: var(--sh-lg, 0 8px 24px rgba(0, 0, 0, .18)); color: var(--text); font-size: 12.5px; font-weight: 400; line-height: 1.7; text-align: start; opacity: 0; visibility: hidden; transform: translateY(-4px); transition: opacity .12s ease, transform .12s ease; }
+.cd-info:hover .cd-info__tip, .cd-info:focus-visible .cd-info__tip, .cd-info:focus-within .cd-info__tip { opacity: 1; visibility: visible; transform: translateY(0); }
+.cd-info__tip dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; margin: 8px 0 0; }
+.cd-info__tip dt { color: var(--text-muted); font-weight: 600; white-space: nowrap; }
+.cd-info__tip dd { margin: 0; }
+
+/* Package / product artwork in the overview details card. */
+.cd-media { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+.cd-media__img { width: 168px; max-width: 40%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--radius-soft); border: 1px solid var(--line); background: var(--fill-soft); }
+
 /* ---------- Responsive ---------- */
 @media (max-width: 1280px) {
   .cd-body { grid-template-columns: minmax(0, 1fr); }

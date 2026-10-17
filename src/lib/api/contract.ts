@@ -26,6 +26,12 @@ export type Row = Record<string, unknown>;
 /** Legacy course/package kind of catalog refs (`legacy:course:<id>`, `legacy:package:<id>`). */
 export type CatalogKind = "course" | "package";
 
+/** Every catalog product type (`b2c.products.product_type`). */
+export type ProductType = "course" | "diploma" | "package" | "bundle" | "consultation" | "live_diploma";
+
+/** Kind of storefront data the studio live preview renders (postMessage `kind`). */
+export type PreviewKind = ProductType;
+
 /** Legacy course/package detail attached to a catalog product (`CatalogProductView.legacy.product`). */
 export type CatalogProduct = Schema["CatalogProduct"];
 export type Promotion = Schema["Promotion"];

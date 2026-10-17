@@ -1,6 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
 
-import { apiGet, apiPost } from "@/lib/api/client";
+import { apiDelete, apiGet, apiPatch, apiPost, apiPut } from "@/lib/api/client";
 import type { PathParams, QueryParams, RequestBody, SuccessResponse } from "@/lib/api/operation-types";
 
 /*
@@ -15,6 +15,8 @@ type CreateCourseOp = "create_course_api_v1_admin_catalog_products_post";
 type GetProductOp = "get_product_api_v1_admin_catalog_products__product_ref__get";
 type SetStatusOp = "set_product_status_api_v1_admin_catalog_products__product_ref__status_post";
 type SalesOp = "product_sales_api_v1_admin_catalog_products__product_ref__sales_get";
+type BehaviorOp = "product_behavior_api_v1_admin_catalog_products__product_ref__behavior_get";
+type TransactionsOp = "product_transactions_api_v1_admin_catalog_products__product_ref__transactions_get";
 type FacetsOp = "product_facets_api_v1_admin_catalog_products_facets_get";
 type InsightsOp = "product_insights_api_v1_admin_catalog_products_insights_get";
 type CurriculumOp = "product_curriculum_api_v1_admin_catalog_products__product_ref__curriculum_get";
@@ -26,6 +28,11 @@ type InstructorsOp = "product_instructors_api_v1_admin_catalog_products__product
 type LearnersOp = "product_learners_api_v1_admin_catalog_products__product_ref__learners_get";
 type SummaryOp = "package_summary_api_v1_admin_catalog_products__product_ref__summary_get";
 type PackageCoursesOp = "package_courses_api_v1_admin_catalog_products__product_ref__courses_get";
+type UpdatePackageOp = "update_package_api_v1_admin_catalog_products__product_ref__package_put";
+type PackageSectionsGetOp = "package_detail_sections_api_v1_admin_catalog_products__product_ref__package_sections_get";
+type UpdatePackageSectionsOp = "update_package_sections_api_v1_admin_catalog_products__product_ref__package_sections_put";
+type AddPackageCourseOp = "add_package_course_api_v1_admin_catalog_products__product_ref__package_courses_post";
+type UpdatePackageCourseOp = "update_package_course_api_v1_admin_catalog_products__product_ref__package_courses__member_product_id__patch";
 type CategoriesOp = "list_categories_api_v1_admin_catalog_categories_get";
 type PriceListsOp = "list_price_lists_api_v1_admin_catalog_price_lists_get";
 type ExtensionPackagesOp = "list_extension_packages_api_v1_admin_catalog_extension_packages_get";
@@ -37,6 +44,13 @@ export type ProductPage = SuccessResponse<ListProductsOp>;
 export type ProductSalesParams = QueryParams<SalesOp>;
 export type ProductSalesSeries = SuccessResponse<SalesOp>;
 export type ProductSalesPoint = NonNullable<ProductSalesSeries["points"]>[number];
+export type ProductBehaviorParams = QueryParams<BehaviorOp>;
+export type ProductBehaviorStats = SuccessResponse<BehaviorOp>;
+export type ProductBehaviorPoint = NonNullable<ProductBehaviorStats["points"]>[number];
+export type ProductTransactionsParams = QueryParams<TransactionsOp>;
+export type ProductTransactions = SuccessResponse<TransactionsOp>;
+export type ProductTransactionPoint = NonNullable<ProductTransactions["points"]>[number];
+export type ProductTransactionRow = NonNullable<ProductTransactions["items"]>[number];
 /** A catalog list item; `source` is `b2c` or `legacy`, `ref` addresses it. */
 export type Product = ProductPage["items"][number];
 /** `GET /admin/catalog/products/{ref}`: list item, B2C detail (`b2c`), legacy detail (`legacy`) and `links`. */
@@ -68,6 +82,11 @@ export type ProductInstructor = SuccessResponse<InstructorsOp>[number];
 export type ProductLearners = SuccessResponse<LearnersOp>;
 export type PackageSummary = SuccessResponse<SummaryOp>;
 export type PackageCourse = SuccessResponse<PackageCoursesOp>[number];
+export type UpdatePackageBody = RequestBody<UpdatePackageOp>;
+export type AddPackageCourseBody = RequestBody<AddPackageCourseOp>;
+export type UpdatePackageCourseBody = RequestBody<UpdatePackageCourseOp>;
+export type PackageDetailSection = SuccessResponse<PackageSectionsGetOp>[number];
+export type UpdatePackageSectionsBody = RequestBody<UpdatePackageSectionsOp>;
 
 export type CategoriesParams = QueryParams<CategoriesOp>;
 export type ProductCategoryPage = SuccessResponse<CategoriesOp>;
@@ -84,6 +103,8 @@ export const productPaths = {
   detail: "admin/catalog/products/{product_ref}",
   status: "admin/catalog/products/{product_ref}/status",
   sales: "admin/catalog/products/{product_ref}/sales",
+  behavior: "admin/catalog/products/{product_ref}/behavior",
+  transactions: "admin/catalog/products/{product_ref}/transactions",
   facets: "admin/catalog/products/facets",
   insights: "admin/catalog/products/insights",
   curriculum: "admin/catalog/products/{product_ref}/curriculum",
@@ -95,6 +116,10 @@ export const productPaths = {
   learners: "admin/catalog/products/{product_ref}/learners",
   summary: "admin/catalog/products/{product_ref}/summary",
   courses: "admin/catalog/products/{product_ref}/courses",
+  package: "admin/catalog/products/{product_ref}/package",
+  packageSections: "admin/catalog/products/{product_ref}/package/sections",
+  packageCourses: "admin/catalog/products/{product_ref}/package/courses",
+  packageCourse: "admin/catalog/products/{product_ref}/package/courses/{member_product_id}",
   categories: "admin/catalog/categories",
   priceLists: "admin/catalog/price-lists",
   extensionPackages: "admin/catalog/extension-packages",
@@ -109,6 +134,10 @@ export const productKeys = {
   content: (productRef: string, part: string) => [...productKeys.all, "content", productRef, part] as const,
   sales: (productRef: string, params?: ProductSalesParams) =>
     [...productKeys.all, "sales", productRef, params ?? {}] as const,
+  behavior: (productRef: string, params?: ProductBehaviorParams) =>
+    [...productKeys.all, "behavior", productRef, params ?? {}] as const,
+  transactions: (productRef: string, params?: ProductTransactionsParams) =>
+    [...productKeys.all, "transactions", productRef, params ?? {}] as const,
   facets: (productType?: string) => [...productKeys.all, "facets", productType ?? ""] as const,
   insights: (params: ProductInsightsParams) => [...productKeys.all, "insights", params] as const,
   lists: (name: string, params?: object) => [...productKeys.all, name, params ?? {}] as const,
@@ -159,6 +188,10 @@ export const getProductCurriculum = (ref: string) => content<ContentSection[]>(p
 export const getProductPrices = (ref: string) => content<LegacyPriceRow[]>(productPaths.prices, ref);
 export const getProductSales = (ref: string, query?: ProductSalesParams) =>
   content<ProductSalesSeries>(productPaths.sales, ref, query as never);
+export const getProductBehavior = (ref: string, query?: ProductBehaviorParams) =>
+  content<ProductBehaviorStats>(productPaths.behavior, ref, query as never);
+export const getProductTransactions = (ref: string, query?: ProductTransactionsParams) =>
+  content<ProductTransactions>(productPaths.transactions, ref, query as never);
 export const getProductRules = (ref: string) => content<CompletionRule[]>(productPaths.rules, ref);
 export const getProductCertificates = (ref: string) => content<ProductCertificate[]>(productPaths.certificates, ref);
 export const getProductRatings = (ref: string, query?: { limit?: number; offset?: number }) =>
@@ -166,8 +199,25 @@ export const getProductRatings = (ref: string, query?: { limit?: number; offset?
 export const getProductInstructors = (ref: string) => content<ProductInstructor[]>(productPaths.instructors, ref);
 export const getProductLearners = (ref: string, limit = 200) =>
   content<ProductLearners>(productPaths.learners, ref, { limit });
-export const getPackageSummary = (ref: string) => content<PackageSummary>(productPaths.summary, ref);
-export const getPackageCourses = (ref: string) => content<PackageCourse[]>(productPaths.courses, ref);
+export const getPackageSummary = (ref: string) => content<PackageSummary>(productPaths.summary, ref);export const getPackageCourses = (ref: string) => content<PackageCourse[]>(productPaths.courses, ref);
+/** Order the package's detail sections (المقدمة، المحاور، الأهداف، الفئة المستهدفة) — B2C. */
+export const getPackageSections = (ref: string) => content<PackageDetailSection[]>(productPaths.packageSections, ref);
+/** Replaces the package's detail sections. */
+export const updatePackageSections = (product_ref: string, body: UpdatePackageSectionsBody) =>
+  apiPut(productPaths.packageSections, { path: { product_ref }, body });
+
+/** Renames / describes / publishes a B2C package. */
+export const updatePackage = (product_ref: string, body: UpdatePackageBody) =>
+  apiPut(productPaths.package, { path: { product_ref }, body });
+/** Bundles a B2C product into a package. */
+export const addPackageCourse = (product_ref: string, body: AddPackageCourseBody) =>
+  apiPost(productPaths.packageCourses, { path: { product_ref }, body });
+/** Marks a bundled course required or optional. */
+export const updatePackageCourse = (product_ref: string, member_product_id: string, body: UpdatePackageCourseBody) =>
+  apiPatch(productPaths.packageCourse, { path: { product_ref, member_product_id }, body });
+/** Unbundles a course from a package. */
+export const removePackageCourse = (product_ref: string, member_product_id: string) =>
+  apiDelete(productPaths.packageCourse, { path: { product_ref, member_product_id } });
 
 export function listCategories(params: CategoriesParams = {}): Promise<ProductCategoryPage> {
   return apiGet(productPaths.categories, { query: params });
@@ -195,6 +245,10 @@ export const productQueries = {
     queryOptions({ queryKey: productKeys.detail(productRef), queryFn: () => getProduct(productRef) }),
   sales: (productRef: string, params?: ProductSalesParams) =>
     queryOptions({ queryKey: productKeys.sales(productRef, params), queryFn: () => getProductSales(productRef, params) }),
+  behavior: (productRef: string, params?: ProductBehaviorParams) =>
+    queryOptions({ queryKey: productKeys.behavior(productRef, params), queryFn: () => getProductBehavior(productRef, params) }),
+  transactions: (productRef: string, params?: ProductTransactionsParams) =>
+    queryOptions({ queryKey: productKeys.transactions(productRef, params), queryFn: () => getProductTransactions(productRef, params) }),
   facets: (productType?: string) =>
     queryOptions({ queryKey: productKeys.facets(productType), queryFn: () => getProductFacets(productType), staleTime: 5 * 60_000 }),
   insights: (params: ProductInsightsParams) =>
@@ -210,6 +264,8 @@ export const productQueries = {
     queryOptions({ queryKey: productKeys.content(ref, "instructors"), queryFn: () => getProductInstructors(ref) }),
   learners: (ref: string) => queryOptions({ queryKey: productKeys.content(ref, "learners"), queryFn: () => getProductLearners(ref) }),
   summary: (ref: string) => queryOptions({ queryKey: productKeys.content(ref, "summary"), queryFn: () => getPackageSummary(ref) }),
+  packageSections: (ref: string) =>
+    queryOptions({ queryKey: productKeys.content(ref, "package-sections"), queryFn: () => getPackageSections(ref) }),
   courses: (ref: string) => queryOptions({ queryKey: productKeys.content(ref, "courses"), queryFn: () => getPackageCourses(ref) }),
   categories: (params?: CategoriesParams) =>
     queryOptions({ queryKey: productKeys.lists("categories", params), queryFn: () => listCategories(params) }),

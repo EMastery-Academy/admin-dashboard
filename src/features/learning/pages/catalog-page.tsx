@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSearchParams } from "react-router-dom";
 
 import {
   listProducts,
@@ -21,32 +22,75 @@ import { initialsOf, productStatusBadge } from "@/lib/status";
 import { CatalogInsightsPanel } from "@/features/learning/components/catalog-insights-panel";
 import { productHref } from "@/lib/refs";
 import { SourceBadge } from "@/components/ui/source-badge";
+import { productTypeLabel } from "@/lib/product-types";
 
 /**
- * Every catalog product: B2C products (`b2c.products`, only `published` ones are sold) and the legacy
- * courses/packages no B2C product represents yet (`source` = `legacy`).
+ * One catalog over every product type: B2C products (`b2c.products`, only `published` ones are sold) and the
+ * legacy courses/packages no B2C product represents yet (`source` = `legacy`). A `?type=` tab narrows the list
+ * (course, diploma, package, bundle, consultation, live_diploma); "all" lists everything.
  */
-export default function CoursesPage() {
-  return (
-    <CatalogList
-      types="course"
-      titleAr="الدورات"
-      titleEn="Courses"
-      subAr="دورات المتجر وحالة نشرها والمدربون."
-      subEn="Storefront courses, instructors and their publishing state."
-    />
-  );
-}
+const ALL_PRODUCT_TYPES = "course,diploma,package,bundle,consultation,live_diploma";
 
-export function PackagesPage() {
+export default function CatalogPage() {
+  const t = useT();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const type = searchParams.get("type") ?? "all";
+
+  const selectType = (next: string) => {
+    setSearchParams(
+      (prev) => {
+        const params = new URLSearchParams(prev);
+        if (next === "all") params.delete("type");
+        else params.set("type", next);
+        return params;
+      },
+      { replace: true },
+    );
+  };
+
+  const facets = useQuery(productQueries.facets()).data;
+  const counts = new Map((facets?.product_types ?? []).map((option) => [option.value, option.count]));
+
+  const tabs: { value: string; ar: string; en: string; count?: number }[] = [
+    { value: "all", ar: "الكل", en: "All" },
+    { value: "course", ...productTypeLabel("course"), count: counts.get("course") },
+    { value: "diploma", ...productTypeLabel("diploma"), count: counts.get("diploma") },
+    { value: "package", ...productTypeLabel("package"), count: counts.get("package") },
+    { value: "bundle", ...productTypeLabel("bundle"), count: counts.get("bundle") },
+    { value: "consultation", ...productTypeLabel("consultation"), count: counts.get("consultation") },
+    { value: "live_diploma", ...productTypeLabel("live_diploma"), count: counts.get("live_diploma") },
+  ];
+
   return (
-    <CatalogList
-      types="package,diploma,bundle"
-      titleAr="الحزم والدبلومات"
-      titleEn="Packages & diplomas"
-      subAr="الحزم والدبلومات والباقات المعروضة في المتجر."
-      subEn="Storefront packages, diplomas and bundles."
-    />
+    <>
+      <PageHead
+        title={t("الكتالوج", "Catalog")}
+        sub={t("كل منتجات المتجر وحالة نشرها.", "Every storefront product and its publishing state.")}
+        actions={
+          type === "course" || type === "diploma" ? (
+            <Button kind="primary" icon="plus" label={t("إنشاء دورة", "Create course")} href="/learning/courses/new" />
+          ) : undefined
+        }
+      />
+
+      <nav className="ma-pagetabs" role="tablist" aria-label={t("أنواع المنتجات", "Product types")} style={{ marginBlock: "var(--space-3)" }}>
+        {tabs.map((tab) => (
+          <button
+            key={tab.value}
+            type="button"
+            role="tab"
+            aria-selected={type === tab.value}
+            className={`ma-pagetab ${type === tab.value ? "is-active" : ""}`}
+            onClick={() => selectType(tab.value)}
+          >
+            {t(tab.ar, tab.en)}
+            {tab.count != null ? <span className="cd-tab__n">{formatNumber(tab.count)}</span> : null}
+          </button>
+        ))}
+      </nav>
+
+      <CatalogList types={type === "all" ? "" : type} />
+    </>
   );
 }
 
@@ -57,27 +101,7 @@ const STATUSES: { value: ProductStatus; ar: string; en: string }[] = [
   { value: "archived", ar: "مؤرشف", en: "Archived" },
 ];
 
-const TYPES: Record<string, [string, string]> = {
-  course: ["دورة", "Course"],
-  package: ["حزمة", "Package"],
-  diploma: ["دبلوم", "Diploma"],
-  bundle: ["باقة", "Bundle"],
-  consultation: ["استشارة", "Consultation"],
-};
-
-function CatalogList({
-  types,
-  titleAr,
-  titleEn,
-  subAr,
-  subEn,
-}: {
-  types: string;
-  titleAr: string;
-  titleEn: string;
-  subAr: string;
-  subEn: string;
-}) {
+function CatalogList({ types }: { types: string }) {
   const t = useT();
   const queryClient = useQueryClient();
 
@@ -109,7 +133,10 @@ function CatalogList({
             <span className="ma-cell-main">{row.title ?? row.slug}</span>
             <span className="ma-cell-sub">
               {[
-                TYPES[row.product_type] ? t(...TYPES[row.product_type]) : row.product_type,
+                (() => {
+                  const label = productTypeLabel(row.product_type);
+                  return t(label.ar, label.en);
+                })(),
                 row.category,
                 row.origin === "migrated" ? t("منقول من المنصة القديمة", "Migrated") : null,
               ]
@@ -215,8 +242,7 @@ function CatalogList({
     },
   ];
 
-  const facets = useQuery(productQueries.facets(types)).data;
-  const typeOptions = types.split(",");
+  const facets = useQuery(productQueries.facets(types || undefined)).data;
 
   const filters: ListFilter[] = [
     {
@@ -224,15 +250,6 @@ function CatalogList({
       label: t("كل الحالات", "All states"),
       options: STATUSES.map((item) => ({ value: item.value, label: t(item.ar, item.en) })),
     },
-    ...(typeOptions.length > 1
-      ? [
-          {
-            key: "product_type",
-            label: t("كل الأنواع", "All types"),
-            options: typeOptions.map((type) => ({ value: type, label: TYPES[type] ? t(...TYPES[type]) : type })),
-          },
-        ]
-      : []),
     {
       key: "category",
       label: t("كل التصنيفات", "All categories"),
@@ -280,22 +297,14 @@ function CatalogList({
 
   return (
     <>
-      <PageHead
-        title={t(titleAr, titleEn)}
-        sub={t(subAr, subEn)}
-        actions={
-          types === "course" ? (
-            <Button kind="primary" icon="plus" label={t("إنشاء دورة", "Create course")} href="/learning/courses/new" />
-          ) : undefined
-        }
-      />
-      <CatalogInsightsPanel productType={types} />
+      <CatalogInsightsPanel productType={types || ALL_PRODUCT_TYPES} />
       <ErrorAlert error={toggle.error} title={t("تعذّر تغيير حالة النشر", "Couldn't change the publishing state")} />
       <PagedList
+        key={types || "all"}
         queryKeyBase={productKeys.list({ product_type: types })}
         fetchPage={({ query, offset, limit, filters: selected, sort }) =>
           listProducts({
-            product_type: selected.product_type || types,
+            product_type: selected.product_type || types || undefined,
             status: (selected.status || undefined) as ProductStatus | undefined,
             category: selected.category || undefined,
             tag: selected.tag || undefined,

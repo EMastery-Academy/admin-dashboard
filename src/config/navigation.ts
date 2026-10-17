@@ -66,8 +66,7 @@ export const navigation: NavModule[] = [
       {
         title: { ar: "الكتالوج", en: "Catalog" },
         items: [
-          { title: { ar: "الدورات", en: "Courses" }, href: "/learning/courses", permission: "courses.read" },
-          { title: { ar: "الحزم والدبلومات", en: "Packages & diplomas" }, href: "/learning/packages", permission: "packages.read" },
+          { title: { ar: "الكتالوج", en: "Catalog" }, href: "/learning/catalog", permission: "courses.read" },
           { title: { ar: "التصنيفات", en: "Categories" }, href: "/learning/categories", permission: "categories.read" },
           { title: { ar: "الاستشارات", en: "Consultations" }, href: "/learning/consultations", permission: "consultations.read" },
           { title: { ar: "المستشارون", en: "Consultants" }, href: "/learning/consultants", permission: "consultations.read" },

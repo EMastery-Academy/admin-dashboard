@@ -30,6 +30,7 @@ export * from "@/lib/api/learning/catalog";
 export * from "@/lib/api/learning/studio";
 export * from "@/lib/api/learning/curriculum";
 export * from "@/lib/api/learning/bundles";
+export * from "@/lib/api/learning/live-diplomas";
 export * from "@/lib/api/learning/consultations";
 export * from "@/lib/api/learning/consultants";
 export * from "@/lib/api/learning/experts";

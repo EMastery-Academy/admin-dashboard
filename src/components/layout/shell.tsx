@@ -122,6 +122,7 @@ export function Shell() {
             );
           })}
           <span className="ma-rail__spacer" />
+          <ThemeToggle />
           <IconButton
             icon="panel"
             label={collapsed ? t("توسيع القائمة الجانبية", "Expand sidebar") : t("طيّ القائمة الجانبية", "Collapse sidebar")}
@@ -252,7 +253,10 @@ function Sidebar({ module, activeHref, onCollapse }: { module: NavModule; active
               <ul className="ma-sidebar__list" hidden={q ? false : !open}>
                 {items.map((item) => (
                   <li key={item.href}>
-                    <NavLink className="ma-sidebar__link" to={item.href}>
+                    <NavLink
+                      className={({ isActive }) => cn("ma-sidebar__link", (isActive || item.href === activeHref) && "is-active")}
+                      to={item.href}
+                    >
                       <span>{translate(lang, item.title.ar, item.title.en)}</span>
                     </NavLink>
                   </li>

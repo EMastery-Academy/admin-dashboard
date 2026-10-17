@@ -2,17 +2,16 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   ordersQueries,
-  type AdminOrder,
   type OrderStatus,
 } from "@/lib/api/sales/orders";
-import { productQueries } from "@/lib/api/learning/catalog";
+import { productQueries, type ProductTransactionRow } from "@/lib/api/learning/catalog";
 import { formatAmount, formatDateTime, formatNumber } from "@/lib/format";
 import { useT } from "@/lib/i18n";
-import { orderHref, customerHref, shortRef } from "@/lib/refs";
+import { orderHref, customerHref, paymentHref, shortRef } from "@/lib/refs";
 import { AppLink } from "@/components/ui/app-link";
 import { SourceBadge } from "@/components/ui/source-badge";
 import { Icon } from "@/components/ui/icon";
-import { StudentsChart } from "../components/students-chart";
+import { ProductStatsPanels } from "../components/product-stats-panels";
 
 interface OrdersTabProps {
   productRef: string;
@@ -23,11 +22,21 @@ export function OrdersTab({ productRef }: OrdersTabProps) {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [sourceFilter, setSourceFilter] = useState<string>("all");
   const [page, setPage] = useState(1);
+  const [txPage, setTxPage] = useState(1);
   const limit = 20;
+  const txLimit = 10;
 
-  // Fetch sales analytics series for the top summary
-  const salesQuery = useQuery(productQueries.sales(productRef, { bucket: "month" }));
-  const salesData = salesQuery.data;
+  // Transactions (payment attempts) on orders that contain this product
+  const transactionsQuery = useQuery(
+    productQueries.transactions(productRef, {
+      bucket: "month",
+      limit: txLimit,
+      offset: (txPage - 1) * txLimit,
+    }),
+  );
+  const transactions = transactionsQuery.data;
+  const txTotal = transactions?.total ?? 0;
+  const txPages = Math.max(1, Math.ceil(txTotal / txLimit));
 
   // Fetch orders filtered by product_ref!
   const ordersQuery = useQuery(
@@ -65,8 +74,8 @@ export function OrdersTab({ productRef }: OrdersTabProps) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-      {/* Sales & Students Chart */}
-      <StudentsChart productRef={productRef} />
+      {/* Behaviour, orders, sales & transaction charts */}
+      <ProductStatsPanels productRef={productRef} />
 
       {/* Orders List Card */}
       <section className="cd-card">
@@ -224,6 +233,145 @@ export function OrdersTab({ productRef }: OrdersTabProps) {
                   className="ma-btn ma-btn--sm ma-btn--soft"
                   disabled={page >= totalPages}
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                >
+                  {t("التالي", "Next")}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Transactions (payment attempts) */}
+      <section className="cd-card">
+        <div className="cd-card__h" style={{ flexWrap: "wrap", gap: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <Icon name="card" />
+            <h2 style={{ margin: 0 }}>{t("حركات الدفع لهذا المنتج", "Payment Transactions")}</h2>
+            <span className="cd-chip cd-chip--plain cd-num">{formatNumber(txTotal)}</span>
+          </div>
+          {transactions && Object.keys(transactions.amount ?? {}).length > 0 && (
+            <span className="cd-muted" style={{ fontSize: 13, marginInlineStart: "auto" }}>
+              {t("الإجمالي", "Total")}:{" "}
+              {Object.entries(transactions.amount)
+                .map(([currency, amount]) => formatAmount(amount as number, currency))
+                .join(" · ")}
+            </span>
+          )}
+        </div>
+
+        <div className="cd-card__b cd-card__b--flush">
+          {transactionsQuery.isLoading ? (
+            <div className="cd-empty" style={{ padding: 40 }}>
+              <Icon name="clock" />
+              <span>{t("جاري تحميل الحركات...", "Loading transactions...")}</span>
+            </div>
+          ) : !transactions || !transactions.items || transactions.items.length === 0 ? (
+            <div className="cd-empty" style={{ padding: 40 }}>
+              <Icon name="card" />
+              <strong>{t("لا توجد حركات دفع", "No transactions")}</strong>
+              <span>
+                {t(
+                  "حركات الدفع متاحة للمنتجات على منصة B2C فقط.",
+                  "Payment transactions are available for B2C products only."
+                )}
+              </span>
+            </div>
+          ) : (
+            <div className="cd-tablewrap">
+              <table className="cd-table">
+                <thead>
+                  <tr>
+                    <th>{t("التاريخ", "Date")}</th>
+                    <th>{t("الحركة", "Transaction")}</th>
+                    <th>{t("الطلب", "Order")}</th>
+                    <th>{t("العميل", "Customer")}</th>
+                    <th>{t("الطريقة", "Method")}</th>
+                    <th>{t("الحالة", "Status")}</th>
+                    <th style={{ textAlign: "end" }}>{t("المبلغ", "Amount")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {transactions.items.map((tx: ProductTransactionRow) => {
+                    const ref = `b2c:${tx.payment_intent_id}`;
+                    return (
+                      <tr key={tx.payment_attempt_id}>
+                        <td>
+                          <span className="cd-muted" style={{ fontSize: 13 }}>
+                            {formatDateTime(tx.created_at)}
+                          </span>
+                        </td>
+                        <td>
+                          <AppLink to={paymentHref(ref)} className="cd-link cd-ltr cd-num" style={{ fontWeight: 600 }}>
+                            {shortRef(ref)}
+                          </AppLink>
+                          {tx.failure_code && (
+                            <div className="cd-muted" style={{ fontSize: 11 }}>
+                              {tx.failure_code}
+                            </div>
+                          )}
+                        </td>
+                        <td>
+                          <AppLink to={orderHref(`b2c:${tx.order_id}`)} className="cd-link cd-ltr cd-num">
+                            {shortRef(`b2c:${tx.order_id}`)}
+                          </AppLink>
+                        </td>
+                        <td>
+                          {tx.customer_email ? (
+                            <span className="cd-muted">{tx.customer_email}</span>
+                          ) : (
+                            <span className="cd-muted">—</span>
+                          )}
+                        </td>
+                        <td>
+                          <span className="cd-muted" style={{ fontSize: 13 }}>
+                            {tx.provider}
+                            {tx.method ? ` · ${tx.method}` : ""}
+                          </span>
+                        </td>
+                        <td>
+                          <span className={`cd-chip ${statusBadgeClass(tx.status || "")}`}>
+                            {tx.order_status || tx.status || "—"}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: "end", fontWeight: 600 }} className="cd-num">
+                          {formatAmount(tx.amount_minor / 100, tx.currency_code || "USD")}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {txPages > 1 && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "12px 16px",
+                borderTop: "1px solid var(--border)",
+              }}
+            >
+              <span className="cd-muted" style={{ fontSize: 13 }}>
+                {t(`صفحة ${txPage} من ${txPages}`, `Page ${txPage} of ${txPages}`)}
+              </span>
+              <div style={{ display: "flex", gap: 6 }}>
+                <button
+                  type="button"
+                  className="ma-btn ma-btn--sm ma-btn--soft"
+                  disabled={txPage <= 1}
+                  onClick={() => setTxPage((p) => Math.max(1, p - 1))}
+                >
+                  {t("السابق", "Previous")}
+                </button>
+                <button
+                  type="button"
+                  className="ma-btn ma-btn--sm ma-btn--soft"
+                  disabled={txPage >= txPages}
+                  onClick={() => setTxPage((p) => Math.min(txPages, p + 1))}
                 >
                   {t("التالي", "Next")}
                 </button>

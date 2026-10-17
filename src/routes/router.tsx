@@ -22,7 +22,7 @@ import AuditPage from "@/features/settings/pages/audit-page";
 import GeneralSettingsPage from "@/features/settings/pages/general-settings-page";
 import AffiliatesPage from "@/features/marketing/pages/affiliates-page";
 import PayoutsPage from "@/features/marketing/pages/payouts-page";
-import CoursesPage, { PackagesPage } from "@/features/learning/pages/catalog-page";
+import CatalogPage from "@/features/learning/pages/catalog-page";
 import CourseNewPage from "@/features/learning/pages/course-new-page";
 import ProductDetailPage from "@/features/learning/pages/product-detail-page";
 import CourseStudioPage from "@/features/learning/studio/pages/course-studio-page";
@@ -95,13 +95,14 @@ export const ROUTER = createBrowserRouter([
       { path: "sales/offers", element: <OffersPage /> },
 
       // Learning
-      { path: "learning/courses", element: <CoursesPage /> },
+      { path: "learning/courses", element: <Navigate to="/learning/catalog?type=course" replace /> },
       { path: "learning/courses/new", element: <CourseNewPage /> },
-      { path: "learning/packages", element: <PackagesPage /> },
+      { path: "learning/packages", element: <Navigate to="/learning/catalog?type=package" replace /> },
+      { path: "learning/catalog", element: <CatalogPage /> },
       { path: "learning/catalog/:productId", element: <ProductDetailPage /> },
       // Full-width workspace: the shell hides its sidebar for routes with `handle.studio`.
       { path: "learning/catalog/:productId/studio", element: <CourseStudioPage />, handle: { studio: true } },
-      { path: "learning/backoffice", element: <Navigate to="/learning/courses" replace /> },
+      { path: "learning/backoffice", element: <Navigate to="/learning/catalog" replace /> },
       { path: "learning/backoffice/:kind/:legacyId", element: <LegacyCatalogRedirect /> },
       { path: "learning/categories", element: <CategoriesPage /> },
       { path: "learning/consultations", element: <ConsultationsPage /> },

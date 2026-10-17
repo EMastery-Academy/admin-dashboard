@@ -8,12 +8,15 @@ import {
   setProductStatus,
   curriculumQueries,
   type ProductStatus,
+  type ProductType,
 } from "@/lib/api";
+import { productTypeLabel } from "@/lib/product-types";
 import { ordersQueries } from "@/lib/api/sales/orders";
 import { useT } from "@/lib/i18n";
 import { Loading, ErrorAlert } from "@/components/ui/kit";
+import { LegacyProductContent } from "@/features/learning/components/legacy-product-content";
 import { DetailHeader } from "./components/detail-header";
-import { DetailTabBar, type DetailTabId } from "./components/detail-tabbar";
+import { DetailTabBar, type DetailTab, type DetailTabDef } from "./components/detail-tabbar";
 import { DetailAside } from "./components/detail-aside";
 import { OverviewTab } from "./tabs/overview-tab";
 import { ContentTab } from "./tabs/content-tab";
@@ -22,6 +25,10 @@ import { InstructorsTab } from "./tabs/instructors-tab";
 import { OrdersTab } from "./tabs/orders-tab";
 import { RelatedTab } from "./tabs/related-tab";
 import { LegacyTab } from "./tabs/legacy-tab";
+import { BundleTab } from "./tabs/bundle-tab";
+import { ConsultationTab } from "./tabs/consultation-tab";
+import { LiveDiplomaTab } from "./tabs/live-diploma-tab";
+import { PackageTab } from "./tabs/package-tab";
 
 export function ProductDetailPage() {
   const t = useT();
@@ -31,8 +38,8 @@ export function ProductDetailPage() {
   const queryClient = useQueryClient();
 
   // Tab State
-  const tabParam = searchParams.get("tab") as DetailTabId | null;
-  const [activeTab, setActiveTab] = useState<DetailTabId>(tabParam || "overview");
+  const tabParam = searchParams.get("tab") as DetailTab | null;
+  const [activeTab, setActiveTab] = useState<DetailTab>(tabParam || "overview");
 
   useEffect(() => {
     if (tabParam && tabParam !== activeTab) {
@@ -40,7 +47,7 @@ export function ProductDetailPage() {
     }
   }, [tabParam, activeTab]);
 
-  const handleSelectTab = (tab: DetailTabId) => {
+  const handleSelectTab = (tab: DetailTab) => {
     setActiveTab(tab);
     setSearchParams(
       (prev) => {
@@ -48,7 +55,7 @@ export function ProductDetailPage() {
         next.set("tab", tab);
         return next;
       },
-      { replace: true }
+      { replace: true },
     );
   };
 
@@ -63,7 +70,15 @@ export function ProductDetailPage() {
   });
 
   const unitsQuery = useQuery(curriculumQueries.units(productRef));
-  const units = unitsQuery.data ?? [];
+  const units = useMemo(() => unitsQuery.data ?? [], [unitsQuery.data]);
+
+  // A package's curriculum is the B2C courses it bundles, so its header/overview read those.
+  const isPackageProduct = productData?.product?.product_type === "package" && Boolean(productData?.b2c);
+  const packageCoursesQuery = useQuery({
+    ...productQueries.courses(productRef),
+    enabled: isPackageProduct,
+  });
+  const packageCourses = useMemo(() => packageCoursesQuery.data ?? [], [packageCoursesQuery.data]);
 
   const salesQuery = useQuery(productQueries.sales(productRef, { bucket: "month" }));
   const salesData = salesQuery.data;
@@ -73,7 +88,7 @@ export function ProductDetailPage() {
     ordersQueries.list({
       product_ref: productRef,
       limit: 1,
-    })
+    }),
   );
   const totalOrdersCount = ordersCountQuery.data?.total ?? salesData?.total_orders ?? 0;
 
@@ -88,6 +103,87 @@ export function ProductDetailPage() {
     },
   });
 
+  const item = productData?.product;
+  const productType = (item?.product_type ?? "course") as ProductType;
+  const legacyKind =
+    productData?.links.legacy_kind === "package"
+      ? "package"
+      : productData?.links.legacy_kind === "course"
+        ? "course"
+        : null;
+  const hasLegacy = Boolean(legacyKind);
+
+  const searchDetail = searchDetailQuery.data;
+  const searchObj = useMemo(() => searchDetail as Record<string, unknown> | undefined, [searchDetail]);
+
+  const tabs: DetailTabDef[] = useMemo(() => {
+    const overview: DetailTabDef = { id: "overview", labelAr: "نظرة عامة", labelEn: "Overview" };
+    const orders: DetailTabDef = {
+      id: "orders",
+      labelAr: "الطلبات والمبيعات",
+      labelEn: "Orders & Sales",
+      count: totalOrdersCount,
+    };
+    const related: DetailTabDef = {
+      id: "related",
+      labelAr: "ذات صلة",
+      labelEn: "Related",
+      count:
+        (searchDetail?.related?.courses?.length || 0) +
+        (searchDetail?.related?.diplomas?.length || 0) +
+        (searchDetail?.related?.packages?.length || 0) +
+        (searchDetail?.related?.consultations?.length || 0),
+    };
+    const legacy: DetailTabDef | null = hasLegacy
+      ? { id: "legacy", labelAr: "محتوى النظام القديم", labelEn: "Legacy content" }
+      : null;
+
+    switch (productType) {
+      case "package":
+        return [overview, { id: "package", labelAr: "الحزمة", labelEn: "Package" }, orders, related];
+      case "bundle":
+        return [overview, { id: "bundle", labelAr: "باقة الدورات", labelEn: "Bundle contents" }, orders, related];
+      case "consultation":
+        return [overview, { id: "consultation", labelAr: "الاستشارة", labelEn: "Consultation" }, orders, related];
+      case "live_diploma":
+        return [overview, { id: "live_diploma", labelAr: "الدبلوم المباشر", labelEn: "Live diploma" }, orders, related];
+      default: {
+        const content: DetailTabDef = {
+          id: "content",
+          labelAr: "محتوى الدورة",
+          labelEn: "Course content",
+          count: units.reduce((acc, u) => acc + (u.lessons?.length || 0), 0),
+        };
+        const instructors: DetailTabDef = {
+          id: "instructors",
+          labelAr: "المدربون",
+          labelEn: "Instructors",
+          count: Array.isArray(searchObj?.instructors)
+            ? searchObj.instructors.length
+            : Array.isArray(searchObj?.trainers)
+              ? searchObj.trainers.length
+              : 1,
+        };
+        return [
+          overview,
+          content,
+          { id: "resources", labelAr: "المصادر والمحتوى", labelEn: "Resources" },
+          instructors,
+          orders,
+          related,
+          ...(legacy ? [legacy] : []),
+        ];
+      }
+    }
+  }, [productType, hasLegacy, units, totalOrdersCount, searchDetail, searchObj]);
+
+  useEffect(() => {
+    if (!tabs.some((tab) => tab.id === activeTab)) {
+      setActiveTab("overview");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tabs]);
+
   if (productQuery.isLoading) {
     return (
       <div style={{ padding: 48 }}>
@@ -96,7 +192,7 @@ export function ProductDetailPage() {
     );
   }
 
-  if (productQuery.error || !productData) {
+  if (productQuery.error || !productData || !item) {
     return (
       <div style={{ padding: 24 }}>
         <ErrorAlert error={productQuery.error || new Error(t("المنتج غير موجود", "Product not found"))} />
@@ -104,39 +200,7 @@ export function ProductDetailPage() {
     );
   }
 
-  const item = productData.product;
   const isPublished = item.status === "published";
-  const legacyKind =
-    productData.links.legacy_kind === "package"
-      ? "package"
-      : productData.links.legacy_kind === "course"
-      ? "course"
-      : null;
-
-  // Calculate badge counts
-  const totalLessons = units.reduce((acc, u) => acc + (u.lessons?.length || 0), 0);
-  const searchDetail = searchDetailQuery.data;
-  const searchObj = searchDetail as Record<string, unknown> | undefined;
-  const instructorsCount = Array.isArray(searchObj?.instructors)
-    ? searchObj.instructors.length
-    : Array.isArray(searchObj?.trainers)
-    ? searchObj.trainers.length
-    : 1;
-
-  const related = searchDetail?.related;
-  const relatedCount =
-    (related?.courses?.length || 0) +
-    (related?.diplomas?.length || 0) +
-    (related?.packages?.length || 0) +
-    (related?.consultations?.length || 0);
-
-  const tabCounts: Partial<Record<DetailTabId, number>> = {
-    content: totalLessons,
-    instructors: instructorsCount,
-    orders: totalOrdersCount,
-    related: relatedCount,
-  };
-
   const showAside = activeTab !== "legacy";
 
   return (
@@ -146,6 +210,7 @@ export function ProductDetailPage() {
         productRef={productRef}
         data={productData}
         units={units}
+        packageCourses={packageCourses}
         sales={salesData}
         onTogglePublish={() => setPublishModalOpen(true)}
       />
@@ -153,9 +218,8 @@ export function ProductDetailPage() {
       {/* Sticky Tab Bar */}
       <DetailTabBar
         activeTab={activeTab}
+        tabs={tabs}
         onSelectTab={handleSelectTab}
-        counts={tabCounts}
-        hasLegacy={Boolean(legacyKind)}
         productTitle={item.title ?? undefined}
         isPublished={isPublished}
         onTogglePublish={() => setPublishModalOpen(true)}
@@ -170,47 +234,46 @@ export function ProductDetailPage() {
               data={productData}
               searchDetail={searchDetail}
               units={units}
-              onGoToContent={() => handleSelectTab("content")}
+              packageCourses={packageCourses}
+              onGoToContent={() => handleSelectTab(productType === "package" ? "package" : "content")}
             />
           )}
 
           {activeTab === "content" && <ContentTab productRef={productRef} />}
 
           {activeTab === "resources" && (
-            <ResourcesTab
-              productRef={productRef}
-              data={productData}
-              searchDetail={searchDetail}
-            />
+            <ResourcesTab productRef={productRef} data={productData} searchDetail={searchDetail} />
           )}
 
           {activeTab === "instructors" && (
-            <InstructorsTab
-              productRef={productRef}
-              data={productData}
-              searchDetail={searchDetail}
-            />
+            <InstructorsTab productRef={productRef} data={productData} searchDetail={searchDetail} />
           )}
+
+          {activeTab === "package" &&
+            (productData.b2c ? (
+              <PackageTab productRef={productRef} />
+            ) : (
+              // Legacy-only package (no B2C product yet): read-only legacy content.
+              <LegacyProductContent productRef={productRef} kind="package" />
+            ))}
+
+          {activeTab === "bundle" && (
+            <BundleTab productRef={productRef} productId={item.product_id ?? null} />
+          )}
+
+          {activeTab === "consultation" && <ConsultationTab data={productData} />}
+
+          {activeTab === "live_diploma" && <LiveDiplomaTab slug={item.slug} />}
 
           {activeTab === "orders" && <OrdersTab productRef={productRef} />}
 
-          {activeTab === "related" && (
-            <RelatedTab productRef={productRef} detail={searchDetail} />
-          )}
+          {activeTab === "related" && <RelatedTab productRef={productRef} detail={searchDetail} />}
 
-          {activeTab === "legacy" && legacyKind && (
-            <LegacyTab productRef={productRef} legacyKind={legacyKind} />
-          )}
+          {activeTab === "legacy" && legacyKind && <LegacyTab productRef={productRef} legacyKind={legacyKind} />}
         </div>
 
         {/* Aside Facts & Completeness */}
-        {showAside && (
-          <DetailAside
-            data={productData}
-            searchDetail={searchDetail}
-            units={units}
-          />
-        )}
+        {showAside && <DetailAside data={productData} searchDetail={searchDetail} units={units} />}
       </div>
 
       {/* Publish / Unpublish Confirmation Modal */}
@@ -230,10 +293,7 @@ export function ProductDetailPage() {
             if (e.target === e.currentTarget) setPublishModalOpen(false);
           }}
         >
-          <div
-            className="cd-card"
-            style={{ width: "min(460px, 92vw)", padding: 24, boxShadow: "var(--sh-xl)" }}
-          >
+          <div className="cd-card" style={{ width: "min(460px, 92vw)", padding: 24, boxShadow: "var(--sh-xl)" }}>
             <h2 className="cd-modal__h">
               {isPublished
                 ? t("إلغاء نشر المنتج؟", "Unpublish product?")
@@ -243,19 +303,21 @@ export function ProductDetailPage() {
               {isPublished
                 ? t(
                     "لن يعود هذا المنتج متاحاً للشراء في الكتالوج العام للطلاب حتى تتم إعادة نشره مجدداً.",
-                    "This product will no longer be visible or purchasable in the public student catalog until republished."
+                    "This product will no longer be visible or purchasable in the public student catalog until republished.",
                   )
                 : t(
-                    "سيصبح هذا المنتج متاحاً للشراء والعرض في الكتالوج العام لجميع الطلاب.",
-                    "This product will become publicly visible and purchasable in the catalog for all students."
+                    "سيصبح هذا المنتج متاحاً للشراء والعرض في الكتالوج العام لجميع الطلاب. النوع: ",
+                    "This product will become publicly visible and purchasable in the catalog for all students. Type: ",
                   )}
+              {!isPublished
+                ? (() => {
+                    const label = productTypeLabel(productType);
+                    return t(label.ar, label.en);
+                  })()
+                : null}
             </p>
             <div className="cd-modal__f" style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
-              <button
-                type="button"
-                className="ma-btn ma-btn--soft"
-                onClick={() => setPublishModalOpen(false)}
-              >
+              <button type="button" className="ma-btn ma-btn--soft" onClick={() => setPublishModalOpen(false)}>
                 {t("إلغاء", "Cancel")}
               </button>
               <button
@@ -267,8 +329,8 @@ export function ProductDetailPage() {
                 {setStatus.isPending
                   ? t("جاري التحديث...", "Updating...")
                   : isPublished
-                  ? t("تأكيد إلغاء النشر", "Confirm unpublish")
-                  : t("تأكيد النشر", "Confirm publish")}
+                    ? t("تأكيد إلغاء النشر", "Confirm unpublish")
+                    : t("تأكيد النشر", "Confirm publish")}
               </button>
             </div>
           </div>

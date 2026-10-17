@@ -15,10 +15,11 @@ import {
   publishStudio,
   studioKeys,
   studioQueries,
+  type PreviewKind,
   type StudioAsset,
   type StudioContent,
   type StudioMeta,
-  type StudioPreviewBase,
+  type StudioPreviewCourseBase,
   type StudioPublishResult,
 } from "@/lib/api";
 import { can } from "@/lib/permissions";
@@ -34,6 +35,8 @@ import { documentProblem, emptyMeta, outlineOf, toDocument } from "@/features/le
 import { AssetLibrary, AssetPickerDialog } from "@/features/learning/studio/panels/asset-library";
 import { MetaPanel } from "@/features/learning/studio/panels/meta-panel";
 import { VersionsPanel } from "@/features/learning/studio/panels/versions-panel";
+import { PackageCoursesCard } from "@/features/learning/components/package-courses-card";
+import { ReadmePanel } from "@/features/learning/studio/panels/readme-panel";
 import { PreviewFrame, type PreviewDevice } from "@/features/learning/studio/preview/preview-frame";
 import { CurriculumTab } from "@/features/learning/curriculum";
 
@@ -48,7 +51,7 @@ export default function CourseStudioPage() {
   return <StudioWorkspace key={productRef} productRef={productRef} initial={page.data} />;
 }
 
-type StudioSubPage = "editor" | "curriculum" | "details" | "assets" | "history";
+type StudioSubPage = "editor" | "readme" | "package" | "curriculum" | "details" | "assets" | "history";
 type Picker = { kind?: "image" | "video" | "file"; resolve: (asset: StudioAsset | null) => void };
 
 const SAVE_LABEL: Record<SaveState, [string, string]> = {
@@ -85,6 +88,7 @@ function StudioWorkspace({ productRef, initial }: { productRef: string; initial:
   const [picker, setPicker] = useState<Picker | null>(null);
   const [publishOpen, setPublishOpen] = useState(false);
   const [readmeOpen, setReadmeOpen] = useState(false);
+  const [readmeText, setReadmeText] = useState<string | null>(null);
   const [published, setPublished] = useState<StudioPublishResult | null>(null);
   const [focus, setFocus] = useState<{ id: string; at: number } | null>(null);
   const editorRef = useRef<Editor | null>(null);
@@ -135,50 +139,55 @@ function StudioWorkspace({ productRef, initial }: { productRef: string; initial:
   const problem = useMemo(() => documentProblem(document), [document]);
   const outline = useMemo(() => outlineOf(blocks), [blocks]);
 
-  const legacyCourse = initial.links.legacy_kind === "course" && initial.links.legacy_id != null;
-  const base = useQuery({ ...studioQueries.previewBase(productRef), enabled: legacyCourse });
-  const unitsQuery = useQuery(curriculumQueries.units(productRef));
+  const hasLegacyContent = initial.links.legacy_kind === "course" || initial.links.legacy_kind === "package";
+  const base = useQuery(studioQueries.previewBase(productRef));
+  const unitsQuery = useQuery({ ...curriculumQueries.units(productRef), enabled: hasLegacyContent });
+
+  const kind: PreviewKind = (base.data?.kind as PreviewKind | undefined) ?? (initial.product_type as PreviewKind) ?? "course";
 
   const liveBase = useMemo(() => {
-    if (!base.data) return null;
-    if (!unitsQuery.data || !unitsQuery.data.length) return base.data;
+    const payload = base.data;
+    if (!payload) return null;
+    if ((payload.kind === "course" || payload.kind === "diploma") && payload.base) {
+      const courseBase = payload.base as StudioPreviewCourseBase;
+      if (!unitsQuery.data || !unitsQuery.data.length) return courseBase;
 
-    const mappedUnits: StudioPreviewBase["units"] = unitsQuery.data.map((u, uIdx) => {
-      const computedDur = (u.lessons ?? []).reduce((acc, l) => acc + (l.duration || 0), 0);
+      const mappedUnits: StudioPreviewCourseBase["units"] = unitsQuery.data.map((u, uIdx) => {
+        const computedDur = (u.lessons ?? []).reduce((acc, l) => acc + (l.duration || 0), 0);
+        return {
+          id: u.id,
+          name: u.name,
+          order: u.order ?? uIdx + 1,
+          duration: u.duration ?? (computedDur > 0 ? computedDur : null),
+          description: u.description ?? null,
+          materials: (u.lessons ?? []).map((l, lIdx) => ({
+            id: l.id,
+            name: l.name,
+            order: l.order ?? lIdx + 1,
+            duration: l.duration ?? null,
+            body: l.body ?? null,
+            is_free: l.is_free,
+            file_id: l.file_id ?? null,
+            file_name: l.file_name ?? null,
+            file_type: null,
+            video_id: null,
+            clip_id: null,
+            playback_url: l.asset_url ?? null,
+            thumbnail_url: null,
+            iframe_url: null,
+            link: l.link ?? null,
+            link2: l.link2 ?? null,
+          })),
+        };
+      });
+
       return {
-        id: u.id,
-        name: u.name,
-        order: u.order ?? uIdx + 1,
-        duration: u.duration ?? (computedDur > 0 ? computedDur : null),
-        description: u.description ?? null,
-        materials: (u.lessons ?? []).map((l, lIdx) => ({
-        id: l.id,
-        name: l.name,
-        order: l.order ?? lIdx + 1,
-        duration: l.duration ?? null,
-        body: l.body ?? null,
-        is_free: l.is_free,
-        file_id: l.file_id ?? null,
-        file_name: l.file_name ?? null,
-        file_type: null,
-        video_id: null,
-        clip_id: null,
-        playback_url: l.asset_url ?? null,
-        thumbnail_url: null,
-        iframe_url: null,
-        link: l.link ?? null,
-        link2: l.link2 ?? null,
-      })),
-    };
-  });
-
-    return {
-      ...base.data,
-      units: mappedUnits,
-    };
+        ...courseBase,
+        units: mappedUnits,
+      };
+    }
+    return payload.base ?? null;
   }, [base.data, unitsQuery.data]);
-
-  const kind = initial.product_type === "diploma" ? "diploma" : initial.links.legacy_kind === "package" ? "package" : "course";
 
   const edit = (nextMeta: StudioMeta, nextBlocks: unknown[]) => {
     if (!editable) return;
@@ -348,7 +357,9 @@ function StudioWorkspace({ productRef, initial }: { productRef: string; initial:
         {(
           [
             ["editor", "المحرر والمعاينة", "Editor & Preview"],
-            ["curriculum", "محتوى الدورة", "Curriculum"],
+            ["readme", "README (المحتوى)", "README (content)"],
+            ...(kind === "package" ? [["package", "دورات الباقة", "Package courses"]] : []),
+            ...(hasLegacyContent ? [["curriculum", "محتوى الدورة", "Curriculum"]] : []),
             ["details", "بيانات الصفحة", "Page Details"],
             ["assets", "مكتبة الملفات", "Asset Library"],
             ["history", "سجل النسخ", "Version History"],
@@ -425,8 +436,38 @@ function StudioWorkspace({ productRef, initial }: { productRef: string; initial:
 
           {showPreview ? (
             <section className="ma-studio__preview" aria-label={t("المعاينة", "Preview")}>
-              {legacyCourse && base.isError ? <ErrorAlert error={base.error} title={t("تعذّر تحميل بيانات المعاينة", "Couldn't load preview data")} /> : null}
+              {base.isError ? <ErrorAlert error={base.error} title={t("تعذّر تحميل بيانات المعاينة", "Couldn't load preview data")} /> : null}
               <PreviewFrame base={liveBase} document={document} kind={kind} device={device} focusBlockId={focus} />
+            </section>
+          ) : null}
+        </div>
+      ) : null}
+
+      {subPage === "readme" ? (
+        <div className={cn("ma-studio", "ma-studio--workspace", !showPreview && "is-no-preview")}>
+          <section className="ma-studio__canvas" style={{ overflowY: "auto", maxHeight: "calc(100vh - 170px)", padding: "var(--space-2) var(--space-3)" }}>
+            <Card title={t("README المنتج (Markdown)", "Product README (Markdown)")}>
+              <ReadmePanel productRef={productRef} editable={editable} onChange={setReadmeText} />
+            </Card>
+          </section>
+          {showPreview ? (
+            <section className="ma-studio__preview" aria-label={t("المعاينة", "Preview")}>
+              {base.isError ? <ErrorAlert error={base.error} title={t("تعذّر تحميل بيانات المعاينة", "Couldn't load preview data")} /> : null}
+              <PreviewFrame base={liveBase} document={document} kind={kind} device={device} readme={readmeText} focusBlockId={{ id: "about", at: 0 }} />
+            </section>
+          ) : null}
+        </div>
+      ) : null}
+
+      {subPage === "package" && kind === "package" ? (
+        <div className={cn("ma-studio", "ma-studio--workspace", !showPreview && "is-no-preview")}>
+          <section className="ma-studio__canvas" style={{ overflowY: "auto", maxHeight: "calc(100vh - 170px)", padding: "var(--space-2) var(--space-3)" }}>
+            <PackageCoursesCard productRef={productRef} editable={editable} />
+          </section>
+          {showPreview ? (
+            <section className="ma-studio__preview" aria-label={t("المعاينة", "Preview")}>
+              {base.isError ? <ErrorAlert error={base.error} title={t("تعذّر تحميل بيانات المعاينة", "Couldn't load preview data")} /> : null}
+              <PreviewFrame base={liveBase} document={document} kind={kind} device={device} readme={readmeText} focusBlockId={{ id: "contents", at: 0 }} />
             </section>
           ) : null}
         </div>
@@ -447,7 +488,7 @@ function StudioWorkspace({ productRef, initial }: { productRef: string; initial:
 
           {showPreview ? (
             <section className="ma-studio__preview" aria-label={t("المعاينة", "Preview")}>
-              {legacyCourse && base.isError ? (
+              {base.isError ? (
                 <ErrorAlert error={base.error} title={t("تعذّر تحميل بيانات المعاينة", "Couldn't load preview data")} />
               ) : null}
               <PreviewFrame
@@ -479,7 +520,7 @@ function StudioWorkspace({ productRef, initial }: { productRef: string; initial:
 
           {showPreview ? (
             <section className="ma-studio__preview" aria-label={t("المعاينة", "Preview")}>
-              {legacyCourse && base.isError ? (
+              {base.isError ? (
                 <ErrorAlert error={base.error} title={t("تعذّر تحميل بيانات المعاينة", "Couldn't load preview data")} />
               ) : null}
               <PreviewFrame
