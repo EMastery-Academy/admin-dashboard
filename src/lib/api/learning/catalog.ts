@@ -11,7 +11,6 @@ import type { PathParams, QueryParams, RequestBody, SuccessResponse } from "@/li
  */
 
 type ListProductsOp = "list_products_api_v1_admin_catalog_products_get";
-type CreateCourseOp = "create_course_api_v1_admin_catalog_products_post";
 type GetProductOp = "get_product_api_v1_admin_catalog_products__product_ref__get";
 type SetStatusOp = "set_product_status_api_v1_admin_catalog_products__product_ref__status_post";
 type SalesOp = "product_sales_api_v1_admin_catalog_products__product_ref__sales_get";
@@ -33,6 +32,8 @@ type PackageSectionsGetOp = "package_detail_sections_api_v1_admin_catalog_produc
 type UpdatePackageSectionsOp = "update_package_sections_api_v1_admin_catalog_products__product_ref__package_sections_put";
 type AddPackageCourseOp = "add_package_course_api_v1_admin_catalog_products__product_ref__package_courses_post";
 type UpdatePackageCourseOp = "update_package_course_api_v1_admin_catalog_products__product_ref__package_courses__member_product_id__patch";
+type UpdateProductOp = "update_product_api_v1_admin_catalog_products__product_ref__patch";
+type CategorySuggestionsOp = "category_suggestions_api_v1_admin_catalog_categories__category_id__suggestions_get";
 type CategoriesOp = "list_categories_api_v1_admin_catalog_categories_get";
 type PriceListsOp = "list_price_lists_api_v1_admin_catalog_price_lists_get";
 type ExtensionPackagesOp = "list_extension_packages_api_v1_admin_catalog_extension_packages_get";
@@ -64,7 +65,110 @@ export type ProductStatus = RequestBody<SetStatusOp>["status"];
 export type ProductSort = NonNullable<ProductsParams["sort"]>;
 export type ProductSource = NonNullable<ProductsParams["source"]>;
 export type ProductOrigin = NonNullable<ProductsParams["origin"]>;
-export type CreateCourseRequest = RequestBody<CreateCourseOp>;
+
+/** Product types an admin can create. */
+export type ProductCreateType = "course" | "diploma" | "package" | "consultation";
+
+export type ProductLevel = "beginner" | "intermediate" | "advanced";
+
+/** Fields accepted when creating a catalog product (course/diploma/package/consultation). */
+export interface CreateProductRequest {
+  product_type?: ProductCreateType;
+  title: string;
+  title_en?: string | null;
+  description?: string | null;
+  price?: number | null;
+  /** ISO 4217; the backend defaults to USD. */
+  currency_code?: string;
+  short_description?: string | null;
+  duration_hours?: number | null;
+  level?: ProductLevel | null;
+  language?: string | null;
+  /** Entitlement length in days after purchase; null/omitted = lifetime. */
+  access_duration_days?: number | null;
+  cpd_eligible?: boolean;
+  /** Consultation session length. */
+  duration_minutes?: number | null;
+  slug?: string | null;
+  published?: boolean;
+  category_ids?: string[];
+  keywords?: string[];
+  marketing_tag?: string | null;
+  skill_ids?: string[];
+  featured?: boolean;
+  manual_accounting?: boolean;
+  apple_store_id?: string | null;
+  google_store_id?: string | null;
+  instructor_ids?: number[];
+  expert_ids?: number[];
+  course_refs?: string[];
+}
+
+/** A skill option from `GET /catalog/onboarding-options`. */
+export interface ProductSkillOption {
+  skill_id: string;
+  slug: string;
+  name: string;
+}
+
+/** A tag option with its product count, from `GET /catalog/onboarding-options`. */
+export interface ProductTagOption {
+  tag: string;
+  count: number;
+}
+
+export type UpdateProductRequest = RequestBody<UpdateProductOp>;
+/** Skills and tags curated for one category. */
+export type CategorySuggestions = SuccessResponse<CategorySuggestionsOp>;
+
+/** `PATCH /admin/catalog/products/{ref}` — partial update of details, general info, categories, skills. */
+export function updateProduct(
+  product_ref: PathParams<GetProductOp>["product_ref"],
+  body: UpdateProductRequest,
+): Promise<ProductView> {
+  return apiPatch(productPaths.detail, { path: { product_ref }, body });
+}
+
+/** `GET /admin/catalog/categories/{id}/suggestions` — the skills/tags that go with a category. */
+export function getCategorySuggestions(category_id: string): Promise<CategorySuggestions> {
+  return apiGet(categorySuggestionsPath, { path: { category_id } });
+}
+
+/** `GET /catalog/onboarding-options` — skills, tags and product types for the product form. */
+export interface OnboardingOptions {
+  skills: ProductSkillOption[];
+  tags: ProductTagOption[];
+  product_types: { code: string; name: string; count: number }[];
+}
+
+/** A B2C category from `GET /catalog/categories`. */
+export interface CatalogCategoryOption {
+  category_id: string;
+  slug: string;
+  name: string | null;
+  parent_id: string | null;
+  sort_order: number;
+  product_count: number;
+}
+
+/** A slim published product card from `GET /catalog/cards`. */
+export interface CatalogProductCard {
+  product_id: string;
+  slug: string;
+  product_type: string;
+  title: string | null;
+}
+
+/** Query params of `GET /catalog/cards` (product_type is repeatable). */
+export type CatalogCardsParams = {
+  product_type?: string[];
+  slug?: string[];
+  expert?: string;
+  category_id?: string;
+  sort?: "newest" | "title";
+  limit?: number;
+  offset?: number;
+};
 
 export type ProductFacets = SuccessResponse<FacetsOp>;
 export type ProductInsightsParams = QueryParams<InsightsOp>;
@@ -127,6 +231,15 @@ export const productPaths = {
   allRatings: "admin/catalog/ratings",
 } as const;
 
+/** Public catalog read endpoints (`/catalog/*`) used by the product form for its options. */
+export const categorySuggestionsPath = "admin/catalog/categories/{category_id}/suggestions";
+
+export const catalogPaths = {
+  onboardingOptions: "catalog/onboarding-options",
+  categories: "catalog/categories",
+  cards: "catalog/cards",
+} as const;
+
 export const productKeys = {
   all: ["learning", "products"] as const,
   list: (params?: ProductsParams) => [...productKeys.all, "list", params ?? {}] as const,
@@ -157,9 +270,26 @@ export function getProduct(product_ref: PathParams<GetProductOp>["product_ref"])
   return apiGet(productPaths.detail, { path: { product_ref } });
 }
 
-/** `POST /admin/catalog/products` — creates a course on the legacy platform (local mirror). Audited. */
-export function createCourse(body: CreateCourseRequest): Promise<ProductView> {
+/** `POST /admin/catalog/products` — creates a course, diploma, package or consultation. Audited. */
+export function createProduct(body: CreateProductRequest): Promise<ProductView> {
   return apiPost(productPaths.list, { body });
+}
+
+/** `GET /catalog/onboarding-options` — skills, tags and product types for the product form. */
+export function getOnboardingOptions(): Promise<OnboardingOptions> {
+  return apiGet(catalogPaths.onboardingOptions);
+}
+
+/** `GET /catalog/categories` — B2C categories (with ids) for assigning to a product. */
+export function listCatalogCategories(): Promise<CatalogCategoryOption[]> {
+  return apiGet(catalogPaths.categories);
+}
+
+/** `GET /catalog/cards` — slim published product cards (package member picker). */
+export function listCatalogCards(
+  params: CatalogCardsParams = {},
+): Promise<{ items: CatalogProductCard[]; total: number }> {
+  return apiGet(catalogPaths.cards, { query: params });
 }
 
 /** `POST /admin/catalog/products/{ref}/status` — B2C status, or publish/draft a legacy-only product. Audited. */
@@ -277,4 +407,20 @@ export const productQueries = {
     queryOptions({ queryKey: productKeys.lists("certificates", params), queryFn: () => listCertificateTemplates(params) }),
   allRatings: (params?: RatingsParams) =>
     queryOptions({ queryKey: productKeys.lists("ratings", params), queryFn: () => listRatings(params) }),
+};
+
+/** React Query options for the public catalog read endpoints used by the product form. */
+export const catalogQueries = {
+  onboardingOptions: () =>
+    queryOptions({ queryKey: ["catalog", "onboarding-options"], queryFn: () => getOnboardingOptions() }),
+  categories: () =>
+    queryOptions({ queryKey: ["catalog", "categories"], queryFn: () => listCatalogCategories() }),
+  cards: (params?: CatalogCardsParams) =>
+    queryOptions({ queryKey: ["catalog", "cards", params ?? {}], queryFn: () => listCatalogCards(params) }),
+  categorySuggestions: (categoryId: string) =>
+    queryOptions({
+      queryKey: ["catalog", "category-suggestions", categoryId],
+      queryFn: () => getCategorySuggestions(categoryId),
+      staleTime: 5 * 60_000,
+    }),
 };

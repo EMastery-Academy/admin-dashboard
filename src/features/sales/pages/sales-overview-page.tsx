@@ -4,7 +4,7 @@ import { Bar, BarChart, CartesianGrid, ComposedChart, Line, XAxis, YAxis } from 
 
 import { dashboardSummary, productSalesReport, salesReport } from "@/lib/api";
 import { defaultRange, percentDelta, previousRange } from "@/lib/dates";
-import { exportElementToPdf, exportToCsv } from "@/lib/export";
+import { exportTabular } from "@/lib/export";
 import { formatAmount, formatCompact, formatDate, formatMonth, formatNumber } from "@/lib/format";
 import { useT } from "@/lib/i18n";
 import { chartRow } from "@/lib/chart-rows";
@@ -66,7 +66,7 @@ export default function SalesOverviewPage() {
 
   const error = sales.error ?? products.error ?? prevSales.error;
 
-  const handleExportCsv = () => {
+  const handleExportCsv = (format: "csv" | "xlsx" | "pdf" = "csv") => {
     const rawDays = sales.data?.days ?? [];
     const headers = [
       t("اليوم", "Date"),
@@ -100,13 +100,13 @@ export default function SalesOverviewPage() {
       ]);
     }
 
-    exportToCsv(`sales-overview-${start}-to-${end}.csv`, headers, rows);
+    return exportTabular(format, `sales-overview-${start}-to-${end}.csv`, headers, rows);
   };
 
   const handleExportPdf = async () => {
     setIsExportingPdf(true);
     try {
-      await exportElementToPdf("sales-overview-content", `sales-overview-${start}-to-${end}.pdf`);
+      await handleExportCsv("pdf");
     } finally {
       setIsExportingPdf(false);
     }
@@ -122,7 +122,8 @@ export default function SalesOverviewPage() {
             <DateRange from={from} to={to} onFrom={setFrom} onTo={setTo} />
             <CurrencySelect />
             <ExportActions
-              onExportCsv={handleExportCsv}
+              onExportCsv={() => handleExportCsv()}
+              onExportExcel={() => handleExportCsv("xlsx")}
               onExportPdf={handleExportPdf}
               isExportingPdf={isExportingPdf}
               disabled={sales.isLoading}

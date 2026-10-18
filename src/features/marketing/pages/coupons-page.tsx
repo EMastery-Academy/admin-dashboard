@@ -2,13 +2,15 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { listPromotions, promotionsKeys, setPromotionActive, type Promotion } from "@/lib/api";
 import { formatDateTime } from "@/lib/format";
-import { useT } from "@/lib/i18n";
+import { useLang, useT } from "@/lib/i18n";
+import { dateValue } from "@/lib/export/columns";
 import { Badge, Button, ErrorAlert, PageHead } from "@/components/ui/kit";
 import { type Column } from "@/components/ui/data-table";
 import { PagedList, type ListFilter } from "@/components/ui/paged-list";
 
 export default function CouponsPage() {
   const t = useT();
+  const lang = useLang();
   const queryClient = useQueryClient();
 
   const toggle = useMutation({
@@ -17,14 +19,15 @@ export default function CouponsPage() {
   });
 
   const columns: Column<Promotion>[] = [
-    { key: "code", header: t("الكود", "Code"), sortable: true, cell: (row) => <span className="ma-num">{row.code}</span> },
-    { key: "name", header: t("الاسم", "Name"), sortable: true, cell: (row) => row.name },
-    { key: "discount", header: t("الخصم", "Discount"), align: "end", sortable: true, sortValue: (row) => row.discount_percent ?? 0, cell: (row) => (row.discount_percent != null ? `${row.discount_percent}%` : "—") },
-    { key: "ends", header: t("ينتهي", "Ends"), cell: (row) => formatDateTime(row.ends_at) },
-    { key: "active", header: t("الحالة", "Status"), cell: (row) => <Badge def={{ label: row.active ? { ar: "مفعّل", en: "Active" } : { ar: "موقوف", en: "Inactive" }, tone: row.active ? "success" : "warning" }} /> },
+    { key: "code", header: t("الكود", "Code"), sortable: true, exportValue: (row) => row.code, cell: (row) => <span className="ma-num">{row.code}</span> },
+    { key: "name", header: t("الاسم", "Name"), sortable: true, exportValue: (row) => row.name, cell: (row) => row.name },
+    { key: "discount", header: t("الخصم", "Discount"), align: "end", sortable: true, sortValue: (row) => row.discount_percent ?? 0, exportKind: "number", exportHeader: t("الخصم %", "Discount %"), exportValue: (row) => row.discount_percent ?? null, cell: (row) => (row.discount_percent != null ? `${row.discount_percent}%` : "—") },
+    { key: "ends", header: t("ينتهي", "Ends"), exportKind: "datetime", exportValue: (row) => dateValue(row.ends_at), cell: (row) => formatDateTime(row.ends_at) },
+    { key: "active", header: t("الحالة", "Status"), exportValue: (row) => (row.active ? (lang === "ar" ? "مفعّل" : "Active") : lang === "ar" ? "موقوف" : "Inactive"), cell: (row) => <Badge def={{ label: row.active ? { ar: "مفعّل", en: "Active" } : { ar: "موقوف", en: "Inactive" }, tone: row.active ? "success" : "warning" }} /> },
     {
       key: "actions",
       header: "",
+      exportable: false,
       align: "end",
       cell: (row) => (
         <Button sm disabled={toggle.isPending} label={row.active ? t("إيقاف", "Deactivate") : t("تفعيل", "Activate")} onClick={() => toggle.mutate(row)} />
@@ -60,6 +63,7 @@ export default function CouponsPage() {
         searchPlaceholder={t("ابحث بالكود أو الاسم…", "Search code or name…")}
         filters={filters}
         empty={t("لا كوبونات.", "No coupons.")}
+        exportConfig={{ filename: "coupons", title: t("الكوبونات", "Coupons"), pdf: true, fetchSize: 200 }}
       />
     </>
   );

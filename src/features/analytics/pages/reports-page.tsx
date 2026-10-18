@@ -18,7 +18,7 @@ import {
   type SalesPoint,
 } from "@/lib/api";
 import { defaultRange, percentDelta, previousRange } from "@/lib/dates";
-import { exportElementToPdf, exportToCsv } from "@/lib/export";
+import { exportTabular } from "@/lib/export";
 import { formatAmount, formatCompact, formatDate, formatDateTime, formatMonth, formatNumber } from "@/lib/format";
 import { useT } from "@/lib/i18n";
 import { chartRow } from "@/lib/chart-rows";
@@ -145,7 +145,7 @@ export default function AnalyticsSalesPage() {
 
   const error = report.error ?? prevReport.error ?? products.error;
 
-  const handleExportCsv = () => {
+  const handleExportCsv = (format: "csv" | "xlsx" | "pdf" = "csv") => {
     const headers = [
       t("اليوم", "Date"),
       t("الطلبات المدفوعة", "Paid Orders"),
@@ -178,13 +178,13 @@ export default function AnalyticsSalesPage() {
       ]);
     }
 
-    exportToCsv(`sales-report-${start}-to-${end}.csv`, headers, rows);
+    return exportTabular(format, `sales-report-${start}-to-${end}.csv`, headers, rows);
   };
 
   const handleExportPdf = async () => {
     setIsExportingPdf(true);
     try {
-      await exportElementToPdf("analytics-sales-content", `sales-report-${start}-to-${end}.pdf`);
+      await handleExportCsv("pdf");
     } finally {
       setIsExportingPdf(false);
     }
@@ -200,7 +200,8 @@ export default function AnalyticsSalesPage() {
             <DateRange from={from} to={to} onFrom={setFrom} onTo={setTo} />
             <CurrencySelect />
             <ExportActions
-              onExportCsv={handleExportCsv}
+              onExportCsv={() => handleExportCsv()}
+              onExportExcel={() => handleExportCsv("xlsx")}
               onExportPdf={handleExportPdf}
               isExportingPdf={isExportingPdf}
               disabled={report.isLoading}
@@ -608,7 +609,7 @@ export function ProductsReportPage() {
     return Array.from(set);
   }, [items]);
 
-  const handleExportCsv = () => {
+  const handleExportCsv = (format: "csv" | "xlsx" | "pdf" = "csv") => {
     const headers = [
       t("المنتج", "Product"),
       t("النوع", "Kind"),
@@ -642,13 +643,13 @@ export function ProductsReportPage() {
       "—",
     ]);
 
-    exportToCsv(`products-report-${start}-to-${end}.csv`, headers, rows);
+    return exportTabular(format, `products-report-${start}-to-${end}.csv`, headers, rows);
   };
 
   const handleExportPdf = async () => {
     setIsExportingPdf(true);
     try {
-      await exportElementToPdf("analytics-products-content", `products-report-${start}-to-${end}.pdf`);
+      await handleExportCsv("pdf");
     } finally {
       setIsExportingPdf(false);
     }
@@ -666,7 +667,8 @@ export function ProductsReportPage() {
             <DateRange from={from} to={to} onFrom={setFrom} onTo={setTo} />
             <CurrencySelect />
             <ExportActions
-              onExportCsv={handleExportCsv}
+              onExportCsv={() => handleExportCsv()}
+              onExportExcel={() => handleExportCsv("xlsx")}
               onExportPdf={handleExportPdf}
               isExportingPdf={isExportingPdf}
               disabled={result.isLoading}
@@ -809,6 +811,7 @@ function ReportFrame({
   fx,
   dateRange,
   onExportCsv,
+  onExportExcel,
   onExportPdf,
   isExportingPdf,
   contentId,
@@ -819,6 +822,7 @@ function ReportFrame({
   fx?: FxInfo;
   dateRange?: { from: string; to: string; onFrom: (v: string) => void; onTo: (v: string) => void };
   onExportCsv?: () => void;
+  onExportExcel?: () => void;
   onExportPdf?: () => Promise<void>;
   isExportingPdf?: boolean;
   contentId?: string;
@@ -843,6 +847,7 @@ function ReportFrame({
             {(onExportCsv || onExportPdf) && (
               <ExportActions
                 onExportCsv={onExportCsv}
+                onExportExcel={onExportExcel}
                 onExportPdf={onExportPdf}
                 isExportingPdf={isExportingPdf}
               />
@@ -890,7 +895,7 @@ export function CouponsReportPage() {
     return items.filter((p) => p.code?.toLowerCase().includes(q));
   }, [items, search]);
 
-  const handleExportCsv = () => {
+  const handleExportCsv = (format: "csv" | "xlsx" | "pdf" = "csv") => {
     const headers = [
       t("الكود", "Code"),
       t("النوع", "Type"),
@@ -905,13 +910,13 @@ export function CouponsReportPage() {
       p.discount,
       p.revenue,
     ]);
-    exportToCsv(`coupons-report-${start}-to-${end}.csv`, headers, rows);
+    return exportTabular(format, `coupons-report-${start}-to-${end}.csv`, headers, rows);
   };
 
   const handleExportPdf = async () => {
     setIsExportingPdf(true);
     try {
-      await exportElementToPdf("analytics-coupons-content", `coupons-report-${start}-to-${end}.pdf`);
+      await handleExportCsv("pdf");
     } finally {
       setIsExportingPdf(false);
     }
@@ -923,7 +928,8 @@ export function CouponsReportPage() {
       sub={t("أداء أكواد الخصم على طلبات B2C المدفوعة.", "Promotion codes applied to paid B2C orders.")}
       fx={result.data?.fx}
       dateRange={{ from, to, onFrom: setFrom, onTo: setTo }}
-      onExportCsv={handleExportCsv}
+      onExportCsv={() => handleExportCsv()}
+              onExportExcel={() => handleExportCsv("xlsx")}
       onExportPdf={handleExportPdf}
       isExportingPdf={isExportingPdf}
       contentId="analytics-coupons-content"
@@ -992,7 +998,7 @@ export function CustomersReportPage() {
     return items.filter((c) => c.email?.toLowerCase().includes(q) || c.full_name?.toLowerCase().includes(q));
   }, [items, search]);
 
-  const handleExportCsv = () => {
+  const handleExportCsv = (format: "csv" | "xlsx" | "pdf" = "csv") => {
     const headers = [
       t("اسم العميل", "Customer Name"),
       t("البريد الإلكتروني", "Email"),
@@ -1007,13 +1013,13 @@ export function CustomersReportPage() {
       c.revenue,
       c.last_purchase_at ?? "",
     ]);
-    exportToCsv(`customers-report-${start}-to-${end}.csv`, headers, rows);
+    return exportTabular(format, `customers-report-${start}-to-${end}.csv`, headers, rows);
   };
 
   const handleExportPdf = async () => {
     setIsExportingPdf(true);
     try {
-      await exportElementToPdf("analytics-customers-content", `customers-report-${start}-to-${end}.pdf`);
+      await handleExportCsv("pdf");
     } finally {
       setIsExportingPdf(false);
     }
@@ -1025,7 +1031,8 @@ export function CustomersReportPage() {
       sub={t("أعلى 100 عميل إنفاقًا خلال الفترة المحددة.", "Top 100 customers by spend in the selected date range.")}
       fx={result.data?.fx}
       dateRange={{ from, to, onFrom: setFrom, onTo: setTo }}
-      onExportCsv={handleExportCsv}
+      onExportCsv={() => handleExportCsv()}
+              onExportExcel={() => handleExportCsv("xlsx")}
       onExportPdf={handleExportPdf}
       isExportingPdf={isExportingPdf}
       contentId="analytics-customers-content"
@@ -1083,7 +1090,7 @@ export function CategoriesReportPage() {
     return items.filter((c) => c.name?.toLowerCase().includes(q) || (c.slug ? c.slug.toLowerCase().includes(q) : false));
   }, [items, search]);
 
-  const handleExportCsv = () => {
+  const handleExportCsv = (format: "csv" | "xlsx" | "pdf" = "csv") => {
     const headers = [
       t("التصنيف", "Category"),
       t("الطلبات", "Orders"),
@@ -1096,13 +1103,13 @@ export function CategoriesReportPage() {
       c.units,
       c.revenue,
     ]);
-    exportToCsv(`categories-report-${start}-to-${end}.csv`, headers, rows);
+    return exportTabular(format, `categories-report-${start}-to-${end}.csv`, headers, rows);
   };
 
   const handleExportPdf = async () => {
     setIsExportingPdf(true);
     try {
-      await exportElementToPdf("analytics-categories-content", `categories-report-${start}-to-${end}.pdf`);
+      await handleExportCsv("pdf");
     } finally {
       setIsExportingPdf(false);
     }
@@ -1114,7 +1121,8 @@ export function CategoriesReportPage() {
       sub={t("مبيعات B2C لكل تصنيف (المنتج في عدة تصنيفات يُحسب في كلٍّ منها).", "B2C sales per category (a product in several categories counts in each).")}
       fx={result.data?.fx}
       dateRange={{ from, to, onFrom: setFrom, onTo: setTo }}
-      onExportCsv={handleExportCsv}
+      onExportCsv={() => handleExportCsv()}
+              onExportExcel={() => handleExportCsv("xlsx")}
       onExportPdf={handleExportPdf}
       isExportingPdf={isExportingPdf}
       contentId="analytics-categories-content"

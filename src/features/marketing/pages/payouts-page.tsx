@@ -1,7 +1,8 @@
 import { useMemo } from "react";
 import { listReferralPayouts, referralsKeys, type ReferralPayout } from "@/lib/api";
 import { formatAmount, formatDateTime } from "@/lib/format";
-import { useT } from "@/lib/i18n";
+import { useLang, useT } from "@/lib/i18n";
+import { badgeLabel, dateValue } from "@/lib/export/columns";
 import { Badge, PageHead } from "@/components/ui/kit";
 import type { Column } from "@/components/ui/data-table";
 import { PagedList, type ListFilter } from "@/components/ui/paged-list";
@@ -13,13 +14,14 @@ const payoutStatus = (status: number) =>
 
 export default function PayoutsPage() {
   const t = useT();
+  const lang = useLang();
 
   const columns: Column<ReferralPayout>[] = [
-    { key: "partner", header: t("المسوّق", "Partner"), cell: (row) => row.partner_name },
-    { key: "amount", header: t("المبلغ", "Amount"), align: "end", cell: (row) => formatAmount(row.amount) },
-    { key: "status", header: t("الحالة", "Status"), cell: (row) => <Badge def={payoutStatus(row.status)} /> },
-    { key: "requested", header: t("الطلب", "Requested"), cell: (row) => formatDateTime(row.requested_at) },
-    { key: "updated", header: t("آخر تحديث", "Updated"), cell: (row) => formatDateTime(row.updated_at) },
+    { key: "partner", header: t("المسوّق", "Partner"), exportValue: (row) => row.partner_name, cell: (row) => row.partner_name },
+    { key: "amount", header: t("المبلغ", "Amount"), align: "end", exportKind: "money", exportValue: (row) => row.amount, cell: (row) => formatAmount(row.amount) },
+    { key: "status", header: t("الحالة", "Status"), exportValue: (row) => badgeLabel(payoutStatus(row.status), lang), cell: (row) => <Badge def={payoutStatus(row.status)} /> },
+    { key: "requested", header: t("الطلب", "Requested"), exportKind: "datetime", exportValue: (row) => dateValue(row.requested_at), cell: (row) => formatDateTime(row.requested_at) },
+    { key: "updated", header: t("آخر تحديث", "Updated"), exportKind: "datetime", exportValue: (row) => dateValue(row.updated_at), cell: (row) => formatDateTime(row.updated_at) },
   ];
 
   const filters: ListFilter[] = useMemo(
@@ -62,6 +64,7 @@ export default function PayoutsPage() {
         filters={filters}
         searchPlaceholder={t("ابحث باسم المسوق…", "Search partner name…")}
         empty={t("لا طلبات صرف.", "No payout requests.")}
+        exportConfig={{ filename: "payouts", title: t("طلبات الصرف", "Payouts"), pdf: true, fetchSize: 200 }}
       />
     </>
   );

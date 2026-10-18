@@ -36,5 +36,5 @@ export function RawTable({ rows, keys }: { rows: Row[]; keys?: string[] }) {
     header: key,
     cell: (row) => <RawValue fieldKey={key} value={row[key]} />,
   }));
-  return <DataTable rows={rows} columns={columns} empty={t("لا بيانات.", "No data.")} />;
+  return <DataTable rows={rows} columns={columns} exportConfig={false} empty={t("لا بيانات.", "No data.")} />;
 }

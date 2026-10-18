@@ -218,6 +218,69 @@ button.ma-link { padding: 0; border: 0; background: none; font: inherit; font-we
 .ma-rich th, .ma-rich td { border: 1px solid var(--line); padding: var(--space-2); text-align: start; }
 .ma-rich blockquote { margin-inline: 0; padding-inline-start: var(--space-3); border-inline-start: 3px solid var(--accent); color: var(--text-muted) !important; }
 
+/* ---------- Create-product form layout ----------
+   Main column of section cards + a sticky aside (summary, status, the single primary CTA).
+   The form element itself is the grid, so the aside's submit button stays inside the <form>. */
+.ma-form-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: var(--space-6); align-items: start; }
+.ma-form-main { display: grid; gap: var(--space-4); min-width: 0; }
+.ma-form-aside { display: grid; gap: var(--space-4); position: sticky; top: calc(var(--topbar-h) + var(--space-4)); }
+@media (max-width: 1023px) {
+  .ma-form-layout { grid-template-columns: minmax(0, 1fr); }
+  .ma-form-aside { position: static; }
+}
+.ma-form-aside .ma-form__actions { flex-direction: column; align-items: stretch; margin-block-start: 0; }
+.ma-form-aside .ma-form__actions .ma-btn { width: 100%; }
+
+/* A checkbox + label row is a label in the design kit (`components.css`), but `admin.css` also
+   defines `.ma-check` as an 18px box for a legacy Radix checkbox: that rule sets `color:
+   var(--on-accent)` (dark ink) which made the label text invisible on dark surfaces. Scope the
+   label back to the kit's role colour so options stay readable in both themes. */
+label.ma-check { display: inline-flex; align-items: center; gap: var(--space-3); width: auto; height: auto; min-height: 32px; border: 0; background: none; color: var(--text); cursor: pointer; }
+label.ma-check input { flex: none; }
+
+/* Searchable multi-select picker that replaces long checkbox walls. */
+.ma-picker { display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--surface); }
+.ma-picker__search { border: 0; border-block-end: 1px solid var(--line); border-radius: 0; box-shadow: none !important; }
+.ma-picker__list { display: grid; gap: 2px; max-height: 220px; overflow: auto; padding: var(--space-2); }
+.ma-picker__list .ma-check { width: 100%; padding: var(--space-1) var(--space-2); border-radius: 6px; }
+.ma-picker__list .ma-check:hover { background: var(--fill-soft); }
+.ma-picker__empty { padding: var(--space-3) var(--space-2); color: var(--text-muted); font-size: 13px; line-height: 20px; }
+.ma-picker__foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); padding: var(--space-2) var(--space-3); border-block-start: 1px solid var(--line); background: var(--fill-soft); font-size: 13px; color: var(--text-muted); }
+.ma-picker__count { font-variant-numeric: tabular-nums; }
+
+/* Toolbar multi-select facet: a compact trigger opening a searchable checkbox panel. */
+.ma-multiselect { z-index: 40; display: flex; flex-direction: column; width: min(320px, 90vw); overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--surface); color: var(--text); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12); }
+.ma-multiselect .ma-picker__search { margin: var(--space-2); }
+.ma-multiselect__summary { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+/* Segmented single-choice control (course/diploma, status). */
+.ma-segmented { display: inline-flex; flex-wrap: wrap; gap: var(--space-1); }
+
+/* A field row with an inline action (slug input + generate button). */
+.ma-field-inline { display: flex; align-items: center; gap: var(--space-2); }
+.ma-field-inline .ma-input { flex: 1; min-width: 0; }
+.ma-field-inline .ma-input-suffix { color: var(--text-muted); font-size: 13px; }
+
+/* Selected-value chips shown under a picker. */
+.ma-chips { display: flex; flex-wrap: wrap; gap: var(--space-1); }
+.ma-chips__chip { display: inline-flex; align-items: center; gap: var(--space-1); padding: 2px var(--space-2); background: var(--fill-soft); border-radius: var(--radius-full); font-size: 13px; line-height: 20px; }
+.ma-chips__chip button { padding: 0; border: 0; background: none; color: var(--text-muted); line-height: 1; cursor: pointer; }
+.ma-chips__chip button:hover { color: var(--text); }
+
+/* Ordered member list (bundle composition): grip, title, quantity, remove. */
+.ma-members { display: grid; gap: var(--space-2); }
+.ma-member { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-3); border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--surface); }
+.ma-member__title { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.ma-member__meta { color: var(--text-muted); font-size: 13px; }
+.ma-member_handle { color: var(--text-muted); }
+.ma-member__qty { width: 76px; }
+@media (max-width: 640px) { .ma-member { grid-template-columns: minmax(0, 1fr) auto; } .ma-member_handle { display: none; } }
+
+/* Repeating single-line editor (learning outcomes, tags list). */
+.ma-listedit { display: grid; gap: var(--space-2); }
+.ma-listedit__row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--space-2); }
+.ma-listedit__add { justify-self: start; }
+
 /* Instructor / related-content chips used on the product detail page. */
 .ma-chip-row { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-block-start: var(--space-2); }
 .ma-chip { display: inline-flex; align-items: center; gap: var(--space-2); padding: 4px var(--space-3) 4px 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; }

@@ -16,6 +16,7 @@ export default function ConsultantsPage() {
     {
       key: "name",
       header: t("المستشار / المدرب", "Consultant / Instructor"),
+      exportValue: (row) => [row.name, row.email].filter(Boolean).join(" · "),
       sortable: true,
       sortValue: (row) => row.name ?? "",
       cell: (row) => (
@@ -36,6 +37,7 @@ export default function ConsultantsPage() {
     {
       key: "services",
       header: t("الخدمات", "Services"),
+      exportKind: "number",
       align: "end",
       sortable: true,
       sortValue: (row) => row.services ?? 0,
@@ -44,6 +46,7 @@ export default function ConsultantsPage() {
     {
       key: "orders",
       header: t("الطلبات", "Orders"),
+      exportKind: "number",
       align: "end",
       sortable: true,
       sortValue: (row) => row.orders ?? 0,
@@ -52,6 +55,9 @@ export default function ConsultantsPage() {
     {
       key: "payments",
       header: t("المدفوعات", "Payments"),
+      exportKind: "money",
+      exportCurrency: (row) => row.currency ?? "SAR",
+      exportValue: (row) => row.revenue ?? null,
       align: "end",
       sortable: true,
       sortValue: (row) => row.revenue ?? 0,
@@ -96,6 +102,7 @@ export default function ConsultantsPage() {
         filters={filters}
         searchPlaceholder={t("ابحث بالاسم أو البريد…", "Search name or email…")}
         empty={t("لا مستشارين.", "No consultants.")}
+        exportConfig={{ filename: "consultants", title: t("المستشارون", "Consultants"), pdf: true, fetchSize: 200 }}
       />
     </>
   );

@@ -4,6 +4,7 @@ import { apiDelete, apiGet, apiPost, apiPut } from "@/lib/api/client";
 import type { PreviewKind } from "@/lib/api/contract";
 import type { RequestBody, SuccessResponse } from "@/lib/api/operation-types";
 import type { components } from "@/types/openapi";
+import type { components as legacyCourseComponents } from "@/lib/api/learning/legacy-course-preview";
 
 /*
  * Course Studio (`/admin/catalog/products/{ref}/studio`): a product's page as a document (`meta` + BlockNote
@@ -32,8 +33,8 @@ export type PublishRequest = NonNullable<RequestBody<PublishOp>>;
 export type StudioPublishResult = SuccessResponse<PublishOp>;
 export type StudioVersion = SuccessResponse<VersionsOp>[number];
 export type StudioVersionDetail = SuccessResponse<VersionOp>;
-/** Storefront data of the product's legacy course (same shape as the public `GET /legacy/courses/{id}`). */
-export type StudioPreviewCourseBase = components["schemas"]["CourseDetailResponse"];
+/** Storefront data of the product's legacy course (frozen shape of the removed `GET /legacy/courses/{id}`). */
+export type StudioPreviewCourseBase = legacyCourseComponents["schemas"]["CourseDetailResponse"];
 /**
  * The storefront data the live preview renders under the draft, tagged with its `kind`. `base` is the
  * kind-specific payload (`StudioPreviewCourseBase` for course/diploma, a package/bundle/live-diploma payload

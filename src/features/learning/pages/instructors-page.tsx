@@ -16,6 +16,7 @@ export default function InstructorsPage() {
     {
       key: "name",
       header: t("المدرب", "Instructor"),
+      exportValue: (row) => [row.name, row.email || row.phone].filter(Boolean).join(" · "),
       sortable: true,
       sortValue: (row) => row.name ?? "",
       cell: (row) => (
@@ -36,18 +37,21 @@ export default function InstructorsPage() {
     {
       key: "specialized",
       header: t("التخصص", "Specialization"),
+      exportValue: (row) => row.specialization ?? "",
       sortable: true,
       cell: (row) => row.specialization || "—",
     },
     {
       key: "city",
       header: t("المدينة / الجنسية", "City / Nationality"),
+      exportValue: (row) => row.city || row.nationality || "",
       sortable: true,
       cell: (row) => row.city || row.nationality || "—",
     },
     {
       key: "years",
       header: t("سنوات الخبرة", "Experience (Years)"),
+      exportKind: "number",
       align: "end",
       sortable: true,
       sortValue: (row) => Number(row.years_of_experience ?? 0),
@@ -56,6 +60,7 @@ export default function InstructorsPage() {
     {
       key: "active",
       header: t("الحالة", "Status"),
+      exportValue: (row) => (row.active ? t("نشط", "Active") : t("موقوف", "Inactive")),
       sortable: true,
       sortValue: (row) => (row.active ? 1 : 0),
       cell: (row) => (
@@ -70,6 +75,7 @@ export default function InstructorsPage() {
     {
       key: "id",
       header: t("المعرّف", "Id"),
+      exportKind: "number",
       align: "end",
       sortable: true,
       sortValue: (row) => row.legacy_trainer_id,
@@ -111,6 +117,7 @@ export default function InstructorsPage() {
         searchPlaceholder={t("ابحث بالاسم أو البريد أو التخصص…", "Search name, email, or specialty…")}
         filters={filters}
         empty={t("لا مدربين.", "No instructors.")}
+        exportConfig={{ filename: "instructors", title: t("المدربون", "Instructors"), pdf: true, fetchSize: 200 }}
       />
     </>
   );

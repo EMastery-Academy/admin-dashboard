@@ -77,8 +77,26 @@ export const navigation: NavModule[] = [
         items: [
           { title: { ar: "المدربون", en: "Instructors" }, href: "/learning/instructors", permission: "instructors.read" },
           { title: { ar: "طلبات المدربين", en: "Instructor applications" }, href: "/learning/applications", permission: "instructors.read", badge: "applications" },
+          { title: { ar: "طلبات الشركات", en: "Company requests" }, href: "/learning/company-requests", permission: "instructors.read" },
           { title: { ar: "الشهادات", en: "Certificates" }, href: "/learning/certificates", permission: "certificates.read" },
           { title: { ar: "أسئلة المتدربين", en: "Q&A inbox" }, href: "/learning/qa", permission: "qa.read", badge: "qa" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "consultations",
+    title: { ar: "الاستشارات", en: "Consultations" },
+    icon: "calendar",
+    sections: [
+      {
+        title: { ar: "الاستشارات", en: "Consultations" },
+        items: [
+          { title: { ar: "نظرة عامة", en: "Overview" }, href: "/consultations", permission: "consultations.read" },
+          { title: { ar: "مباشر الآن", en: "Live now" }, href: "/consultations/live", permission: "consultations.read" },
+          { title: { ar: "الخبراء", en: "Experts" }, href: "/consultations/experts", permission: "consultations.read" },
+          { title: { ar: "الحجوزات", en: "Bookings" }, href: "/consultations/bookings", permission: "consultations.read" },
+          { title: { ar: "الطلبات", en: "Orders" }, href: "/consultations/orders", permission: "consultations.read" },
         ],
       },
     ],

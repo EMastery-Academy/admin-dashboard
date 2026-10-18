@@ -81,6 +81,7 @@ export function PaymentIntentDetail({ paymentIntentId }: { paymentIntentId: stri
           <h3 className="ma-subhead">{t("محاولات الدفع", "Gateway attempts")}</h3>
           <DataTable
             rows={attempts}
+            exportConfig={false}
             empty={t("لا محاولات.", "No attempts.")}
             columns={[
               { key: "when", header: t("التاريخ", "When"), cell: (row) => formatDateTime(row.created_at) },
@@ -103,6 +104,7 @@ export function PaymentIntentDetail({ paymentIntentId }: { paymentIntentId: stri
               <h3 className="ma-subhead">{t("الاستردادات", "Refunds")}</h3>
               <DataTable
                 rows={refunds}
+                exportConfig={false}
                 columns={[
                   { key: "when", header: t("التاريخ", "When"), cell: (row) => formatDateTime(row.created_at) },
                   { key: "amount", header: t("المبلغ", "Amount"), align: "end", cell: (row) => formatMinor(row.amount_minor, row.currency_code) },

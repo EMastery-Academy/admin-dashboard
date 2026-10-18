@@ -7,6 +7,8 @@ export const orderHref = (ref: string): string => `/sales/orders/${encodeURIComp
 export const paymentHref = (ref: string): string => `/sales/payments/${encodeURIComponent(ref)}`;
 export const customerHref = (ref: string): string => `/customers/${encodeURIComponent(ref)}`;
 export const productHref = (ref: string): string => `/learning/catalog/${encodeURIComponent(ref)}`;
+/** A product's detail page opened on one tab (`?tab=`), e.g. right after it is created. */
+export const productTabHref = (ref: string, tab: string): string => `${productHref(ref)}?tab=${encodeURIComponent(tab)}`;
 /** Course Studio of a product (page editor with live preview). */
 export const studioHref = (ref: string): string => `${productHref(ref)}/studio`;
 

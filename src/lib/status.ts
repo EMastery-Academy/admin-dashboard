@@ -98,3 +98,46 @@ export function initialsOf(name: string | null | undefined, fallback = "MA"): st
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase() || fallback;
   return `${parts[0][0] ?? ""}${parts[1][0] ?? ""}`.toUpperCase() || fallback;
 }
+
+/** Booking lifecycle of a B2C consultation (labels match the student/expert apps). */
+export function bookingStatusBadge(status: string | null | undefined): BadgeDef | null {
+  switch (status) {
+    case "pending_payment":
+      return { label: { ar: "بانتظار الدفع", en: "Pending payment" }, tone: "warning" };
+    case "expired":
+      return { label: { ar: "منتهي", en: "Expired" }, tone: "neutral" };
+    case "awaiting_approval":
+      return { label: { ar: "بانتظار موافقة الخبير", en: "Awaiting expert" }, tone: "warning" };
+    case "confirmed":
+      return { label: { ar: "مؤكد", en: "Confirmed" }, tone: "info" };
+    case "in_progress":
+      return { label: { ar: "جارٍ", en: "In progress" }, tone: "info" };
+    case "completed":
+      return { label: { ar: "مكتمل", en: "Completed" }, tone: "success" };
+    case "rejected":
+      return { label: { ar: "مرفوض", en: "Rejected" }, tone: "danger" };
+    case "refund_pending":
+      return { label: { ar: "بانتظار الاسترداد", en: "Refund pending" }, tone: "danger" };
+    case "no_show_customer":
+      return { label: { ar: "غياب الطالب", en: "Student no-show" }, tone: "danger" };
+    case "no_show_expert":
+      return { label: { ar: "غياب الخبير", en: "Expert no-show" }, tone: "danger" };
+    case "cancelled":
+      return { label: { ar: "ملغى", en: "Cancelled" }, tone: "neutral" };
+    default:
+      return status ? { label: { ar: status, en: status } } : null;
+  }
+}
+
+export function slotStateBadge(state: string | null | undefined): BadgeDef | null {
+  switch (state) {
+    case "free":
+      return { label: { ar: "متاح", en: "Free" }, tone: "success" };
+    case "held":
+      return { label: { ar: "محجوز مؤقتًا", en: "Held" }, tone: "warning" };
+    case "booked":
+      return { label: { ar: "محجوز", en: "Booked" }, tone: "info" };
+    default:
+      return state ? { label: { ar: state, en: state } } : null;
+  }
+}

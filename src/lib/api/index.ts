@@ -31,10 +31,14 @@ export * from "@/lib/api/learning/studio";
 export * from "@/lib/api/learning/curriculum";
 export * from "@/lib/api/learning/bundles";
 export * from "@/lib/api/learning/live-diplomas";
+export * from "@/lib/api/learning/pricing";
 export * from "@/lib/api/learning/consultations";
 export * from "@/lib/api/learning/consultants";
 export * from "@/lib/api/learning/experts";
 export * from "@/lib/api/learning/instructors";
+
+// Consultations (B2C)
+export * from "@/lib/api/consultations/admin";
 
 // Marketing
 export * from "@/lib/api/marketing/promotions";

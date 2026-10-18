@@ -26,10 +26,18 @@ export default defineConfig({
   server: {
     proxy: {
       // Same-origin door to the backend, so its httpOnly admin cookies work in dev.
-      "/api": { target: "http://localhost:8000", changeOrigin: true },
+      "/api": { target: process.env.API_PROXY_TARGET ?? "http://localhost:8000", changeOrigin: true },
     },
   },
   resolve: {
     alias: { "@": "/src" },
+    // One copy of each, so BlockNote's React context is shared by the editor and its blocks.
+    dedupe: ["react", "react-dom", "@blocknote/core", "@blocknote/react", "@blocknote/mantine", "@mantine/core"],
+  },
+  // The studio route is lazy: without this Vite discovers BlockNote after startup, re-optimizes it and a
+  // page loaded before that holds a second copy of the package ("useBlockNoteEditor was called outside of a
+  // BlockNoteContext provider"). Pre-bundling it up front keeps a single instance.
+  optimizeDeps: {
+    include: ["@blocknote/core", "@blocknote/core/locales", "@blocknote/react", "@blocknote/mantine", "@floating-ui/react"],
   },
 });

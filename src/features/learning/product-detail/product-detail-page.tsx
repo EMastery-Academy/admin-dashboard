@@ -19,6 +19,7 @@ import { DetailHeader } from "./components/detail-header";
 import { DetailTabBar, type DetailTab, type DetailTabDef } from "./components/detail-tabbar";
 import { DetailAside } from "./components/detail-aside";
 import { OverviewTab } from "./tabs/overview-tab";
+import { ProductDetailsEditor } from "./components/product-details-editor";
 import { ContentTab } from "./tabs/content-tab";
 import { ResourcesTab } from "./tabs/resources-tab";
 import { InstructorsTab } from "./tabs/instructors-tab";
@@ -111,7 +112,7 @@ export function ProductDetailPage() {
       : productData?.links.legacy_kind === "course"
         ? "course"
         : null;
-  const hasLegacy = Boolean(legacyKind);
+  const hasLegacy = Boolean(legacyKind && !productData?.b2c);
 
   const searchDetail = searchDetailQuery.data;
   const searchObj = useMemo(() => searchDetail as Record<string, unknown> | undefined, [searchDetail]);
@@ -238,6 +239,12 @@ export function ProductDetailPage() {
               onGoToContent={() => handleSelectTab(productType === "package" ? "package" : "content")}
             />
           )}
+
+          {activeTab === "overview" &&
+            productData.b2c &&
+            (productType === "course" || productType === "diploma" || productType === "package") && (
+              <ProductDetailsEditor key={productRef} productRef={productRef} data={productData} />
+            )}
 
           {activeTab === "content" && <ContentTab productRef={productRef} />}
 

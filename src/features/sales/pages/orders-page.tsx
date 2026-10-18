@@ -2,7 +2,8 @@ import { useState } from "react";
 
 import { listOrders, type AdminOrder } from "@/lib/api";
 import { formatAmount, formatDateTime } from "@/lib/format";
-import { useT } from "@/lib/i18n";
+import { useLang, useT } from "@/lib/i18n";
+import { badgeLabel } from "@/lib/export/columns";
 import { customerHref, orderHref, shortRef } from "@/lib/refs";
 import { SourceBadge } from "@/components/ui/source-badge";
 import { initialsOf, orderStatusBadge, paymentStatusBadge } from "@/lib/status";
@@ -33,6 +34,7 @@ const PAYMENT_STATUSES: { value: string; ar: string; en: string }[] = [
 
 export default function OrdersPage() {
   const t = useT();
+  const lang = useLang();
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
 
@@ -42,6 +44,7 @@ export default function OrdersPage() {
       header: t("الطلب", "Order"),
       sortable: true,
       sortValue: (row) => row.created_at,
+      exportValue: (row) => shortRef(row.ref),
       cell: (row) => (
         <AppLink className="ma-link ma-link--plain" to={orderHref(row.ref)}>
           <span className="ma-cell-main"><bdi>{shortRef(row.ref)}</bdi></span>
@@ -65,11 +68,12 @@ export default function OrdersPage() {
         )
       ),
     },
-    { key: "source", header: t("النظام", "System"), cell: (row) => <SourceBadge source={row.source} /> },
-    { key: "status", header: t("الحالة", "Status"), sortable: true, cell: (row) => <Badge def={orderStatusBadge(row.status)} /> },
+    { key: "source", header: t("النظام", "System"), exportValue: (row) => row.source, cell: (row) => <SourceBadge source={row.source} /> },
+    { key: "status", header: t("الحالة", "Status"), sortable: true, exportValue: (row) => badgeLabel(orderStatusBadge(row.status), lang), cell: (row) => <Badge def={orderStatusBadge(row.status)} /> },
     {
       key: "payment",
       header: t("الدفع", "Payment"),
+      exportValue: (row) => [badgeLabel(paymentStatusBadge(row.payment_status), lang), row.payment_provider].filter(Boolean).join(" · "),
       cell: (row) => (
         <>
           <Badge def={paymentStatusBadge(row.payment_status)} />
@@ -83,6 +87,9 @@ export default function OrdersPage() {
       align: "end",
       sortable: true,
       sortValue: (row) => row.amount_minor,
+      exportKind: "money",
+      exportValue: (row) => row.amount_minor / 100,
+      exportCurrency: (row) => row.currency_code,
       cell: (row) => <span className="ma-num">{formatAmount(row.amount_minor / 100, row.currency_code)}</span>,
     },
   ];
@@ -128,6 +135,14 @@ export default function OrdersPage() {
         searchPlaceholder={t("ابحث ببريد العميل…", "Search customer email…")}
         filters={filters}
         empty={t("لا طلبات.", "No orders.")}
+        exportConfig={{
+          filename: "orders",
+          title: t("الطلبات", "Orders"),
+          pdf: true,
+          fetchSize: 200,
+          extraColumns: [{ key: "created", header: t("تاريخ الإنشاء", "Created"), kind: "datetime", value: (row) => (row.created_at ? new Date(row.created_at) : null) }],
+          describe: () => (from || to ? [`${t("الفترة", "Period")}: ${from || "…"} → ${to || "…"}`] : []),
+        }}
       />
 
       <p className="ma-note">

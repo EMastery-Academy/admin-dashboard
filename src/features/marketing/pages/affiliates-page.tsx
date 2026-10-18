@@ -2,7 +2,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { listReferralPartners, referralsKeys, setReferralPartnerStatus, type ReferralPartner } from "@/lib/api";
 import { formatDateTime } from "@/lib/format";
-import { useT } from "@/lib/i18n";
+import { useLang, useT } from "@/lib/i18n";
+import { badgeLabel, dateValue } from "@/lib/export/columns";
 import { Badge, Button, ErrorAlert, PageHead } from "@/components/ui/kit";
 import { type Column } from "@/components/ui/data-table";
 import { PagedList, type ListFilter } from "@/components/ui/paged-list";
@@ -10,6 +11,7 @@ import { affiliateStatusBadge } from "@/lib/status";
 
 export default function AffiliatesPage() {
   const t = useT();
+  const lang = useLang();
   const queryClient = useQueryClient();
 
   const approve = useMutation({
@@ -18,18 +20,19 @@ export default function AffiliatesPage() {
   });
 
   const columns: Column<ReferralPartner>[] = [
-    { key: "name", header: t("المسوّق", "Partner"), sortable: true, cell: (row) => (
+    { key: "name", header: t("المسوّق", "Partner"), sortable: true, exportValue: (row) => row.name, cell: (row) => (
       <span>
         <span className="ma-cell-main">{row.name}</span>
         <span className="ma-cell-sub"><bdi>{row.email}</bdi></span>
       </span>
     ) },
-    { key: "code", header: t("كود الإحالة", "Referral code"), cell: (row) => <span className="ma-num">{row.referral_code || "—"}</span> },
-    { key: "status", header: t("الحالة", "Status"), sortable: true, cell: (row) => <Badge def={affiliateStatusBadge(row.status)} /> },
-    { key: "joined", header: t("الانضمام", "Joined"), sortable: true, sortValue: (row) => row.joined_at, cell: (row) => formatDateTime(row.joined_at) },
+    { key: "code", header: t("كود الإحالة", "Referral code"), exportValue: (row) => row.referral_code || "", cell: (row) => <span className="ma-num">{row.referral_code || "—"}</span> },
+    { key: "status", header: t("الحالة", "Status"), sortable: true, exportValue: (row) => badgeLabel(affiliateStatusBadge(row.status), lang), cell: (row) => <Badge def={affiliateStatusBadge(row.status)} /> },
+    { key: "joined", header: t("الانضمام", "Joined"), sortable: true, sortValue: (row) => row.joined_at, exportKind: "datetime", exportValue: (row) => dateValue(row.joined_at), cell: (row) => formatDateTime(row.joined_at) },
     {
       key: "actions",
       header: "",
+      exportable: false,
       align: "end",
       cell: (row) =>
         row.status === "approved" ? null : (
@@ -62,6 +65,13 @@ export default function AffiliatesPage() {
         searchPlaceholder={t("ابحث بالاسم أو البريد…", "Search name or email…")}
         filters={filters}
         empty={t("لا مسوقين.", "No partners.")}
+        exportConfig={{
+          filename: "affiliates",
+          title: t("المسوّقون", "Affiliates"),
+          pdf: true,
+          fetchSize: 200,
+          extraColumns: [{ key: "email", header: t("البريد", "Email"), value: (row) => row.email }],
+        }}
       />
     </>
   );

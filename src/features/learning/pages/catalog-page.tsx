@@ -13,7 +13,8 @@ import {
   type ProductStatus,
 } from "@/lib/api";
 import { formatAmount, formatDateTime, formatNumber } from "@/lib/format";
-import { useT } from "@/lib/i18n";
+import { useLang, useT } from "@/lib/i18n";
+import { badgeLabel, dateValue } from "@/lib/export/columns";
 import { AppLink } from "@/components/ui/app-link";
 import { Avatar, Badge, Button, ErrorAlert, PageHead } from "@/components/ui/kit";
 import { type Column } from "@/components/ui/data-table";
@@ -61,16 +62,44 @@ export default function CatalogPage() {
     { value: "live_diploma", ...productTypeLabel("live_diploma"), count: counts.get("live_diploma") },
   ];
 
+  const createHref = (() => {
+    switch (type) {
+      case "package":
+        return "/learning/packages/new";
+      case "bundle":
+        return "/learning/bundles/new";
+      case "consultation":
+        return "/learning/consultations/new";
+      case "live_diploma":
+        return "/learning/live-diplomas/new";
+      default:
+        return "/learning/courses/new";
+    }
+  })();
+
+  const createLabel = (() => {
+    switch (type) {
+      case "package":
+        return t("إنشاء حزمة", "Create package");
+      case "bundle":
+        return t("إنشاء باقة", "Create bundle");
+      case "consultation":
+        return t("إنشاء استشارة", "Create consultation");
+      case "live_diploma":
+        return t("إنشاء دبلوم مباشر", "Create live diploma");
+      case "diploma":
+        return t("إنشاء دبلوم", "Create diploma");
+      default:
+        return t("إنشاء دورة", "Create course");
+    }
+  })();
+
   return (
     <>
       <PageHead
         title={t("الكتالوج", "Catalog")}
         sub={t("كل منتجات المتجر وحالة نشرها.", "Every storefront product and its publishing state.")}
-        actions={
-          type === "course" || type === "diploma" ? (
-            <Button kind="primary" icon="plus" label={t("إنشاء دورة", "Create course")} href="/learning/courses/new" />
-          ) : undefined
-        }
+        actions={<Button kind="primary" icon="plus" label={createLabel} href={createHref} />}
       />
 
       <nav className="ma-pagetabs" role="tablist" aria-label={t("أنواع المنتجات", "Product types")} style={{ marginBlock: "var(--space-3)" }}>
@@ -103,6 +132,7 @@ const STATUSES: { value: ProductStatus; ar: string; en: string }[] = [
 
 function CatalogList({ types }: { types: string }) {
   const t = useT();
+  const lang = useLang();
   const queryClient = useQueryClient();
 
   const toggle = useMutation({
@@ -118,6 +148,7 @@ function CatalogList({ types }: { types: string }) {
     {
       key: "title",
       header: t("العنوان", "Title"),
+      exportValue: (row) => row.title ?? row.slug,
       width: "16rem",
       sortKey: "title",
       cell: (row) => (
@@ -150,6 +181,7 @@ function CatalogList({ types }: { types: string }) {
     {
       key: "instructor",
       header: t("المدرب", "Instructor"),
+      exportValue: (row) => row.instructor ?? "",
       cell: (row) =>
         row.instructor ? (
           <span className="ma-cell-flex">
@@ -168,6 +200,9 @@ function CatalogList({ types }: { types: string }) {
     {
       key: "price",
       header: t("السعر", "Price"),
+      exportKind: "money",
+      exportCurrency: (row) => row.price_currency ?? "USD",
+      exportValue: (row) => row.price ?? null,
       align: "end",
       sortKey: "price",
       cell: (row) => (row.price != null ? formatAmount(row.price, row.price_currency ?? "USD") : "—"),
@@ -175,6 +210,8 @@ function CatalogList({ types }: { types: string }) {
     {
       key: "orders",
       header: t("طلبات مدفوعة", "Paid orders"),
+      exportKind: "number",
+      exportValue: (row) => row.paid_orders,
       align: "end",
       sortKey: "paid_orders",
       cell: (row) => <span className="ma-num">{formatNumber(row.paid_orders)}</span>,
@@ -182,6 +219,8 @@ function CatalogList({ types }: { types: string }) {
     {
       key: "rating",
       header: t("التقييم", "Rating"),
+      exportKind: "number",
+      exportValue: (row) => row.rating ?? null,
       align: "end",
       sortKey: "rating",
       cell: (row) =>
@@ -196,6 +235,7 @@ function CatalogList({ types }: { types: string }) {
     {
       key: "tags",
       header: t("الوسوم", "Tags"),
+      exportValue: (row) => (row.tags ?? []).join(", "),
       cell: (row) => {
         const tags = row.tags ?? [];
         if (!tags.length) return "—";
@@ -214,6 +254,7 @@ function CatalogList({ types }: { types: string }) {
     {
       key: "status",
       header: t("الحالة", "Status"),
+      exportValue: (row) => [badgeLabel(productStatusBadge(row.status), lang), row.source].filter(Boolean).join(" · "),
       cell: (row) => (
         <span className="ma-cell-flex">
           <Badge def={productStatusBadge(row.status)} />
@@ -224,6 +265,8 @@ function CatalogList({ types }: { types: string }) {
     {
       key: "updated",
       header: t("آخر تحديث", "Updated"),
+      exportKind: "datetime",
+      exportValue: (row) => dateValue(row.updated_at),
       sortKey: "updated",
       cell: (row) => formatDateTime(row.updated_at),
     },
@@ -244,21 +287,12 @@ function CatalogList({ types }: { types: string }) {
 
   const facets = useQuery(productQueries.facets(types || undefined)).data;
 
+  /** Single-choice filters. */
   const filters: ListFilter[] = [
     {
       key: "status",
       label: t("كل الحالات", "All states"),
       options: STATUSES.map((item) => ({ value: item.value, label: t(item.ar, item.en) })),
-    },
-    {
-      key: "category",
-      label: t("كل التصنيفات", "All categories"),
-      options: (facets?.categories ?? []).map((item) => ({ value: item.value, label: `${item.label} (${item.count})` })),
-    },
-    {
-      key: "tag",
-      label: t("كل الوسوم", "All tags"),
-      options: (facets?.tags ?? []).map((item) => ({ value: item.value, label: `${item.label} (${item.count})` })),
     },
     {
       key: "source",
@@ -286,6 +320,36 @@ function CatalogList({ types }: { types: string }) {
     },
   ];
 
+  /**
+   * Multi-select facet filters, the way the storefront search page holds its facets: the current
+   * product types / categories / tags with counts, several selectable at once. The type facet only
+   * shows on the "All" tab — a type tab already fixes the type.
+   */
+  const multiFilters: ListFilter[] = [
+    ...(types
+      ? []
+      : [
+          {
+            key: "product_type",
+            label: t("كل الأنواع", "All types"),
+            options: (facets?.product_types ?? []).map((item) => {
+              const label = productTypeLabel(item.value);
+              return { value: item.value, label: `${t(label.ar, label.en)} (${item.count})` };
+            }),
+          },
+        ]),
+    {
+      key: "category",
+      label: t("كل التصنيفات", "All categories"),
+      options: (facets?.categories ?? []).map((item) => ({ value: item.value, label: `${item.label} (${item.count})` })),
+    },
+    {
+      key: "tag",
+      label: t("كل الوسوم", "All tags"),
+      options: (facets?.tags ?? []).map((item) => ({ value: item.value, label: `${item.label} (${item.count})` })),
+    },
+  ];
+
   const sortOptions: { value: ProductSort; label: string }[] = [
     { value: "updated", label: t("آخر تحديث", "Last updated") },
     { value: "created", label: t("تاريخ الإنشاء", "Created") },
@@ -302,12 +366,12 @@ function CatalogList({ types }: { types: string }) {
       <PagedList
         key={types || "all"}
         queryKeyBase={productKeys.list({ product_type: types })}
-        fetchPage={({ query, offset, limit, filters: selected, sort }) =>
+        fetchPage={({ query, offset, limit, filters: selected, multi, sort }) =>
           listProducts({
-            product_type: selected.product_type || types || undefined,
+            product_type: multi?.product_type?.length ? multi.product_type.join(",") : types || undefined,
             status: (selected.status || undefined) as ProductStatus | undefined,
-            category: selected.category || undefined,
-            tag: selected.tag || undefined,
+            category: multi?.category?.length ? multi.category.join(",") : undefined,
+            tag: multi?.tag?.length ? multi.tag.join(",") : undefined,
             source: (selected.source || undefined) as ProductSource | undefined,
             origin: (selected.origin || undefined) as ProductOrigin | undefined,
             purchased: selected.purchased ? selected.purchased === "true" : undefined,
@@ -322,7 +386,18 @@ function CatalogList({ types }: { types: string }) {
         columns={columns}
         searchPlaceholder={t("ابحث بالعنوان أو الرابط…", "Search title or slug…")}
         filters={filters}
+        multiFilters={multiFilters}
         empty={t("لا عناصر.", "No items.")}
+        exportConfig={{
+          filename: "catalog",
+          title: t("الكتالوج", "Catalog"),
+          pdf: true,
+          fetchSize: 200,
+          extraColumns: [
+            { key: "type", header: t("النوع", "Type"), value: (row) => { const label = productTypeLabel(row.product_type); return t(label.ar, label.en); } },
+            { key: "category", header: t("التصنيف", "Category"), value: (row) => row.category ?? "" },
+          ],
+        }}
       />
     </>
   );

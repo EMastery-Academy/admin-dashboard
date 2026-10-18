@@ -24,9 +24,20 @@ import AffiliatesPage from "@/features/marketing/pages/affiliates-page";
 import PayoutsPage from "@/features/marketing/pages/payouts-page";
 import CatalogPage from "@/features/learning/pages/catalog-page";
 import CourseNewPage from "@/features/learning/pages/course-new-page";
+import PackageNewPage from "@/features/learning/pages/package-new-page";
+import ConsultationNewPage from "@/features/learning/pages/consultation-new-page";
+import BundleNewPage from "@/features/learning/pages/bundle-new-page";
+import LiveDiplomaNewPage from "@/features/learning/pages/live-diploma-new-page";
 import ProductDetailPage from "@/features/learning/pages/product-detail-page";
 import CourseStudioPage from "@/features/learning/studio/pages/course-studio-page";
 import ConsultationsPage from "@/features/learning/pages/consultations-page";
+import ConsultationsOverviewPage from "@/features/consultations/pages/overview-page";
+import LiveMeetingsPage from "@/features/consultations/pages/live-page";
+import ConsultationExpertsPage from "@/features/consultations/pages/experts-page";
+import ExpertDetailPage from "@/features/consultations/pages/expert-detail-page";
+import ConsultationBookingsPage from "@/features/consultations/pages/bookings-page";
+import BookingDetailPage from "@/features/consultations/pages/booking-detail-page";
+import ConsultationOrdersPage from "@/features/consultations/pages/orders-page";
 import ConsultationDetailPage from "@/features/learning/pages/consultation-detail-page";
 import ConsultantsPage from "@/features/learning/pages/consultants-page";
 import ConsultantDetailPage from "@/features/learning/pages/consultant-detail-page";
@@ -50,6 +61,7 @@ import {
   CertificatesPage,
   CommissionsPage,
   InstructorApplicationsPage,
+  CompanyRequestsPage,
   NotificationsPage,
   OffersPage,
   PriceListsPage,
@@ -98,6 +110,9 @@ export const ROUTER = createBrowserRouter([
       { path: "learning/courses", element: <Navigate to="/learning/catalog?type=course" replace /> },
       { path: "learning/courses/new", element: <CourseNewPage /> },
       { path: "learning/packages", element: <Navigate to="/learning/catalog?type=package" replace /> },
+      { path: "learning/packages/new", element: <PackageNewPage /> },
+      { path: "learning/bundles/new", element: <BundleNewPage /> },
+      { path: "learning/live-diplomas/new", element: <LiveDiplomaNewPage /> },
       { path: "learning/catalog", element: <CatalogPage /> },
       { path: "learning/catalog/:productId", element: <ProductDetailPage /> },
       // Full-width workspace: the shell hides its sidebar for routes with `handle.studio`.
@@ -106,14 +121,25 @@ export const ROUTER = createBrowserRouter([
       { path: "learning/backoffice/:kind/:legacyId", element: <LegacyCatalogRedirect /> },
       { path: "learning/categories", element: <CategoriesPage /> },
       { path: "learning/consultations", element: <ConsultationsPage /> },
+      { path: "learning/consultations/new", element: <ConsultationNewPage /> },
       { path: "learning/consultations/:id", element: <ConsultationDetailPage /> },
       { path: "learning/consultants", element: <ConsultantsPage /> },
       { path: "learning/consultants/:id", element: <ConsultantDetailPage /> },
       { path: "learning/instructors", element: <InstructorsPage /> },
       { path: "learning/instructors/:trainerId", element: <InstructorDetailPage /> },
       { path: "learning/applications", element: <InstructorApplicationsPage /> },
+      { path: "learning/company-requests", element: <CompanyRequestsPage /> },
       { path: "learning/certificates", element: <CertificatesPage /> },
       { path: "learning/qa", element: ph("أسئلة المتدربين", "Q&A inbox") },
+
+      // Consultations (B2C)
+      { path: "consultations", element: <ConsultationsOverviewPage /> },
+      { path: "consultations/live", element: <LiveMeetingsPage /> },
+      { path: "consultations/experts", element: <ConsultationExpertsPage /> },
+      { path: "consultations/experts/:id", element: <ExpertDetailPage /> },
+      { path: "consultations/bookings", element: <ConsultationBookingsPage /> },
+      { path: "consultations/bookings/:id", element: <BookingDetailPage /> },
+      { path: "consultations/orders", element: <ConsultationOrdersPage /> },
 
       // Customers
       { path: "customers", element: <CustomersPage /> },

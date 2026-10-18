@@ -1,7 +1,8 @@
 import { useMemo } from "react";
 import { listRefunds, paymentsKeys, type AdminRefund } from "@/lib/api";
 import { formatDateTime, formatMinor } from "@/lib/format";
-import { useT } from "@/lib/i18n";
+import { useLang, useT } from "@/lib/i18n";
+import { badgeLabel, dateValue } from "@/lib/export/columns";
 import { Badge, PageHead } from "@/components/ui/kit";
 import type { Column } from "@/components/ui/data-table";
 import { PagedList, type ListFilter } from "@/components/ui/paged-list";
@@ -19,14 +20,15 @@ const refundBadge = (status: string) => {
 
 export default function RefundsPage() {
   const t = useT();
+  const lang = useLang();
 
   const columns: Column<AdminRefund>[] = [
-    { key: "when", header: t("التاريخ", "When"), cell: (row) => formatDateTime(row.created_at) },
-    { key: "order", header: t("الطلب", "Order"), cell: (row) => <bdi className="ma-num">#{row.order_id.slice(0, 8)}</bdi> },
-    { key: "provider", header: t("المزوّد", "Provider"), cell: (row) => row.provider },
-    { key: "amount", header: t("المبلغ", "Amount"), align: "end", cell: (row) => formatMinor(row.amount_minor, row.currency_code) },
-    { key: "status", header: t("الحالة", "Status"), cell: (row) => <Badge def={refundBadge(row.status)} /> },
-    { key: "reason", header: t("السبب", "Reason"), cell: (row) => <span className="ma-cell-sub">{row.reason || "—"}</span> },
+    { key: "when", header: t("التاريخ", "When"), exportKind: "datetime", exportValue: (row) => dateValue(row.created_at), cell: (row) => formatDateTime(row.created_at) },
+    { key: "order", header: t("الطلب", "Order"), exportValue: (row) => `#${row.order_id.slice(0, 8)}`, cell: (row) => <bdi className="ma-num">#{row.order_id.slice(0, 8)}</bdi> },
+    { key: "provider", header: t("المزوّد", "Provider"), exportValue: (row) => row.provider, cell: (row) => row.provider },
+    { key: "amount", header: t("المبلغ", "Amount"), align: "end", exportKind: "money", exportValue: (row) => row.amount_minor / 100, exportCurrency: (row) => row.currency_code, cell: (row) => formatMinor(row.amount_minor, row.currency_code) },
+    { key: "status", header: t("الحالة", "Status"), exportValue: (row) => badgeLabel(refundBadge(row.status), lang), cell: (row) => <Badge def={refundBadge(row.status)} /> },
+    { key: "reason", header: t("السبب", "Reason"), exportValue: (row) => row.reason || "", cell: (row) => <span className="ma-cell-sub">{row.reason || "—"}</span> },
   ];
 
   const filters: ListFilter[] = useMemo(
@@ -71,6 +73,7 @@ export default function RefundsPage() {
         filters={filters}
         searchPlaceholder={t("ابحث برقم الطلب أو المزوّد…", "Search order id or provider…")}
         empty={t("لا استردادات.", "No refunds.")}
+        exportConfig={{ filename: "refunds", title: t("الاستردادات", "Refunds"), pdf: true, fetchSize: 200 }}
       />
     </>
   );

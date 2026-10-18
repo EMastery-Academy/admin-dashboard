@@ -11,7 +11,11 @@ import {
   type AdminOrderTransaction,
 } from "@/lib/api";
 import { formatDateTime, formatMinor } from "@/lib/format";
-import { useT } from "@/lib/i18n";
+import { useLang, useT } from "@/lib/i18n";
+import { badgeLabel } from "@/lib/export/columns";
+import { useTableExport } from "@/lib/export/use-table-export";
+import type { ExportColumn } from "@/lib/export/types";
+import { ExportActions } from "@/components/reports/export-actions";
 import { initialsOf, orderStatusBadge, paymentStatusBadge } from "@/lib/status";
 import { AppLink } from "@/components/ui/app-link";
 import { Avatar, Badge, Button, Card, Dl, Empty, ErrorAlert, Loading, PageHead } from "@/components/ui/kit";
@@ -23,6 +27,7 @@ import { customerHref, isLegacy, paymentHref, productHref, refParam, shortRef } 
 
 export default function OrderDetailPage() {
   const t = useT();
+  const lang = useLang();
   // An order ref: `b2c:<order_id>` (or a bare UUID) or `legacy:order:<id>`.
   const { id: rawId } = useParams<{ id: string }>();
   const id = refParam(rawId);
@@ -41,6 +46,35 @@ export default function OrderDetailPage() {
   // Legacy orders are read-only; only B2C orders can be cancelled.
   const cancellable = data && !isLegacy(data) && (data.status === "created" || data.status === "pending_payment" || data.status === "payment_failed");
 
+  // Invoice-style document: order summary tiles + the order lines.
+  const lineColumns: ExportColumn<AdminOrderLine>[] = [
+    { key: "title", header: t("المنتج", "Product"), value: (row) => row.title ?? row.slug ?? shortRef(row.product_ref) },
+    { key: "type", header: t("النوع", "Type"), value: (row) => row.product_type ?? "" },
+    { key: "qty", header: t("الكمية", "Qty"), kind: "number", value: (row) => row.quantity },
+    { key: "unit", header: t("سعر الوحدة", "Unit"), kind: "money", value: (row) => row.unit_amount_minor / 100, currency: (row) => row.currency_code },
+    { key: "total", header: t("الإجمالي", "Total"), kind: "money", value: (row) => row.total_amount_minor / 100, currency: (row) => row.currency_code },
+  ];
+  const orderRef = shortRef(id.includes(":") ? id : `b2c:${id}`);
+  const exporter = useTableExport<AdminOrderLine>(
+    data
+      ? {
+          filename: `order-${orderRef.replace("#", "")}`,
+          title: `${t("الطلب", "Order")} \u2066${orderRef}\u2069`,
+          pdf: true,
+          columns: lineColumns,
+          getRows: async () => ({ items: data.lines ?? [], truncated: false }),
+          meta: {
+            filters: [data.customer_email ?? data.customer_ref ?? ""].filter(Boolean),
+            summary: [
+              { label: t("الحالة", "Status"), value: badgeLabel(orderStatusBadge(data.status), lang) },
+              { label: t("التاريخ", "Date"), value: formatDateTime(data.created_at) },
+              { label: t("الإجمالي", "Total"), value: formatMinor(data.amount_minor, data.currency_code) },
+            ],
+          },
+        }
+      : undefined,
+  );
+
   return (
     <>
       <PageHead
@@ -56,7 +90,11 @@ export default function OrderDetailPage() {
         }
         sub={data ? <bdi>{data.customer_email ?? data.customer_ref ?? "—"}</bdi> : undefined}
         actions={
-          cancellable ? (
+          <>
+            {data ? (
+              <ExportActions onExportExcel={exporter.exportExcel} onExportPdf={exporter.exportPdf} isExportingExcel={exporter.busy === "xlsx"} isExportingPdf={exporter.busy === "pdf"} />
+            ) : null}
+            {cancellable ? (
             <Button
               kind="secondary"
               icon="x"
@@ -64,7 +102,8 @@ export default function OrderDetailPage() {
               disabled={cancel.isPending}
               onClick={() => cancel.mutate()}
             />
-          ) : null
+            ) : null}
+          </>
         }
       />
 
@@ -181,7 +220,7 @@ function Lines({ lines }: { lines: AdminOrderLine[] }) {
 
   return (
     <Card title={t("بنود الطلب", "Order lines")} className="ma-section-gap">
-      <DataTable rows={filtered} columns={columns} toolbar={toolbar} empty={t("لا بنود.", "No lines.")} />
+      <DataTable rows={filtered} columns={columns} toolbar={toolbar} exportConfig={false} empty={t("لا بنود.", "No lines.")} />
     </Card>
   );
 }

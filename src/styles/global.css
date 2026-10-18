@@ -10,6 +10,9 @@
 @import "./patterns.css" layer(components);
 /* Course / product details revamp styling. */
 @import "./product-detail.css" layer(components);
+/* Consultations management: availability calendar. */
+@import "./consultations.css" layer(components);
+@import "./print.css" layer(components);
 
 /* Kit breakpoints: mobile-first 600 · 900 · 1200. */
 @theme {

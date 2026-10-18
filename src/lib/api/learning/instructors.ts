@@ -6,7 +6,6 @@ import type { PathParams, QueryParams, SuccessResponse } from "@/lib/api/operati
 type SearchOp = "search_instructors_api_v1_search_instructors_get";
 type AdminListOp = "list_instructors_api_v1_admin_instructors_get";
 type AdminGetOp = "get_instructor_api_v1_admin_instructors__legacy_trainer_id__get";
-type ApplicationsOp = "list_instructor_applications_api_v1_admin_instructors_applications_get";
 
 export type InstructorListParams = QueryParams<SearchOp>;
 export type InstructorListItem = SuccessResponse<SearchOp>[number];
@@ -14,15 +13,21 @@ export type InstructorListItem = SuccessResponse<SearchOp>[number];
 export type AdminInstructor = SuccessResponse<AdminGetOp>;
 export type AdminInstructorsParams = QueryParams<AdminListOp>;
 export type AdminInstructorPage = SuccessResponse<AdminListOp>;
-export type InstructorApplicationsParams = QueryParams<ApplicationsOp>;
-export type InstructorApplicationPage = SuccessResponse<ApplicationsOp>;
+export type InstructorApplicationsParams = { query?: string; limit?: number; offset?: number };
+export type InstructorApplicationPage = {
+  items: Array<{ request_id: string; name: string; email: string; mobile: string; country: string | null;
+    city: string | null; status: string; submitted_at: string; payload: Record<string, unknown> }>;
+  total: number;
+  limit: number;
+  offset: number;
+};
 export type InstructorApplication = InstructorApplicationPage["items"][number];
 
 export const instructorsPaths = {
   search: "search/instructors",
   adminList: "admin/instructors",
   adminDetail: "admin/instructors/{legacy_trainer_id}",
-  applications: "admin/instructors/applications",
+  applications: "admin/requests/trainer-applications",
 } as const;
 
 export const instructorsKeys = {
@@ -43,7 +48,7 @@ export function getAdminInstructor(
   return apiGet(instructorsPaths.adminDetail, { path: { legacy_trainer_id } });
 }
 
-/** `GET /admin/instructors/applications` — applications to become an instructor, newest first. */
+/** B2C-owned applications to become an instructor, newest first. */
 export function listInstructorApplications(
   params: InstructorApplicationsParams = {},
 ): Promise<InstructorApplicationPage> {

@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useRef, useState, type ReactNode } from "react";
 import {
   getCoreRowModel,
   getSortedRowModel,
@@ -18,6 +18,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ExportActions } from "@/components/reports/export-actions";
+import { toExportColumns } from "@/lib/export/columns";
+import { readDomTable } from "@/lib/export/dom-table";
+import { useTableExport } from "@/lib/export/use-table-export";
+import type { ExportColumn, ExportMeta } from "@/lib/export/types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export type Column<T> = {
@@ -34,7 +39,39 @@ export type Column<T> = {
   sortValue?: (row: T) => string | number | null | undefined;
   /** API sort key; when the table is server-sorted only columns with one are sortable. */
   sortKey?: string;
+  /** Plain value for Excel/PDF export (the `cell` renderer returns ReactNode). Falls back to `sortValue`. */
+  exportValue?: (row: T) => string | number | boolean | Date | null | undefined;
+  /** Export header when it should differ from the on-screen `header`. */
+  exportHeader?: string;
+  /** Typing for Excel number formats and PDF formatting. Defaults to text. */
+  exportKind?: "text" | "number" | "money" | "date" | "datetime";
+  /** Currency code appended to `money` cells in the PDF. */
+  exportCurrency?: (row: T) => string | null | undefined;
+  /** Set `false` for action/avatar columns that must not appear in exports. */
+  exportable?: boolean;
 };
+
+/** Enables the Export menu (Excel, and PDF when `pdf`). Without `fetchAll` the current rows are exported. */
+export type TableExport<T> = {
+  filename: string;
+  title: string;
+  pdf?: boolean;
+  meta?: ExportMeta;
+  /** Export-only columns (not shown on screen), appended after the table columns. */
+  extraColumns?: ExportColumn<T>[];
+  /** Fetch the whole filtered result (paged lists); receives the row cap. */
+  fetchAll?: (max: number, onProgress?: (done: number, total: number) => void) => Promise<{ items: T[]; truncated: boolean }>;
+};
+
+/** Page heading for automatic exports (the page's `<h1>`), falling back to the document title. */
+function autoTitle(): string {
+  return document.querySelector("main h1")?.textContent?.trim() || document.title;
+}
+
+function autoFilename(): string {
+  const slug = window.location.pathname.split("/").filter(Boolean).slice(0, 2).join("-").replace(/[^\w-]+/g, "") || "table";
+  return slug;
+}
 
 export type SortState = { key: string; dir: "asc" | "desc" };
 
@@ -60,6 +97,7 @@ export function DataTable<T>({
   footer,
   serverSort,
   onServerSort,
+  exportConfig,
 }: {
   columns: Column<T>[];
   rows: T[];
@@ -79,6 +117,8 @@ export function DataTable<T>({
    */
   serverSort?: SortState;
   onServerSort?: (sort: SortState) => void;
+  /** Explicit export setup. Omit for the automatic Excel export of the on-screen table; `false` hides the menu. */
+  exportConfig?: TableExport<T> | false;
 }) {
   const t = useT();
   const [localSorting, setLocalSorting] = useState<SortingState>(initialSort ? [{ id: initialSort.key, desc: initialSort.dir === "desc" }] : []);
@@ -124,6 +164,47 @@ export function DataTable<T>({
     getSortedRowModel: getSortedRowModel(),
   });
 
+  const visibleKeys = table.getVisibleLeafColumns().map((column) => column.id);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const explicit = exportConfig ? exportConfig : undefined;
+  const exporter = useTableExport<T>(
+    explicit
+      ? {
+          filename: explicit.filename,
+          title: explicit.title,
+          pdf: explicit.pdf,
+          meta: explicit.meta,
+          columns: [...toExportColumns(columns, visibleKeys), ...(explicit.extraColumns ?? [])],
+          getRows: explicit.fetchAll ?? (async () => ({ items: table.getSortedRowModel().rows.map((row) => row.original), truncated: false })),
+        }
+      : undefined,
+  );
+  // No explicit config: export what the table shows (visible columns, current rows and sort), read from the DOM.
+  const autoExporter = useTableExport<string[]>(
+    exportConfig === undefined
+      ? {
+          filename: autoFilename(),
+          title: autoTitle(),
+          columns: [],
+          getRows: async () => {
+            const read = readDomTable(rootRef.current ?? document.body);
+            return { items: read.rows, truncated: false, columns: read.columns, title: autoTitle() };
+          },
+        }
+      : undefined,
+  );
+  const active = explicit ? exporter : autoExporter;
+  const exportMenu =
+    exportConfig !== false && (exportConfig ? exportConfig.fetchAll || rows.length > 0 : rows.length > 0) ? (
+      <ExportActions
+        onExportExcel={active.exportExcel}
+        onExportPdf={explicit?.pdf ? active.exportPdf : undefined}
+        isExportingExcel={active.busy === "xlsx"}
+        isExportingPdf={active.busy === "pdf"}
+        disabled={loading || Boolean(error)}
+      />
+    ) : null;
+
   const hideable = table.getAllColumns().filter((column) => column.getCanHide());
   const showToggle = (showColumnToggle ?? columns.length > 5) && hideable.length > 2 && rows.length > 0;
 
@@ -132,8 +213,10 @@ export function DataTable<T>({
   else if (error) body = <div className="ma-panel__body"><ErrorAlert error={error} title={t("تعذّر تحميل البيانات", "Couldn't load the data")} /></div>;
   else if (rows.length === 0) body = <Empty text={empty ?? t("لا توجد بيانات بعد.", "Nothing here yet.")} />;
 
-  const columnMenu = showToggle ? (
+  const columnMenu = showToggle || exportMenu ? (
     <div className="ma-toolbar__end">
+      {exportMenu}
+      {showToggle ? (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button sm icon="layers" label={t("الأعمدة", "Columns")} />
@@ -156,11 +239,12 @@ export function DataTable<T>({
           })}
         </DropdownMenuContent>
       </DropdownMenu>
+      ) : null}
     </div>
   ) : null;
 
   return (
-    <div className="ma-datatable">
+    <div className="ma-datatable" ref={rootRef}>
       {toolbar || columnMenu ? (
         <div className="ma-toolbar">
           {toolbar}

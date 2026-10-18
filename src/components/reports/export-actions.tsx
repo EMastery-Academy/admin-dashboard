@@ -11,28 +11,42 @@ import { useT } from "@/lib/i18n";
 
 export type ExportActionsProps = {
   onExportCsv?: () => void | Promise<void>;
+  onExportExcel?: () => void | Promise<void>;
   onExportPdf?: () => void | Promise<void>;
   isExportingPdf?: boolean;
+  isExportingExcel?: boolean;
   disabled?: boolean;
   variant?: "dropdown" | "buttons";
 };
 
 export function ExportActions({
   onExportCsv,
+  onExportExcel,
   onExportPdf,
   isExportingPdf = false,
+  isExportingExcel = false,
   disabled = false,
   variant = "dropdown",
 }: ExportActionsProps) {
   const t = useT();
   const [internalBusy, setInternalBusy] = useState(false);
-  const busy = isExportingPdf || internalBusy;
+  const busy = isExportingPdf || isExportingExcel || internalBusy;
 
   const handlePdf = async () => {
     if (!onExportPdf || busy) return;
     try {
       setInternalBusy(true);
       await onExportPdf();
+    } finally {
+      setInternalBusy(false);
+    }
+  };
+
+  const handleExcel = async () => {
+    if (!onExportExcel || busy) return;
+    try {
+      setInternalBusy(true);
+      await onExportExcel();
     } finally {
       setInternalBusy(false);
     }
@@ -46,6 +60,15 @@ export function ExportActions({
   if (variant === "buttons") {
     return (
       <div className="ma-inline-cluster" role="group" aria-label={t("خيارات التصدير", "Export options")}>
+        {onExportExcel && (
+          <Button
+            kind="soft"
+            icon={busy ? "refresh" : "download"}
+            label={t("تصدير Excel", "Export Excel")}
+            onClick={handleExcel}
+            disabled={disabled || busy}
+          />
+        )}
         {onExportCsv && (
           <Button
             kind="soft"
@@ -83,6 +106,12 @@ export function ExportActions({
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
+        {onExportExcel && (
+          <DropdownMenuItem onClick={handleExcel} disabled={busy}>
+            <Icon name="download" />
+            <span>{t("تصدير كملف Excel", "Export as Excel (.xlsx)")}</span>
+          </DropdownMenuItem>
+        )}
         {onExportCsv && (
           <DropdownMenuItem onClick={handleCsv}>
             <Icon name="download" />

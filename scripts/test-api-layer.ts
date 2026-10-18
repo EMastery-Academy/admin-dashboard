@@ -23,6 +23,14 @@ import {
   getConsultationInfo,
   getConsultationRevenue,
   getConsultationService,
+  getB2cBooking,
+  getB2cExpert,
+  getB2cOverview,
+  getB2cTop,
+  listB2cBookings,
+  listB2cExpertSlots,
+  listB2cExperts,
+  listB2cOrders,
   getCustomer,
   getCustomer360,
   getDatabaseHealth,
@@ -155,6 +163,8 @@ type TestContext = {
   ticketId?: number;
   ticketStatus?: number;
   consultationId?: number;
+  b2cExpertId?: string;
+  b2cBookingId?: string;
   bundleId?: string;
   createdAdminId?: string;
   createdRoleId?: string;
@@ -630,6 +640,38 @@ function liveEndpointTests(): LiveTest[] {
         if (ctx.consultantId) await getConsultant(ctx.consultantId);
       },
     },
+
+    // -- B2C consultations management
+    {
+      name: "GET /admin/consultations-b2c/overview|top",
+      run: async () => {
+        const end = new Date().toISOString();
+        const start = new Date(Date.now() - 30 * 86_400_000).toISOString();
+        await getB2cOverview({ start, end });
+        await getB2cTop({ start, end, by: "services" });
+        await getB2cTop({ start, end, by: "experts" });
+      },
+    },
+    {
+      name: "GET /admin/consultations-b2c/experts[/{id}[/slots]]",
+      run: async (ctx) => {
+        const page = await listB2cExperts({ limit: 5 });
+        ctx.b2cExpertId = page.items[0]?.consultant_id;
+        if (!ctx.b2cExpertId) throw new SkipTest("no expert");
+        await getB2cExpert(ctx.b2cExpertId);
+        await listB2cExpertSlots(ctx.b2cExpertId);
+      },
+    },
+    {
+      name: "GET /admin/consultations-b2c/bookings[/{id}]",
+      run: async (ctx) => {
+        const page = await listB2cBookings({ limit: 5 });
+        ctx.b2cBookingId = page.items[0]?.booking_id;
+        if (!ctx.b2cBookingId) throw new SkipTest("no booking");
+        await getB2cBooking(ctx.b2cBookingId);
+      },
+    },
+    { name: "GET /admin/consultations-b2c/orders", run: async () => { await listB2cOrders({ limit: 5 }); } },
 
     // -- promotions
     {

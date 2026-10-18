@@ -76,6 +76,14 @@ export function ReadmePanel({
           {t("لم يُحفظ README بعد؛ احفظه ليصبح مصدر محتوى الصفحة.", "No README is saved yet; save it to make it the page's content source.")}
         </Alert>
       ) : null}
+      {query.data?.source === "consultation" ? (
+        <Alert kind="info" title={t("مُولَّد من تفاصيل الاستشارة", "Generated from the consultation's details")}>
+          {t(
+            "لم يُحفظ README بعد: جمعنا الوصف وأقسام النظام القديم وبيانات الجلسة. عدّله ثم احفظه ليصبح محتوى الصفحة.",
+            "No README is saved yet: we combined the description, the legacy sections and the session facts. Edit it, then save to make it the page's content.",
+          )}
+        </Alert>
+      ) : null}
       {state === "error" ? <Alert kind="warning" title={t("تعذّر الحفظ", "Couldn't save")}>{error}</Alert> : null}
       <textarea
         id="product-readme-editor"

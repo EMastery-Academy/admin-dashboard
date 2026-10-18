@@ -2,7 +2,6 @@ import type { QueryKey, UseQueryOptions } from "@tanstack/react-query";
 
 import {
   contentQueries,
-  instructorsQueries,
   productQueries,
   promotionsQueries,
   referralsQueries,
@@ -10,6 +9,7 @@ import {
   customersQueries,
 } from "@/lib/api";
 import { AdminListPanel } from "@/components/ui/admin-list-panel";
+import { RequestInboxPage } from "@/features/learning/pages/request-inbox-page";
 
 /** Admin API query options as the panel's untyped `query` (the panel renders any page/array/object). */
 const q = (options: unknown) => options as UseQueryOptions<unknown, Error, unknown, QueryKey>;
@@ -28,16 +28,11 @@ export function AnnouncementsPage() {
 }
 
 export function InstructorApplicationsPage() {
-  return (
-    <AdminListPanel
-      titleAr="طلبات المدربين"
-      titleEn="Instructor applications"
-      subAr="طلبات الانضمام كمدرب، الأحدث أولاً."
-      subEn="Applications to become an instructor, newest first."
-      query={q(instructorsQueries.applications({ limit: 200 }))}
-      columns={["name", "email", "mobile", "country", "specialization", "status", "submitted_at"]}
-    />
-  );
+  return <RequestInboxPage kind="trainer-applications" />;
+}
+
+export function CompanyRequestsPage() {
+  return <RequestInboxPage kind="company-training" />;
 }
 
 export function CommissionsPage() {

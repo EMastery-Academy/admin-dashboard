@@ -10,7 +10,8 @@ import {
   type AdminRefund,
 } from "@/lib/api";
 import { formatDateTime, formatMinor } from "@/lib/format";
-import { useT } from "@/lib/i18n";
+import { useLang, useT } from "@/lib/i18n";
+import { badgeLabel } from "@/lib/export/columns";
 import { customerHref, orderHref, paymentHref, shortRef } from "@/lib/refs";
 import { SourceBadge } from "@/components/ui/source-badge";
 import { initialsOf, orderStatusBadge, paymentStatusBadge } from "@/lib/status";
@@ -67,11 +68,13 @@ const CURRENCIES = ["USD", "AED", "SAR"];
 
 function AllPaymentsList() {
   const t = useT();
+  const lang = useLang();
 
   const columns: Column<AdminPayment>[] = [
     {
       key: "when",
       header: t("التاريخ", "When"),
+      exportValue: (row) => shortRef(row.order_ref ?? row.ref),
       cell: (row) => (
         <AppLink className="ma-link ma-link--plain" to={row.order_ref ? orderHref(row.order_ref) : paymentHref(row.ref)}>
           <span className="ma-cell-main"><bdi>{shortRef(row.order_ref ?? row.ref)}</bdi></span>
@@ -82,6 +85,7 @@ function AllPaymentsList() {
     {
       key: "customer",
       header: t("العميل", "Customer"),
+      exportValue: (row) => row.customer_email ?? "",
       cell: (row) => (
         <AppLink
           className="ma-cell-flex ma-link ma-link--plain"
@@ -92,14 +96,17 @@ function AllPaymentsList() {
         </AppLink>
       ),
     },
-    { key: "source", header: t("النظام", "System"), cell: (row) => <SourceBadge source={row.source} /> },
-    { key: "provider", header: t("البوابة", "Gateway"), cell: (row) => row.provider },
-    { key: "status", header: t("الدفع", "Payment"), cell: (row) => <Badge def={paymentStatusBadge(row.status)} /> },
-    { key: "order", header: t("الطلب", "Order"), cell: (row) => <Badge def={orderStatusBadge(row.order_status)} /> },
+    { key: "source", header: t("النظام", "System"), exportValue: (row) => row.source, cell: (row) => <SourceBadge source={row.source} /> },
+    { key: "provider", header: t("البوابة", "Gateway"), exportValue: (row) => row.provider, cell: (row) => row.provider },
+    { key: "status", header: t("الدفع", "Payment"), exportValue: (row) => badgeLabel(paymentStatusBadge(row.status), lang), cell: (row) => <Badge def={paymentStatusBadge(row.status)} /> },
+    { key: "order", header: t("الطلب", "Order"), exportValue: (row) => badgeLabel(orderStatusBadge(row.order_status), lang), cell: (row) => <Badge def={orderStatusBadge(row.order_status)} /> },
     {
       key: "amount",
       header: t("المبلغ", "Amount"),
       align: "end",
+      exportKind: "money",
+      exportValue: (row) => row.amount_minor / 100,
+      exportCurrency: (row) => row.currency_code,
       cell: (row) => (
         <>
           <span className="ma-num">{formatMinor(row.amount_minor, row.currency_code)}</span>
@@ -107,7 +114,7 @@ function AllPaymentsList() {
         </>
       ),
     },
-    { key: "open", header: "", align: "end", cell: (row) => <Button sm icon="eye" label={t("التفاصيل", "Details")} href={paymentHref(row.ref)} /> },
+    { key: "open", header: "", align: "end", exportable: false, cell: (row) => <Button sm icon="eye" label={t("التفاصيل", "Details")} href={paymentHref(row.ref)} /> },
   ];
 
   const filters: ListFilter[] = [
@@ -142,6 +149,16 @@ function AllPaymentsList() {
       searchPlaceholder={t("ابحث ببريد العميل…", "Search customer email…")}
       filters={filters}
       empty={t("لا مدفوعات.", "No payments.")}
+      exportConfig={{
+        filename: "payments",
+        title: t("المدفوعات", "Payments"),
+        pdf: true,
+        fetchSize: 200,
+        extraColumns: [
+          { key: "created", header: t("تاريخ الإنشاء", "Created"), kind: "datetime", value: (row) => (row.created_at ? new Date(row.created_at) : null) },
+          { key: "refunded", header: t("المسترد", "Refunded"), kind: "money", value: (row) => (row.refunded_minor ?? 0) / 100, currency: (row) => row.currency_code },
+        ],
+      }}
     />
   );
 }
@@ -154,11 +171,11 @@ function paymentStatusLabel(t: (ar: string, en?: string) => string, status: stri
 function FailuresList() {
   const t = useT();
   const columns: Column<AdminPaymentFailure>[] = [
-    { key: "when", header: t("التاريخ", "When"), cell: (row) => formatDateTime(row.created_at) },
-    { key: "order", header: t("الطلب", "Order"), cell: (row) => <bdi className="ma-num">#{row.order_id?.slice(0, 8) ?? "—"}</bdi> },
-    { key: "provider", header: t("المزوّد", "Provider"), cell: (row) => row.provider },
-    { key: "reason", header: t("السبب", "Reason"), cell: (row) => <span className="ma-cell-sub">{row.failure_message || row.failure_code || "—"}</span> },
-    { key: "amount", header: t("المبلغ", "Amount"), align: "end", cell: (row) => formatMinor(row.amount_minor, row.currency_code) },
+    { key: "when", header: t("التاريخ", "When"), exportKind: "datetime", exportValue: (row) => (row.created_at ? new Date(row.created_at) : null), cell: (row) => formatDateTime(row.created_at) },
+    { key: "order", header: t("الطلب", "Order"), exportValue: (row) => (row.order_id ? `#${row.order_id.slice(0, 8)}` : ""), cell: (row) => <bdi className="ma-num">#{row.order_id?.slice(0, 8) ?? "—"}</bdi> },
+    { key: "provider", header: t("المزوّد", "Provider"), exportValue: (row) => row.provider, cell: (row) => row.provider },
+    { key: "reason", header: t("السبب", "Reason"), exportValue: (row) => row.failure_message || row.failure_code || "", cell: (row) => <span className="ma-cell-sub">{row.failure_message || row.failure_code || "—"}</span> },
+    { key: "amount", header: t("المبلغ", "Amount"), align: "end", exportKind: "money", exportValue: (row) => row.amount_minor / 100, exportCurrency: (row) => row.currency_code, cell: (row) => formatMinor(row.amount_minor, row.currency_code) },
   ];
 
   const filters: ListFilter[] = [
@@ -192,6 +209,7 @@ function FailuresList() {
       filters={filters}
       searchPlaceholder={t("ابحث برقم الطلب أو البوابة…", "Search order id or gateway…")}
       empty={t("لا مدفوعات فاشلة.", "No failed payments.")}
+      exportConfig={{ filename: "failed-payments", title: t("المدفوعات الفاشلة", "Failed payments"), pdf: true, fetchSize: 200 }}
     />
   );
 }
@@ -199,11 +217,11 @@ function FailuresList() {
 function RefundsList() {
   const t = useT();
   const columns: Column<AdminRefund>[] = [
-    { key: "when", header: t("التاريخ", "When"), cell: (row) => formatDateTime(row.created_at) },
-    { key: "order", header: t("الطلب", "Order"), cell: (row) => <bdi className="ma-num">#{row.order_id?.slice(0, 8) ?? "—"}</bdi> },
-    { key: "amount", header: t("المبلغ", "Amount"), align: "end", cell: (row) => formatMinor(row.amount_minor, row.currency_code) },
-    { key: "status", header: t("الحالة", "Status"), cell: (row) => <Badge def={{ label: { ar: row.status, en: row.status } }} /> },
-    { key: "reason", header: t("السبب", "Reason"), cell: (row) => <span className="ma-cell-sub">{row.reason || "—"}</span> },
+    { key: "when", header: t("التاريخ", "When"), exportKind: "datetime", exportValue: (row) => (row.created_at ? new Date(row.created_at) : null), cell: (row) => formatDateTime(row.created_at) },
+    { key: "order", header: t("الطلب", "Order"), exportValue: (row) => (row.order_id ? `#${row.order_id.slice(0, 8)}` : ""), cell: (row) => <bdi className="ma-num">#{row.order_id?.slice(0, 8) ?? "—"}</bdi> },
+    { key: "amount", header: t("المبلغ", "Amount"), align: "end", exportKind: "money", exportValue: (row) => row.amount_minor / 100, exportCurrency: (row) => row.currency_code, cell: (row) => formatMinor(row.amount_minor, row.currency_code) },
+    { key: "status", header: t("الحالة", "Status"), exportValue: (row) => row.status, cell: (row) => <Badge def={{ label: { ar: row.status, en: row.status } }} /> },
+    { key: "reason", header: t("السبب", "Reason"), exportValue: (row) => row.reason || "", cell: (row) => <span className="ma-cell-sub">{row.reason || "—"}</span> },
   ];
 
   const filters: ListFilter[] = [
@@ -238,6 +256,7 @@ function RefundsList() {
       filters={filters}
       searchPlaceholder={t("ابحث برقم الطلب…", "Search order id…")}
       empty={t("لا استردادات.", "No refunds.")}
+      exportConfig={{ filename: "refunds", title: t("الاستردادات", "Refunds"), pdf: true, fetchSize: 200 }}
     />
   );
 }

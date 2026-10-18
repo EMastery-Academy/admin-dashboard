@@ -3,9 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 
 import { useT } from "@/lib/i18n";
 import { Card, IconButton } from "@/components/ui/kit";
+import type { ExportColumn } from "@/lib/export/types";
+import { fetchAllPages } from "@/lib/export/fetch-all";
 import { DataTable, type Column, type SortState } from "@/components/ui/data-table";
 import { SearchIcon, type AnimatedIconHandle } from "@/components/icons/animated";
 import { SelectField } from "@/components/ui/select";
+import { MultiSelect } from "@/components/ui/multi-select";
 import { Pagination } from "@/components/ui/primitives";
 
 export type PageResult<T> = {
@@ -32,6 +35,8 @@ export type PagedListProps<T> = {
     limit: number;
     /** Selected filter values, keyed by API param name; unset keys are omitted. */
     filters: Record<string, string>;
+    /** Selected multi-filter values, keyed by API param name; empty keys are omitted. */
+    multi?: Record<string, string[]>;
     /** Present when `sort` is configured. */
     sort?: SortState;
   }) => Promise<PageResult<T>>;
@@ -39,6 +44,8 @@ export type PagedListProps<T> = {
   searchPlaceholder?: string;
   /** Select filters wired straight to API query params. */
   filters?: ListFilter[];
+  /** Multi-select facet filters (checkboxes); each maps to one API query param. */
+  multiFilters?: ListFilter[];
   /** Extra controls rendered after the filters (e.g. a source switch). */
   toolbar?: ReactNode;
   empty?: string;
@@ -48,6 +55,21 @@ export type PagedListProps<T> = {
    * clicks on columns that declare a matching `sortKey`.
    */
   sort?: { options: { value: string; label: string }[]; initial: SortState };
+  /**
+   * Adds the Export menu. Excel exports every row matching the active search, filters and sort
+   * (fetched page by page, capped); `pdf` adds the branded PDF report.
+   */
+  exportConfig?: {
+    filename: string;
+    title: string;
+    pdf?: boolean;
+    /** Page size for the fetch-all walk; keep within the endpoint's `limit` maximum (default 50). */
+    fetchSize?: number;
+    /** Extra summary lines for the report/sheet header, e.g. the page's date range. */
+    describe?: () => string[];
+    /** Export-only columns (not shown on screen), appended after the table columns. */
+    extraColumns?: ExportColumn<T>[];
+  };
 };
 
 /** A searchable, filterable, paginated table backed by a B2C `Page<T>` endpoint. */
@@ -57,16 +79,19 @@ export function PagedList<T>({
   columns,
   searchPlaceholder,
   filters,
+  multiFilters,
   toolbar,
   empty,
   pageSize = 25,
   sort,
+  exportConfig,
 }: PagedListProps<T>) {
   const t = useT();
   const [text, setText] = useState("");
   const [search, setSearch] = useState("");
   const [offset, setOffset] = useState(0);
   const [values, setValues] = useState<Record<string, string>>({});
+  const [multiValues, setMultiValues] = useState<Record<string, string[]>>({});
   const [order, setOrder] = useState<SortState | undefined>(sort?.initial);
 
   const changeSort = (next: SortState) => {
@@ -75,11 +100,29 @@ export function PagedList<T>({
   };
 
   const result = useQuery({
-    queryKey: [...queryKeyBase, { search, offset, values, order }],
-    queryFn: () => fetchPage({ query: search || undefined, offset, limit: pageSize, filters: values, sort: order }),
+    queryKey: [...queryKeyBase, { search, offset, values, multiValues, order }],
+    queryFn: () =>
+      fetchPage({ query: search || undefined, offset, limit: pageSize, filters: values, multi: multiValues, sort: order }),
   });
 
-  const hasToolbar = Boolean(searchPlaceholder || (filters && filters.length) || toolbar || sort);
+  const activeFilters = [
+    search ? `${t("بحث", "Search")}: ${search}` : null,
+    ...(filters ?? []).map((filter) => {
+      const value = values[filter.key];
+      const option = filter.options.find((item) => item.value === value);
+      return value && option ? `${filter.label}: ${option.label}` : null;
+    }),
+    ...(multiFilters ?? []).map((filter) => {
+      const picked = (multiValues[filter.key] ?? [])
+        .map((value) => filter.options.find((item) => item.value === value)?.label ?? value)
+        .join(", ");
+      return picked ? `${filter.label}: ${picked}` : null;
+    }),
+  ].filter((line): line is string => Boolean(line));
+
+  const hasToolbar = Boolean(
+    searchPlaceholder || (filters && filters.length) || (multiFilters && multiFilters.length) || toolbar || sort,
+  );
 
   return (
     <Card flush>
@@ -89,6 +132,25 @@ export function PagedList<T>({
         empty={empty}
         loading={result.isLoading}
         error={result.error}
+        exportConfig={
+          exportConfig
+            ? {
+                filename: exportConfig.filename,
+                title: exportConfig.title,
+                pdf: exportConfig.pdf,
+                extraColumns: exportConfig.extraColumns,
+                meta: { filters: [...(exportConfig.describe?.() ?? []), ...activeFilters] },
+                fetchAll: async (max, onProgress) => {
+                  const all = await fetchAllPages(
+                    (from, limit) =>
+                      fetchPage({ query: search || undefined, offset: from, limit, filters: values, multi: multiValues, sort: order }),
+                    { pageSize: exportConfig.fetchSize, max, onProgress },
+                  );
+                  return { items: all.items, truncated: all.truncated };
+                },
+              }
+            : undefined
+        }
         toolbar={
           hasToolbar ? (
             <>
@@ -114,6 +176,19 @@ export function PagedList<T>({
                     setOffset(0);
                   }}
                   options={[{ value: "all", label: filter.label }, ...filter.options]}
+                />
+              ))}
+
+              {(multiFilters ?? []).map((filter) => (
+                <MultiSelect
+                  key={filter.key}
+                  label={filter.label}
+                  options={filter.options}
+                  selected={multiValues[filter.key] ?? []}
+                  onChange={(next) => {
+                    setMultiValues((prev) => ({ ...prev, [filter.key]: next }));
+                    setOffset(0);
+                  }}
                 />
               ))}
 
