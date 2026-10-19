@@ -12,6 +12,8 @@
 @import "./product-detail.css" layer(components);
 /* Consultations management: availability calendar. */
 @import "./consultations.css" layer(components);
+/* Subscriptions management: plan cards, funnel. */
+@import "./subscriptions.css" layer(components);
 @import "./print.css" layer(components);
 
 /* Kit breakpoints: mobile-first 600 · 900 · 1200. */

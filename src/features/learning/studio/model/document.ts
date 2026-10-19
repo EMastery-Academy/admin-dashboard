@@ -2,6 +2,8 @@ import { z } from "zod";
 
 import type { StudioDocument, StudioMeta } from "@/lib/api";
 
+import type { StudioPartialBlock } from "@/features/learning/studio/editor/schema";
+
 /*
  * The studio page document (schema version 1): `meta` plus BlockNote `blocks`. The backend validates the same
  * whitelist (`app/modules/catalog/domain/content_document.py`); this mirror catches mistakes before a save.
@@ -92,6 +94,28 @@ export function outlineOf(blocks: unknown[]): OutlineItem[] {
 }
 
 export type GalleryItem = { url: string; alt: string };
+
+/**
+ * Blocks whose data lives in props. BlockNote throws while building a document that gives them `content`,
+ * which would blank the whole studio page, so anything loaded from the API is normalised first.
+ */
+const CONTENTLESS = new Set(["banner", "instructorCard", "assetGallery", "divider", "image", "video", "file"]);
+
+/** Makes API-stored blocks loadable: drops `content` from content-less blocks and empty `children`. */
+export function toEditorBlocks(blocks: unknown[]): StudioPartialBlock[] {
+  const clean = (raw: unknown): StudioPartialBlock | null => {
+    if (!raw || typeof raw !== "object") return null;
+    const block = { ...(raw as Record<string, unknown>) };
+    if (CONTENTLESS.has(String(block.type))) delete block.content;
+    if (Array.isArray(block.children)) {
+      const children = block.children.map(clean).filter((child): child is StudioPartialBlock => child !== null);
+      if (children.length > 0) block.children = children;
+      else delete block.children;
+    }
+    return block as StudioPartialBlock;
+  };
+  return blocks.map(clean).filter((block): block is StudioPartialBlock => block !== null);
+}
 
 export function parseGallery(value: unknown): GalleryItem[] {
   if (typeof value !== "string" || !value) return [];

@@ -1,4 +1,6 @@
-import type { StudioPartialBlock } from "@/features/learning/studio/editor/schema";
+import { BlockNoteEditor } from "@blocknote/core";
+
+import { studioSchema, type StudioEditor, type StudioPartialBlock } from "@/features/learning/studio/editor/schema";
 import { STUDIO_BLOCK_TYPES } from "@/features/learning/studio/model/document";
 
 export function sanitizeParsedBlocks(blocks: unknown[]): StudioPartialBlock[] {
@@ -8,17 +10,17 @@ export function sanitizeParsedBlocks(blocks: unknown[]): StudioPartialBlock[] {
   function sanitizeBlock(b: any): any {
     if (!b || typeof b !== "object") return null;
     let type = b.type;
-    const props = { ...(b.props || {}) };
+    let props = { ...(b.props || {}) };
     const content = b.content;
     const children = Array.isArray(b.children) ? b.children.map(sanitizeBlock).filter(Boolean) : undefined;
 
     if (type === "heading") {
       const lvl = Number(props.level ?? 1);
       props.level = Math.min(3, Math.max(1, lvl));
-    } else if (type === "codeBlock") {
+    } else if (type === "codeBlock" || !allowedTypes.has(type)) {
+      // Not in the studio's block set (code, audio…): keep the text, drop the block-specific props.
       type = "paragraph";
-    } else if (!allowedTypes.has(type)) {
-      type = "paragraph";
+      props = {};
     }
 
     return {
@@ -31,6 +33,18 @@ export function sanitizeParsedBlocks(blocks: unknown[]): StudioPartialBlock[] {
   }
 
   return blocks.map(sanitizeBlock).filter(Boolean) as StudioPartialBlock[];
+}
+
+/**
+ * Markdown → studio blocks. The converter only needs a schema, so one headless editor (never mounted) is
+ * reused: this is how the product README is imported into the studio editor on open.
+ */
+let markdownParser: StudioEditor | null = null;
+
+export function markdownToStudioBlocks(markdown: string): StudioPartialBlock[] {
+  if (!markdown.trim()) return [];
+  markdownParser ??= BlockNoteEditor.create({ schema: studioSchema });
+  return sanitizeParsedBlocks(markdownParser.tryParseMarkdownToBlocks(markdown));
 }
 
 export function extractSyllabusFromMarkdown(markdown: string) {

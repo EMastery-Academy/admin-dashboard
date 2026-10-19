@@ -84,6 +84,14 @@ export function ReadmePanel({
           )}
         </Alert>
       ) : null}
+      {query.data?.source === "description" ? (
+        <Alert kind="info" title={t("مُولَّد من وصف المنتج", "Generated from the product's description")}>
+          {t(
+            "لم يُحفظ README بعد: جمعنا وصف المنتج ومخرجات التعلم. عدّله ثم احفظه ليصبح محتوى الصفحة.",
+            "No README is saved yet: we combined the product's description and learning outcomes. Edit it, then save to make it the page's content.",
+          )}
+        </Alert>
+      ) : null}
       {state === "error" ? <Alert kind="warning" title={t("تعذّر الحفظ", "Couldn't save")}>{error}</Alert> : null}
       <textarea
         id="product-readme-editor"

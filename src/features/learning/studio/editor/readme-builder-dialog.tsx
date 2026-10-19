@@ -89,6 +89,8 @@ export type ReadmeBuilderDialogProps = {
   onClose: () => void;
   editor: Editor | null;
   meta: StudioMeta;
+  /** The product's current README: prefilled so the dialog starts from real content, not a template. */
+  initialMarkdown?: string;
   onUpdateMeta?: (meta: StudioMeta) => void;
   onApplyBlocks: (blocks: StudioPartialBlock[], mode: "replace" | "append") => void;
   onSyncCurriculum?: (syllabus: { unitName: string; lessons: string[] }[]) => Promise<void>;
@@ -99,12 +101,13 @@ export function ReadmeBuilderDialog({
   onClose,
   editor,
   meta,
+  initialMarkdown,
   onUpdateMeta,
   onApplyBlocks,
   onSyncCurriculum,
 }: ReadmeBuilderDialogProps) {
   const t = useT();
-  const [markdown, setMarkdown] = useState(TEMPLATES.full);
+  const [markdown, setMarkdown] = useState(initialMarkdown?.trim() ? initialMarkdown : TEMPLATES.full);
   const [applyMode, setApplyMode] = useState<"replace" | "append">("replace");
   const [updateMeta, setUpdateMeta] = useState(true);
   const [syncCurriculum, setSyncCurriculum] = useState(false);
@@ -163,8 +166,8 @@ export function ReadmeBuilderDialog({
 
       toast.success(
         t(
-          `تم بناء أقسام ومحتوى الدورة بنجاح (${sanitized.length} كتلة)!`,
-          `Course sections and body built successfully (${sanitized.length} blocks)!`
+          `تم بناء محتوى الصفحة بنجاح (${sanitized.length} كتلة)!`,
+          `Page content built successfully (${sanitized.length} blocks)!`
         )
       );
       onClose();
@@ -182,7 +185,7 @@ export function ReadmeBuilderDialog({
         style={{ inlineSize: "min(860px, calc(100vw - 32px))" }}
         role="dialog"
         aria-modal="true"
-        aria-label={t("بناء الدورة من كود README", "Build course from README code")}
+        aria-label={t("بناء الصفحة من كود README", "Build the page from README code")}
         onKeyDown={(e) => e.key === "Escape" && onClose()}
       >
         <div className="ma-studio-dialog__head">
@@ -204,12 +207,12 @@ export function ReadmeBuilderDialog({
             </div>
             <div>
               <strong style={{ fontSize: "16px", display: "block" }}>
-                {t("بناء سريع لأقسام ومحتوى الدورة من كود README", "Quick Build Course Sections & Body from README")}
+                {t("بناء سريع لمحتوى الصفحة من كود README", "Quick Build Page Content from README")}
               </strong>
               <p className="ma-studio-dialog__text" style={{ fontSize: "12px", margin: 0 }}>
                 {t(
-                  "اكتب أو الصق نص README بصيغة Markdown لبناء هيكل وأقسام ومحتوى الدورة بسرعة فائقة.",
-                  "Write or paste Markdown README code to rapidly build course structure, sections, and body."
+                  "يبدأ الحقل بنص README الحالي للمنتج. عدّله أو الصقه بصيغة Markdown لبناء المحتوى ككتل قابلة للتحرير.",
+                  "The field starts with the product's current README. Edit or paste Markdown to build the content as editable blocks."
                 )}
               </p>
             </div>
@@ -310,6 +313,14 @@ export function ReadmeBuilderDialog({
             }}
             autoFocus
           />
+          {initialMarkdown?.trim() ? (
+            <p className="ma-studio__hint" style={{ margin: "6px 0 0" }}>
+              {t(
+                "هذا نص README المحفوظ للمنتج. «بناء» يحوّله إلى كتل في المحرر.",
+                "This is the product's saved README. \"Build\" turns it into blocks in the editor.",
+              )}
+            </p>
+          ) : null}
         </div>
 
         {/* Detected Info Chips */}
@@ -412,7 +423,7 @@ export function ReadmeBuilderDialog({
                 checked={updateMeta}
                 onChange={(e) => setUpdateMeta(e.target.checked)}
               />
-              {t("تحديث عنوان ونبذة الدورة تلقائياً (من السطر الأول)", "Auto-update course title & summary (from first line)")}
+              {t("تحديث عنوان ونبذة الصفحة تلقائياً (من السطر الأول)", "Auto-update the page title & summary (from the first line)")}
             </label>
 
             {onSyncCurriculum && parsedInfo.units.length > 0 ? (
@@ -437,7 +448,7 @@ export function ReadmeBuilderDialog({
           <Button
             kind="primary"
             icon="check"
-            label={isBuilding ? t("جارٍ البناء…", "Building…") : t("بناء أقسام ومحتوى الدورة", "Build Course Sections & Body")}
+            label={isBuilding ? t("جارٍ البناء…", "Building…") : t("بناء محتوى الصفحة", "Build Page Content")}
             disabled={isBuilding || !markdown.trim()}
             onClick={handleBuild}
           />

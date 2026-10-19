@@ -1,17 +1,18 @@
 /* oxlint-disable react/set-state-in-effect */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useMatches, useNavigate } from "react-router-dom";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import { navigation, flatItems, matchActive, type NavModule } from "@/config/navigation";
+import { adminSearch, searchKeys } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { useAdminAuth } from "@/lib/auth/store";
 import { useLang, useLangStore, translate, useT } from "@/lib/i18n";
 import { MenuIcon, SearchIcon, type AnimatedIconHandle } from "@/components/icons/animated";
 import { Icon } from "@/components/ui/icon";
-import { IconButton } from "@/components/ui/kit";
+import { IconButton, Avatar } from "@/components/ui/kit";
 import { Button as BaseButton } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
-import { Avatar } from "@/components/ui/kit";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,7 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { initialsOf } from "@/lib/status";
-import { CommandPalette, useCommandPalette, usePaletteStore } from "./command-palette";
+import { CommandPalette, KIND_META, useCommandPalette, usePaletteStore } from "./command-palette";
 
 const COLLAPSED_KEY = "admin.sidebarCollapsed";
 
@@ -163,7 +164,7 @@ export function Shell() {
             </ol>
           </nav>
           <div className="ma-topbar__actions">
-            <SearchButton label={t("بحث أو أمر", "Search or jump to")} onClick={palette.show} />
+            <SearchButton label={t("بحث شامل أو أمر", "Search everything or jump to")} onClick={palette.show} />
             <LangToggle />
             <ThemeToggle />
             <AccountMenu email={admin?.email ?? ""} onSignOut={async () => {
@@ -183,9 +184,64 @@ export function Shell() {
 function Sidebar({ module, activeHref, onCollapse }: { module: NavModule; activeHref?: string; onCollapse?: () => void }) {
   const t = useT();
   const lang = useLang();
-  const searchIcon = useRef<AnimatedIconHandle>(null);
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
+
+  const rawTerm = query.trim();
+  const q = rawTerm.toLowerCase();
+
+  const matchingModuleSections = useMemo(() => {
+    if (module.disabled) return [];
+    return module.sections
+      .map((section, si) => {
+        const items = section.items.filter(
+          (item) =>
+            !q ||
+            translate(lang, item.title.ar, item.title.en).toLowerCase().includes(q) ||
+            item.title.en.toLowerCase().includes(q) ||
+            item.title.ar.toLowerCase().includes(q),
+        );
+        return { section, si, items };
+      })
+      .filter(({ items }) => !q || items.length > 0);
+  }, [module, q, lang]);
+
+  // Also check other modules' pages when the query isn't found in the active module
+  const otherDomainPages = useMemo(() => {
+    if (!q || matchingModuleSections.length > 0) return [];
+    return flatItems(navigation)
+      .filter(
+        (item) =>
+          item.module.id !== module.id &&
+          (translate(lang, item.title.ar, item.title.en).toLowerCase().includes(q) ||
+            item.title.en.toLowerCase().includes(q) ||
+            item.title.ar.toLowerCase().includes(q)),
+      )
+      .slice(0, 5);
+  }, [q, matchingModuleSections.length, module.id, lang]);
+
+  const notFoundLocally = Boolean(q && matchingModuleSections.length === 0 && otherDomainPages.length === 0);
+
+  // Debounce query for automatic API fallback when not found in local sidebar pages
+  useEffect(() => {
+    if (!rawTerm || !notFoundLocally) {
+      setDebouncedQuery("");
+      return;
+    }
+    const handle = window.setTimeout(() => {
+      setDebouncedQuery(rawTerm);
+    }, 150);
+    return () => window.clearTimeout(handle);
+  }, [rawTerm, notFoundLocally]);
+
+  const fallbackSearch = useQuery({
+    queryKey: searchKeys.admin({ q: debouncedQuery, limit_per_kind: 3 }),
+    queryFn: () => adminSearch({ q: debouncedQuery, limit_per_kind: 3 }),
+    enabled: notFoundLocally && debouncedQuery.length >= 1,
+    placeholderData: keepPreviousData,
+    staleTime: 15_000,
+  });
 
   if (module.disabled) {
     return (
@@ -198,7 +254,9 @@ function Sidebar({ module, activeHref, onCollapse }: { module: NavModule; active
     );
   }
 
-  const q = query.trim().toLowerCase();
+  const openGlobalWithQuery = () => {
+    usePaletteStore.getState().openWithQuery(rawTerm);
+  };
 
   return (
     <>
@@ -217,28 +275,28 @@ function Sidebar({ module, activeHref, onCollapse }: { module: NavModule; active
       </div>
       <div className="ma-sidebar__search">
         <div className="ma-search">
-          <SearchIcon ref={searchIcon} size={18} className="ma-search__icon" />
+          <Icon name="search" className="ma-search__icon" />
           <input
             className="ma-input ma-input--search"
             type="search"
-            placeholder={t("ابحث في الصفحات", "Search pages")}
-            aria-label={t("ابحث في صفحات هذا القسم", "Search pages in this domain")}
+            placeholder={t("ابحث في الصفحات أو المنصة…", "Search pages or platform…")}
+            aria-label={t("ابحث في الصفحات أو المنصة", "Search pages or platform")}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            onFocus={() => searchIcon.current?.startAnimation()}
-            onBlur={() => searchIcon.current?.stopAnimation()}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && rawTerm) {
+                event.preventDefault();
+                openGlobalWithQuery();
+              }
+            }}
           />
         </div>
       </div>
       <div className="ma-sidebar__nav">
-        {module.sections.map((section, si) => {
+        {matchingModuleSections.map(({ section, si, items }) => {
           const holdsActive = section.items.some((item) => item.href === activeHref);
           const key = `${module.id}:${si}`;
           const open = holdsActive || !collapsedSections[key];
-          const items = section.items.filter(
-            (item) => !q || translate(lang, item.title.ar, item.title.en).toLowerCase().includes(q) || item.title.en.toLowerCase().includes(q),
-          );
-          if (q && !items.length) return null;
           return (
             <div className="ma-sidebar__section" key={key}>
               <button
@@ -265,6 +323,66 @@ function Sidebar({ module, activeHref, onCollapse }: { module: NavModule; active
             </div>
           );
         })}
+
+        {otherDomainPages.length > 0 ? (
+          <div className="ma-sidebar__section">
+            <div className="ma-sidebar__section-btn" aria-expanded="true">
+              <Icon name="chevron" />
+              {t("صفحات في أقسام أخرى", "Other domains")}
+            </div>
+            <ul className="ma-sidebar__list">
+              {otherDomainPages.map((item) => (
+                <li key={item.href}>
+                  <NavLink className="ma-sidebar__link" to={item.href} onClick={() => setQuery("")}>
+                    <span>{translate(lang, item.title.ar, item.title.en)}</span>
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        {notFoundLocally ? (
+          <div className="ma-sidebar__section">
+            <div className="ma-sidebar__section-btn" aria-expanded="true">
+              <Icon name="search" />
+              {fallbackSearch.isFetching
+                ? t("جاري البحث في المنصة…", "Searching platform…")
+                : t("نتائج من المنصة", "Platform results")}
+            </div>
+            <ul className="ma-sidebar__list">
+              {(fallbackSearch.data?.items ?? []).slice(0, 8).map((hit) => {
+                const meta = KIND_META[hit.kind];
+                return (
+                  <li key={`${hit.kind}:${hit.ref}`}>
+                    <NavLink
+                      className="ma-sidebar__link"
+                      to={hit.href}
+                      onClick={() => setQuery("")}
+                      title={hit.subtitle ?? hit.title}
+                    >
+                      <Icon name={meta?.icon ?? "file"} />
+                      <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {hit.title}
+                      </span>
+                    </NavLink>
+                  </li>
+                );
+              })}
+              <li>
+                <button
+                  type="button"
+                  className="ma-sidebar__link"
+                  style={{ width: "100%", textAlign: "start", background: "none", border: "none", cursor: "pointer" }}
+                  onClick={openGlobalWithQuery}
+                >
+                  <Icon name="search" />
+                  <span>{t(`بحث شامل عن «${rawTerm}»…`, `Global search for "${rawTerm}"…`)}</span>
+                </button>
+              </li>
+            </ul>
+          </div>
+        ) : null}
       </div>
     </>
   );
@@ -272,18 +390,14 @@ function Sidebar({ module, activeHref, onCollapse }: { module: NavModule; active
 
 function SearchButton({ label, onClick }: { label: string; onClick: () => void }) {
   const icon = useRef<AnimatedIconHandle>(null);
-  const play = () => icon.current?.startAnimation();
-  const stop = () => icon.current?.stopAnimation();
   return (
     <BaseButton
       variant="soft"
       size="sm"
       onClick={onClick}
       aria-keyshortcuts="Control+K Meta+K"
-      onMouseEnter={play}
-      onMouseLeave={stop}
-      onFocus={play}
-      onBlur={stop}
+      onMouseEnter={() => icon.current?.startAnimation()}
+      onMouseLeave={() => icon.current?.stopAnimation()}
     >
       <SearchIcon ref={icon} size={18} />
       <span className="ma-topbar__desktop">{label}</span>

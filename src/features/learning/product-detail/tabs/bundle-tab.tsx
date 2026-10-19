@@ -11,7 +11,7 @@ import {
 } from "@/lib/api";
 import { formatAmount } from "@/lib/format";
 import { useT } from "@/lib/i18n";
-import { productHref } from "@/lib/refs";
+import { productHref, studioHref } from "@/lib/refs";
 import { productTypeLabel } from "@/lib/product-types";
 import { AppLink } from "@/components/ui/app-link";
 import { Button, Card, Empty, ErrorAlert, Field, Loading } from "@/components/ui/kit";
@@ -184,6 +184,18 @@ export function BundleTab({ productRef: _productRef, productId }: { productRef: 
             ))}
           </div>
         )}
+      </Card>
+
+      <Card title={t("محتوى صفحة الحزمة", "Bundle page content")}>
+        <p className="ma-muted" style={{ marginBlockEnd: 12 }}>
+          {t(
+            "يُكتب محتوى صفحة الحزمة (المقدمة والأهداف والبانر) في استوديو الحزمة ويظهر مباشرة على المتجر.",
+            "The bundle page content (intro, goals, banner) is written in the bundle Studio and shows straight away on the storefront.",
+          )}
+        </p>
+        <AppLink className="ma-btn ma-btn--primary" to={studioHref(`b2c:${productId}`)}>
+          {t("فتح استوديو الحزمة", "Open the bundle studio")}
+        </AppLink>
       </Card>
 
       <Card title={t("ملخّص", "Summary")} className="ma-section-gap">

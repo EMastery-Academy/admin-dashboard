@@ -2076,6 +2076,109 @@
         }
       }
     },
+    "/api/v1/admin/search": {
+      "get": {
+        "tags": [
+          "Admin search"
+        ],
+        "summary": "Global admin search",
+        "description": "Unified back-office search across courses, diplomas, live diplomas, packages, bundles, instructors, students (customers), orders, coupons, offers, consultations, consultants, experts, subscription plans, subscribers, support tickets, categories, affiliates, and certificates across both B2C and legacy schemas. Each section is filtered according to the signed-in admin's RBAC scopes.",
+        "operationId": "global_admin_search_api_v1_admin_search_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200,
+              "description": "Search term (title, name, email, phone, slug, coupon code, #order_id, UUID).",
+              "default": "",
+              "title": "Q"
+            },
+            "description": "Search term (title, name, email, phone, slug, coupon code, #order_id, UUID)."
+          },
+          {
+            "name": "kinds",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 300
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional comma-separated resource kinds to include (e.g. `course,diploma,package,bundle,instructor,student`).",
+              "title": "Kinds"
+            },
+            "description": "Optional comma-separated resource kinds to include (e.g. `course,diploma,package,bundle,instructor,student`)."
+          },
+          {
+            "name": "limit_per_kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 25,
+              "minimum": 1,
+              "description": "Maximum items returned per resource kind.",
+              "default": 5,
+              "title": "Limit Per Kind"
+            },
+            "description": "Maximum items returned per resource kind."
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminSearchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/admin/catalog/products": {
       "get": {
         "tags": [
@@ -23628,10 +23731,3109 @@
           }
         }
       }
+    },
+    "/api/v1/subscriptions/plans": {
+      "get": {
+        "tags": [
+          "Subscriptions"
+        ],
+        "summary": "List Public Subscription Plans",
+        "operationId": "list_public_subscription_plans_api_v1_subscriptions_plans_get",
+        "parameters": [
+          {
+            "name": "audience_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "individual",
+                    "company"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Audience Type"
+            }
+          },
+          {
+            "name": "billing_interval",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "month",
+                    "year"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Billing Interval"
+            }
+          },
+          {
+            "name": "plan_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "standard",
+                    "full_library",
+                    "choose_x"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Plan Type"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "ar",
+              "title": "Lang"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SubscriptionPlanPublicResponse"
+                  },
+                  "title": "Response List Public Subscription Plans Api V1 Subscriptions Plans Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/subscriptions/features": {
+      "get": {
+        "tags": [
+          "Subscriptions"
+        ],
+        "summary": "List Public Subscription Features",
+        "description": "Active feature catalog, for the plan comparison table.",
+        "operationId": "list_public_subscription_features_api_v1_subscriptions_features_get",
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "ar",
+              "title": "Lang"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SubscriptionFeatureOut"
+                  },
+                  "title": "Response List Public Subscription Features Api V1 Subscriptions Features Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/subscriptions/plans/{slug_or_id}": {
+      "get": {
+        "tags": [
+          "Subscriptions"
+        ],
+        "summary": "Get Public Subscription Plan",
+        "operationId": "get_public_subscription_plan_api_v1_subscriptions_plans__slug_or_id__get",
+        "parameters": [
+          {
+            "name": "slug_or_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug Or Id"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "ar",
+              "title": "Lang"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "name": "b2c_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "B2C Access Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionPlanPublicResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/subscriptions/checkout": {
+      "post": {
+        "tags": [
+          "Subscriptions"
+        ],
+        "summary": "Create Subscription Checkout Session",
+        "operationId": "create_subscription_checkout_session_api_v1_subscriptions_checkout_post",
+        "security": [
+          {
+            "B2C JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          },
+          {
+            "name": "b2c_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "B2C Access Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubscriptionCheckoutRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckoutSessionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/subscriptions/me": {
+      "get": {
+        "tags": [
+          "Subscriptions"
+        ],
+        "summary": "List My Subscriptions",
+        "operationId": "list_my_subscriptions_api_v1_subscriptions_me_get",
+        "security": [
+          {
+            "B2C JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "b2c_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "B2C Access Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CustomerSubscriptionResponse"
+                  },
+                  "title": "Response List My Subscriptions Api V1 Subscriptions Me Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/subscriptions/me/perks": {
+      "get": {
+        "tags": [
+          "Subscriptions"
+        ],
+        "summary": "My Consultation Perks",
+        "description": "Free consultation credits left this period and the subscriber discount, if any.\nDeclared before `/me/{subscription_id}` so \"perks\" is not read as an id.",
+        "operationId": "my_consultation_perks_api_v1_subscriptions_me_perks_get",
+        "security": [
+          {
+            "B2C JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "b2c_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "B2C Access Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsultationPerksResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/subscriptions/me/{subscription_id}": {
+      "get": {
+        "tags": [
+          "Subscriptions"
+        ],
+        "summary": "Get My Subscription Detail",
+        "operationId": "get_my_subscription_detail_api_v1_subscriptions_me__subscription_id__get",
+        "security": [
+          {
+            "B2C JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "subscription_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Subscription Id"
+            }
+          },
+          {
+            "name": "b2c_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "B2C Access Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerSubscriptionDetailResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/subscriptions/me/{subscription_id}/cancel": {
+      "post": {
+        "tags": [
+          "Subscriptions"
+        ],
+        "summary": "Cancel My Subscription",
+        "operationId": "cancel_my_subscription_api_v1_subscriptions_me__subscription_id__cancel_post",
+        "security": [
+          {
+            "B2C JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "subscription_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Subscription Id"
+            }
+          },
+          {
+            "name": "b2c_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "B2C Access Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/CancelSubscriptionRequest"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Payload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerSubscriptionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/subscriptions/me/{subscription_id}/selections": {
+      "get": {
+        "tags": [
+          "Subscriptions"
+        ],
+        "summary": "Get My Choose X Selections",
+        "operationId": "get_my_choose_x_selections_api_v1_subscriptions_me__subscription_id__selections_get",
+        "security": [
+          {
+            "B2C JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "subscription_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Subscription Id"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "ar",
+              "title": "Lang"
+            }
+          },
+          {
+            "name": "b2c_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "B2C Access Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChooseXSelectionStateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Subscriptions"
+        ],
+        "summary": "Select Choose X Course",
+        "operationId": "select_choose_x_course_api_v1_subscriptions_me__subscription_id__selections_post",
+        "security": [
+          {
+            "B2C JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "subscription_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Subscription Id"
+            }
+          },
+          {
+            "name": "b2c_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "B2C Access Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SelectCourseRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CourseSelectionOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/subscriptions/me/{subscription_id}/selections/replace": {
+      "post": {
+        "tags": [
+          "Subscriptions"
+        ],
+        "summary": "Replace Choose X Course",
+        "operationId": "replace_choose_x_course_api_v1_subscriptions_me__subscription_id__selections_replace_post",
+        "security": [
+          {
+            "B2C JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "subscription_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Subscription Id"
+            }
+          },
+          {
+            "name": "b2c_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "B2C Access Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplaceCourseRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CourseSelectionOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/subscriptions/me/{subscription_id}/seats": {
+      "get": {
+        "tags": [
+          "Subscriptions"
+        ],
+        "summary": "List Company Subscription Seats",
+        "operationId": "list_company_subscription_seats_api_v1_subscriptions_me__subscription_id__seats_get",
+        "security": [
+          {
+            "B2C JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "subscription_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Subscription Id"
+            }
+          },
+          {
+            "name": "b2c_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "B2C Access Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SubscriptionSeatOut"
+                  },
+                  "title": "Response List Company Subscription Seats Api V1 Subscriptions Me  Subscription Id  Seats Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Subscriptions"
+        ],
+        "summary": "Assign Company Subscription Seat",
+        "operationId": "assign_company_subscription_seat_api_v1_subscriptions_me__subscription_id__seats_post",
+        "security": [
+          {
+            "B2C JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "subscription_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Subscription Id"
+            }
+          },
+          {
+            "name": "b2c_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "B2C Access Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignSeatRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionSeatOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/subscriptions/me/{subscription_id}/seats/{seat_id}": {
+      "delete": {
+        "tags": [
+          "Subscriptions"
+        ],
+        "summary": "Revoke Company Subscription Seat",
+        "operationId": "revoke_company_subscription_seat_api_v1_subscriptions_me__subscription_id__seats__seat_id__delete",
+        "security": [
+          {
+            "B2C JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "subscription_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Subscription Id"
+            }
+          },
+          {
+            "name": "seat_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Seat Id"
+            }
+          },
+          {
+            "name": "b2c_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "B2C Access Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionSeatOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/subscriptions/me/{subscription_id}/selections/learning-started": {
+      "post": {
+        "tags": [
+          "Subscriptions"
+        ],
+        "summary": "Mark My Selection Learning Started",
+        "description": "Mark a selected course as learning_started=true for the authenticated customer.",
+        "operationId": "mark_my_selection_learning_started_api_v1_subscriptions_me__subscription_id__selections_learning_started_post",
+        "security": [
+          {
+            "B2C JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "subscription_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Subscription Id"
+            }
+          },
+          {
+            "name": "b2c_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "B2C Access Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SelectCourseRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "integer"
+                  },
+                  "title": "Response Mark My Selection Learning Started Api V1 Subscriptions Me  Subscription Id  Selections Learning Started Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/subscriptions/events/course-started": {
+      "post": {
+        "tags": [
+          "Subscriptions"
+        ],
+        "summary": "Record Lms Course Started Event",
+        "description": "Webhook/internal event receiver when a learner starts a course in the LMS (LMS-03).",
+        "operationId": "record_lms_course_started_event_api_v1_subscriptions_events_course_started_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordLearningStartedRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "integer"
+                  },
+                  "type": "object",
+                  "title": "Response Record Lms Course Started Event Api V1 Subscriptions Events Course Started Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/subscriptions/dev/activate-order/{order_id}": {
+      "post": {
+        "tags": [
+          "Subscriptions"
+        ],
+        "summary": "Dev Activate Subscription Order",
+        "description": "Development-only helper to simulate Stripe subscription payment webhook completion.",
+        "operationId": "dev_activate_subscription_order_api_v1_subscriptions_dev_activate_order__order_id__post",
+        "security": [
+          {
+            "B2C JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          },
+          {
+            "name": "b2c_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "B2C Access Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CustomerSubscriptionResponse"
+                  },
+                  "title": "Response Dev Activate Subscription Order Api V1 Subscriptions Dev Activate Order  Order Id  Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/subscriptions/me/{subscription_id}/dev-renew": {
+      "post": {
+        "tags": [
+          "Subscriptions"
+        ],
+        "summary": "Dev Renew My Subscription",
+        "description": "Development-only helper to simulate a recurring invoice.paid renewal cycle.",
+        "operationId": "dev_renew_my_subscription_api_v1_subscriptions_me__subscription_id__dev_renew_post",
+        "security": [
+          {
+            "B2C JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "subscription_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Subscription Id"
+            }
+          },
+          {
+            "name": "b2c_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "B2C Access Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerSubscriptionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/subscriptions/plans": {
+      "get": {
+        "tags": [
+          "Admin Subscriptions"
+        ],
+        "summary": "Admin List Subscription Plans",
+        "operationId": "admin_list_subscription_plans_api_v1_admin_subscriptions_plans_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "audience_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "individual",
+                    "company"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Audience Type"
+            }
+          },
+          {
+            "name": "billing_interval",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "month",
+                    "year"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Billing Interval"
+            }
+          },
+          {
+            "name": "plan_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "standard",
+                    "full_library",
+                    "choose_x"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Plan Type"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Search title or slug.",
+              "title": "Query"
+            },
+            "description": "Search title or slug."
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "ar",
+              "title": "Lang"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SubscriptionPlanAdminResponse"
+                  },
+                  "title": "Response Admin List Subscription Plans Api V1 Admin Subscriptions Plans Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin Subscriptions"
+        ],
+        "summary": "Admin Create Subscription Plan",
+        "operationId": "admin_create_subscription_plan_api_v1_admin_subscriptions_plans_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSubscriptionPlanRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionPlanAdminResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/subscriptions/plans/{plan_id}": {
+      "get": {
+        "tags": [
+          "Admin Subscriptions"
+        ],
+        "summary": "Admin Get Subscription Plan",
+        "operationId": "admin_get_subscription_plan_api_v1_admin_subscriptions_plans__plan_id__get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "plan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "ar",
+              "title": "Lang"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionPlanAdminResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Admin Subscriptions"
+        ],
+        "summary": "Admin Update Subscription Plan",
+        "operationId": "admin_update_subscription_plan_api_v1_admin_subscriptions_plans__plan_id__put",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "plan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSubscriptionPlanRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionPlanAdminResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/subscriptions/plans/{plan_id}/products": {
+      "put": {
+        "tags": [
+          "Admin Subscriptions"
+        ],
+        "summary": "Admin Set Subscription Plan Products",
+        "operationId": "admin_set_subscription_plan_products_api_v1_admin_subscriptions_plans__plan_id__products_put",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "plan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetPlanProductsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionPlanAdminResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/subscriptions/plans/{plan_id}/benefits": {
+      "put": {
+        "tags": [
+          "Admin Subscriptions"
+        ],
+        "summary": "Admin Set Subscription Plan Benefits",
+        "operationId": "admin_set_subscription_plan_benefits_api_v1_admin_subscriptions_plans__plan_id__benefits_put",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "plan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetPlanBenefitsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionPlanAdminResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/subscriptions/features": {
+      "get": {
+        "tags": [
+          "Admin Subscriptions"
+        ],
+        "summary": "Admin List Subscription Features",
+        "description": "The feature catalog plans pick from (AI planner, expert consultations, ...).",
+        "operationId": "admin_list_subscription_features_api_v1_admin_subscriptions_features_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SubscriptionFeatureAdminOut"
+                  },
+                  "title": "Response Admin List Subscription Features Api V1 Admin Subscriptions Features Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin Subscriptions"
+        ],
+        "summary": "Admin Create Subscription Feature",
+        "operationId": "admin_create_subscription_feature_api_v1_admin_subscriptions_features_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubscriptionFeatureIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionFeatureAdminOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/subscriptions/features/{feature_id}": {
+      "put": {
+        "tags": [
+          "Admin Subscriptions"
+        ],
+        "summary": "Admin Update Subscription Feature",
+        "operationId": "admin_update_subscription_feature_api_v1_admin_subscriptions_features__feature_id__put",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "feature_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Feature Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubscriptionFeatureIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionFeatureAdminOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/subscriptions/plans/{plan_id}/features": {
+      "put": {
+        "tags": [
+          "Admin Subscriptions"
+        ],
+        "summary": "Admin Set Subscription Plan Features",
+        "description": "Replace the catalog features a plan offers, in display order.",
+        "operationId": "admin_set_subscription_plan_features_api_v1_admin_subscriptions_plans__plan_id__features_put",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "plan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetPlanFeaturesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionPlanAdminResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/subscriptions/plans/{plan_id}/status": {
+      "post": {
+        "tags": [
+          "Admin Subscriptions"
+        ],
+        "summary": "Admin Set Subscription Plan Status",
+        "description": "Publish, move back to draft, or archive a plan. Publishing requires ar/en titles\nand resources (Choose-X needs at least `selection_allowance` selectable resources).",
+        "operationId": "admin_set_subscription_plan_status_api_v1_admin_subscriptions_plans__plan_id__status_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "plan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetPlanStatusRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionPlanAdminResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/subscriptions/plans/{plan_id}/discount": {
+      "put": {
+        "tags": [
+          "Admin Subscriptions"
+        ],
+        "summary": "Admin Set Subscription Plan Discount",
+        "description": "Set (or clear with `{\"discount\": null}`) the plan sale price. New subscribers are\ncharged the discounted price; existing subscribers keep what they pay.",
+        "operationId": "admin_set_subscription_plan_discount_api_v1_admin_subscriptions_plans__plan_id__discount_put",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "plan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetPlanDiscountRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionPlanAdminResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/subscriptions/plans/{plan_id}/card-features": {
+      "put": {
+        "tags": [
+          "Admin Subscriptions"
+        ],
+        "summary": "Admin Set Subscription Plan Card Features",
+        "operationId": "admin_set_subscription_plan_card_features_api_v1_admin_subscriptions_plans__plan_id__card_features_put",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "plan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetCardFeaturesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionPlanAdminResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/subscriptions/plans/{plan_id}/duplicate": {
+      "post": {
+        "tags": [
+          "Admin Subscriptions"
+        ],
+        "summary": "Admin Duplicate Subscription Plan",
+        "description": "Copy a plan into a new draft with a new slug.",
+        "operationId": "admin_duplicate_subscription_plan_api_v1_admin_subscriptions_plans__plan_id__duplicate_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "plan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DuplicatePlanRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionPlanAdminResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/subscriptions/plans/{plan_id}/abandoned-checkouts": {
+      "get": {
+        "tags": [
+          "Admin Subscriptions"
+        ],
+        "summary": "Admin List Subscription Plan Abandoned Checkouts",
+        "description": "Customers who started checkout for this plan but never became subscribers.",
+        "operationId": "admin_list_subscription_plan_abandoned_checkouts_api_v1_admin_subscriptions_plans__plan_id__abandoned_checkouts_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "plan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AbandonedCheckoutListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/subscriptions/stats/overview": {
+      "get": {
+        "tags": [
+          "Admin Subscriptions"
+        ],
+        "summary": "Admin Subscription Stats Overview",
+        "description": "Subscriber KPIs (active, MRR/ARR, new, churn), per-plan breakdown and a daily trend.\nRequires `admin:catalog:read` or `admin:analytics:read`.",
+        "operationId": "admin_subscription_stats_overview_api_v1_admin_subscriptions_stats_overview_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "start",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Range start (ISO date or date-time, UTC), e.g. `2026-10-01`.",
+              "examples": [
+                "2026-10-01"
+              ],
+              "title": "Start"
+            },
+            "description": "Range start (ISO date or date-time, UTC), e.g. `2026-10-01`."
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Range end, exclusive (ISO date or date-time, UTC).",
+              "examples": [
+                "2026-10-31"
+              ],
+              "title": "End"
+            },
+            "description": "Range end, exclusive (ISO date or date-time, UTC)."
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "ar",
+              "title": "Lang"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionStatsOverviewResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/subscriptions/stats/funnel": {
+      "get": {
+        "tags": [
+          "Admin Subscriptions"
+        ],
+        "summary": "Admin Subscription Stats Funnel",
+        "description": "Per plan: distinct visitors who viewed the plan page → customers who started\ncheckout → customers who paid. Requires `admin:catalog:read` or `admin:analytics:read`.",
+        "operationId": "admin_subscription_stats_funnel_api_v1_admin_subscriptions_stats_funnel_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "start",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Range start (ISO date or date-time, UTC), e.g. `2026-10-01`.",
+              "examples": [
+                "2026-10-01"
+              ],
+              "title": "Start"
+            },
+            "description": "Range start (ISO date or date-time, UTC), e.g. `2026-10-01`."
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Range end, exclusive (ISO date or date-time, UTC).",
+              "examples": [
+                "2026-10-31"
+              ],
+              "title": "End"
+            },
+            "description": "Range end, exclusive (ISO date or date-time, UTC)."
+          },
+          {
+            "name": "plan_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "ar",
+              "title": "Lang"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionFunnelResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/subscriptions/customer-subscriptions": {
+      "get": {
+        "tags": [
+          "Admin Subscriptions"
+        ],
+        "summary": "Admin List Customer Subscriptions",
+        "operationId": "admin_list_customer_subscriptions_api_v1_admin_subscriptions_customer_subscriptions_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "audience_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "individual",
+                    "company"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Audience Type"
+            }
+          },
+          {
+            "name": "plan_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "customer_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Customer Id"
+            }
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Search customer email, name or company.",
+              "title": "Query"
+            },
+            "description": "Search customer email, name or company."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminCustomerSubscriptionListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/subscriptions/customer-subscriptions/{subscription_id}": {
+      "get": {
+        "tags": [
+          "Admin Subscriptions"
+        ],
+        "summary": "Admin Get Customer Subscription Detail",
+        "operationId": "admin_get_customer_subscription_detail_api_v1_admin_subscriptions_customer_subscriptions__subscription_id__get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "subscription_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Subscription Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerSubscriptionDetailResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/subscriptions/customer-subscriptions/{subscription_id}/cancel": {
+      "post": {
+        "tags": [
+          "Admin Subscriptions"
+        ],
+        "summary": "Admin Cancel Customer Subscription",
+        "operationId": "admin_cancel_customer_subscription_api_v1_admin_subscriptions_customer_subscriptions__subscription_id__cancel_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "subscription_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Subscription Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/CancelSubscriptionRequest"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Payload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerSubscriptionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "AbandonedCheckoutListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AbandonedCheckoutOut"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "AbandonedCheckoutListResponse"
+      },
+      "AbandonedCheckoutOut": {
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Customer Id"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "full_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name"
+          },
+          "attempts": {
+            "type": "integer",
+            "title": "Attempts"
+          },
+          "last_attempt_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Attempt At"
+          },
+          "last_order_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Order Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer_id",
+          "attempts"
+        ],
+        "title": "AbandonedCheckoutOut"
+      },
       "AccessExtensionCheckoutRequest": {
         "properties": {
           "entitlement_id": {
@@ -25203,6 +28405,37 @@
           "created_at"
         ],
         "title": "AdminCustomerDetail"
+      },
+      "AdminCustomerSubscriptionListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CustomerSubscriptionResponse"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "AdminCustomerSubscriptionListResponse"
       },
       "AdminDeleteServiceResponse": {
         "properties": {
@@ -27681,6 +30914,127 @@
         ],
         "title": "AdminRoleResponse"
       },
+      "AdminSearchHit": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "course",
+              "diploma",
+              "live_diploma",
+              "package",
+              "bundle",
+              "consultation",
+              "instructor",
+              "consultant",
+              "expert",
+              "student",
+              "order",
+              "coupon",
+              "offer",
+              "subscription_plan",
+              "subscriber",
+              "ticket",
+              "category",
+              "affiliate",
+              "certificate"
+            ],
+            "title": "Kind"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "ref": {
+            "type": "string",
+            "title": "Ref"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "b2c",
+              "legacy"
+            ],
+            "title": "Source"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "href": {
+            "type": "string",
+            "title": "Href"
+          },
+          "subtitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subtitle"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "id",
+          "ref",
+          "source",
+          "title",
+          "href"
+        ],
+        "title": "AdminSearchHit"
+      },
+      "AdminSearchResponse": {
+        "properties": {
+          "query": {
+            "type": "string",
+            "title": "Query"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AdminSearchHit"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "query",
+          "total"
+        ],
+        "title": "AdminSearchResponse"
+      },
       "AdminSlot": {
         "properties": {
           "slot_id": {
@@ -28425,6 +31779,33 @@
           "role_id"
         ],
         "title": "AssignRoleRequest"
+      },
+      "AssignSeatRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "maxLength": 320,
+            "minLength": 3,
+            "title": "Email"
+          },
+          "customer_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "title": "AssignSeatRequest"
       },
       "AuthResponse": {
         "properties": {
@@ -29828,13 +33209,62 @@
             "title": "Booking Id"
           },
           "checkout": {
-            "$ref": "#/components/schemas/CheckoutSessionResponse"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CheckoutSessionResponse"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Payment session; null when the booking is covered by a subscription."
+          },
+          "covered_by_subscription": {
+            "type": "boolean",
+            "title": "Covered By Subscription",
+            "default": false
+          },
+          "order_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Order Id"
+          },
+          "payment_intent_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payment Intent Id"
+          },
+          "discount_percent": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Discount Percent",
+            "description": "Subscriber discount applied to the session price."
           }
         },
         "type": "object",
         "required": [
-          "booking_id",
-          "checkout"
+          "booking_id"
         ],
         "title": "BookingCheckoutResponse"
       },
@@ -30543,6 +33973,17 @@
         "additionalProperties": false,
         "type": "object",
         "title": "CancelBookingRequest"
+      },
+      "CancelSubscriptionRequest": {
+        "properties": {
+          "immediate": {
+            "type": "boolean",
+            "title": "Immediate",
+            "default": false
+          }
+        },
+        "type": "object",
+        "title": "CancelSubscriptionRequest"
       },
       "CartItemRequest": {
         "properties": {
@@ -32083,6 +35524,98 @@
         ],
         "title": "CheckoutSessionResponse"
       },
+      "ChooseXSelectionStateResponse": {
+        "properties": {
+          "subscription_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Subscription Id"
+          },
+          "usage": {
+            "$ref": "#/components/schemas/ChooseXUsageOut"
+          },
+          "active_selections": {
+            "items": {
+              "$ref": "#/components/schemas/CourseSelectionOut"
+            },
+            "type": "array",
+            "title": "Active Selections"
+          },
+          "selection_history": {
+            "items": {
+              "$ref": "#/components/schemas/CourseSelectionOut"
+            },
+            "type": "array",
+            "title": "Selection History"
+          },
+          "eligible_products": {
+            "items": {
+              "$ref": "#/components/schemas/SubscriptionPlanProductOut"
+            },
+            "type": "array",
+            "title": "Eligible Products"
+          }
+        },
+        "type": "object",
+        "required": [
+          "subscription_id",
+          "usage",
+          "active_selections",
+          "selection_history",
+          "eligible_products"
+        ],
+        "title": "ChooseXSelectionStateResponse"
+      },
+      "ChooseXUsageOut": {
+        "properties": {
+          "selection_allowance": {
+            "type": "integer",
+            "title": "Selection Allowance"
+          },
+          "used_selections": {
+            "type": "integer",
+            "title": "Used Selections"
+          },
+          "remaining_selections": {
+            "type": "integer",
+            "title": "Remaining Selections"
+          },
+          "replacements_used": {
+            "type": "integer",
+            "title": "Replacements Used"
+          },
+          "max_replacements_per_period": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Replacements Per Period"
+          },
+          "remaining_replacements": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Remaining Replacements"
+          }
+        },
+        "type": "object",
+        "required": [
+          "selection_allowance",
+          "used_selections",
+          "remaining_selections",
+          "replacements_used"
+        ],
+        "title": "ChooseXUsageOut"
+      },
       "CohortEnrollmentView": {
         "properties": {
           "customer_id": {
@@ -33029,6 +36562,82 @@
           "completed_at"
         ],
         "title": "ConsultationMilestone"
+      },
+      "ConsultationPerksResponse": {
+        "properties": {
+          "has_perks": {
+            "type": "boolean",
+            "title": "Has Perks"
+          },
+          "subscription_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subscription Id"
+          },
+          "plan_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Title"
+          },
+          "credits_per_period": {
+            "type": "integer",
+            "title": "Credits Per Period",
+            "default": 0
+          },
+          "credits_used": {
+            "type": "integer",
+            "title": "Credits Used",
+            "default": 0
+          },
+          "credits_remaining": {
+            "type": "integer",
+            "title": "Credits Remaining",
+            "default": 0
+          },
+          "discount_percent": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Discount Percent"
+          },
+          "period_end": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Period End"
+          }
+        },
+        "type": "object",
+        "required": [
+          "has_perks"
+        ],
+        "title": "ConsultationPerksResponse",
+        "description": "What the signed-in customer's subscription gives them on expert consultations."
       },
       "ConsultationResponse": {
         "properties": {
@@ -33987,6 +37596,147 @@
         ],
         "title": "CourseResponse"
       },
+      "CourseSelectionOut": {
+        "properties": {
+          "selection_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Selection Id"
+          },
+          "subscription_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Subscription Id"
+          },
+          "customer_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Customer Id"
+          },
+          "product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Product Id"
+          },
+          "product_slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Product Slug"
+          },
+          "product_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Product Title"
+          },
+          "entitlement_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entitlement Id"
+          },
+          "period_start": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Period Start"
+          },
+          "period_end": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Period End"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "learning_started": {
+            "type": "boolean",
+            "title": "Learning Started"
+          },
+          "learning_started_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Learning Started At"
+          },
+          "can_replace": {
+            "type": "boolean",
+            "title": "Can Replace"
+          },
+          "replaced_by_selection_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Replaced By Selection Id"
+          },
+          "replaced_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Replaced At"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "selection_id",
+          "subscription_id",
+          "customer_id",
+          "product_id",
+          "period_start",
+          "period_end",
+          "status",
+          "learning_started",
+          "can_replace"
+        ],
+        "title": "CourseSelectionOut"
+      },
       "CreateExpertServiceRequest": {
         "properties": {
           "title": {
@@ -34604,6 +38354,215 @@
         ],
         "title": "CreateSlotsResponse"
       },
+      "CreateSubscriptionPlanRequest": {
+        "properties": {
+          "slug": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Slug"
+          },
+          "audience_type": {
+            "type": "string",
+            "enum": [
+              "individual",
+              "company"
+            ],
+            "title": "Audience Type",
+            "default": "individual"
+          },
+          "plan_type": {
+            "type": "string",
+            "enum": [
+              "standard",
+              "full_library",
+              "choose_x"
+            ],
+            "title": "Plan Type",
+            "default": "standard"
+          },
+          "billing_interval": {
+            "type": "string",
+            "enum": [
+              "month",
+              "year"
+            ],
+            "title": "Billing Interval",
+            "default": "month"
+          },
+          "price": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              }
+            ],
+            "title": "Price"
+          },
+          "currency_code": {
+            "type": "string",
+            "maxLength": 3,
+            "minLength": 3,
+            "title": "Currency Code",
+            "default": "USD"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "published",
+              "archived"
+            ],
+            "title": "Status",
+            "default": "draft"
+          },
+          "selection_allowance": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Selection Allowance"
+          },
+          "max_replacements_per_period": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Replacements Per Period"
+          },
+          "max_seats": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Max Seats",
+            "default": 1
+          },
+          "thumbnail_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thumbnail Url"
+          },
+          "hero_media_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hero Media Url"
+          },
+          "stripe_product_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stripe Product Id"
+          },
+          "stripe_price_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stripe Price Id"
+          },
+          "translations": {
+            "items": {
+              "$ref": "#/components/schemas/SubscriptionTranslationSchema"
+            },
+            "type": "array",
+            "title": "Translations"
+          },
+          "sections": {
+            "items": {
+              "$ref": "#/components/schemas/SubscriptionSectionSchema"
+            },
+            "type": "array",
+            "title": "Sections"
+          },
+          "learning_outcomes": {
+            "items": {
+              "$ref": "#/components/schemas/SubscriptionOutcomeSchema"
+            },
+            "type": "array",
+            "title": "Learning Outcomes"
+          },
+          "benefits": {
+            "items": {
+              "$ref": "#/components/schemas/SubscriptionPlanBenefitIn"
+            },
+            "type": "array",
+            "title": "Benefits"
+          },
+          "products": {
+            "items": {
+              "$ref": "#/components/schemas/SubscriptionPlanProductIn"
+            },
+            "type": "array",
+            "title": "Products"
+          },
+          "is_featured": {
+            "type": "boolean",
+            "title": "Is Featured",
+            "default": false
+          },
+          "card_features": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object",
+            "title": "Card Features",
+            "description": "Plan card bullet items keyed by locale (ar/en)."
+          },
+          "discount": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PlanDiscountIn"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "slug",
+          "price"
+        ],
+        "title": "CreateSubscriptionPlanRequest"
+      },
       "CreateUnitRequest": {
         "properties": {
           "name": {
@@ -34657,6 +38616,25 @@
           "name"
         ],
         "title": "CreateUnitRequest"
+      },
+      "CurrencyAmountOut": {
+        "properties": {
+          "currency_code": {
+            "type": "string",
+            "title": "Currency Code"
+          },
+          "amount": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Amount"
+          }
+        },
+        "type": "object",
+        "required": [
+          "currency_code",
+          "amount"
+        ],
+        "title": "CurrencyAmountOut"
       },
       "CurriculumLesson": {
         "properties": {
@@ -35386,6 +39364,436 @@
         ],
         "title": "CustomerStatusRequest"
       },
+      "CustomerSubscriptionDetailResponse": {
+        "properties": {
+          "subscription_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Subscription Id"
+          },
+          "customer_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Customer Id"
+          },
+          "plan_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Plan Id"
+          },
+          "order_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Order Id"
+          },
+          "stripe_subscription_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stripe Subscription Id"
+          },
+          "plan_slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Slug"
+          },
+          "plan_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Title"
+          },
+          "audience_type": {
+            "type": "string",
+            "title": "Audience Type"
+          },
+          "plan_type": {
+            "type": "string",
+            "title": "Plan Type"
+          },
+          "billing_interval": {
+            "type": "string",
+            "title": "Billing Interval"
+          },
+          "price": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price"
+          },
+          "currency_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency Code"
+          },
+          "plan_version": {
+            "type": "integer",
+            "title": "Plan Version"
+          },
+          "seat_limit": {
+            "type": "integer",
+            "title": "Seat Limit"
+          },
+          "company_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company Name"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "current_period_start": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Current Period Start"
+          },
+          "current_period_end": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Current Period End"
+          },
+          "auto_renew": {
+            "type": "boolean",
+            "title": "Auto Renew"
+          },
+          "cancel_at_period_end": {
+            "type": "boolean",
+            "title": "Cancel At Period End"
+          },
+          "canceled_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Canceled At"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "plan_snapshot": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Plan Snapshot"
+          },
+          "customer_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Email"
+          },
+          "customer_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Name"
+          },
+          "seats": {
+            "items": {
+              "$ref": "#/components/schemas/SubscriptionSeatOut"
+            },
+            "type": "array",
+            "title": "Seats"
+          },
+          "selections": {
+            "items": {
+              "$ref": "#/components/schemas/CourseSelectionOut"
+            },
+            "type": "array",
+            "title": "Selections"
+          }
+        },
+        "type": "object",
+        "required": [
+          "subscription_id",
+          "customer_id",
+          "plan_id",
+          "audience_type",
+          "plan_type",
+          "billing_interval",
+          "plan_version",
+          "seat_limit",
+          "status",
+          "current_period_start",
+          "current_period_end",
+          "auto_renew",
+          "cancel_at_period_end"
+        ],
+        "title": "CustomerSubscriptionDetailResponse"
+      },
+      "CustomerSubscriptionResponse": {
+        "properties": {
+          "subscription_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Subscription Id"
+          },
+          "customer_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Customer Id"
+          },
+          "plan_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Plan Id"
+          },
+          "order_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Order Id"
+          },
+          "stripe_subscription_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stripe Subscription Id"
+          },
+          "plan_slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Slug"
+          },
+          "plan_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Title"
+          },
+          "audience_type": {
+            "type": "string",
+            "title": "Audience Type"
+          },
+          "plan_type": {
+            "type": "string",
+            "title": "Plan Type"
+          },
+          "billing_interval": {
+            "type": "string",
+            "title": "Billing Interval"
+          },
+          "price": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price"
+          },
+          "currency_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency Code"
+          },
+          "plan_version": {
+            "type": "integer",
+            "title": "Plan Version"
+          },
+          "seat_limit": {
+            "type": "integer",
+            "title": "Seat Limit"
+          },
+          "company_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company Name"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "current_period_start": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Current Period Start"
+          },
+          "current_period_end": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Current Period End"
+          },
+          "auto_renew": {
+            "type": "boolean",
+            "title": "Auto Renew"
+          },
+          "cancel_at_period_end": {
+            "type": "boolean",
+            "title": "Cancel At Period End"
+          },
+          "canceled_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Canceled At"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "plan_snapshot": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Plan Snapshot"
+          },
+          "customer_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Email"
+          },
+          "customer_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "subscription_id",
+          "customer_id",
+          "plan_id",
+          "audience_type",
+          "plan_type",
+          "billing_interval",
+          "plan_version",
+          "seat_limit",
+          "status",
+          "current_period_start",
+          "current_period_end",
+          "auto_renew",
+          "cancel_at_period_end"
+        ],
+        "title": "CustomerSubscriptionResponse"
+      },
       "CustomerTargetSkillResponse": {
         "properties": {
           "skill_id": {
@@ -35781,6 +40189,21 @@
           "outcome"
         ],
         "title": "DeleteExpertServiceResponse"
+      },
+      "DuplicatePlanRequest": {
+        "properties": {
+          "slug": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Slug"
+          }
+        },
+        "type": "object",
+        "required": [
+          "slug"
+        ],
+        "title": "DuplicatePlanRequest"
       },
       "EntitlementDetailResponse": {
         "properties": {
@@ -40703,6 +45126,483 @@
         ],
         "title": "PermissionModule"
       },
+      "PlanDiscountIn": {
+        "properties": {
+          "discount_type": {
+            "type": "string",
+            "enum": [
+              "percent",
+              "fixed"
+            ],
+            "title": "Discount Type"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              }
+            ],
+            "title": "Value"
+          },
+          "starts_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Starts At"
+          },
+          "ends_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ends At"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          }
+        },
+        "type": "object",
+        "required": [
+          "discount_type",
+          "value"
+        ],
+        "title": "PlanDiscountIn"
+      },
+      "PlanDiscountOut": {
+        "properties": {
+          "discount_type": {
+            "type": "string",
+            "enum": [
+              "percent",
+              "fixed"
+            ],
+            "title": "Discount Type"
+          },
+          "value": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Value"
+          },
+          "starts_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Starts At"
+          },
+          "ends_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ends At"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          }
+        },
+        "type": "object",
+        "required": [
+          "discount_type",
+          "value",
+          "is_active"
+        ],
+        "title": "PlanDiscountOut"
+      },
+      "PlanFeatureAdminOut": {
+        "properties": {
+          "feature_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Feature Id"
+          },
+          "feature_key": {
+            "type": "string",
+            "title": "Feature Key"
+          },
+          "icon": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Icon"
+          },
+          "title_ar": {
+            "type": "string",
+            "title": "Title Ar"
+          },
+          "title_en": {
+            "type": "string",
+            "title": "Title En"
+          },
+          "value_ar": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value Ar"
+          },
+          "value_en": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value En"
+          },
+          "is_highlighted": {
+            "type": "boolean",
+            "title": "Is Highlighted",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "feature_id",
+          "feature_key",
+          "title_ar",
+          "title_en"
+        ],
+        "title": "PlanFeatureAdminOut"
+      },
+      "PlanFeatureIn": {
+        "properties": {
+          "feature_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Feature Id"
+          },
+          "value_ar": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 160
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value Ar"
+          },
+          "value_en": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 160
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value En"
+          },
+          "is_highlighted": {
+            "type": "boolean",
+            "title": "Is Highlighted",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "feature_id"
+        ],
+        "title": "PlanFeatureIn"
+      },
+      "PlanFeatureOut": {
+        "properties": {
+          "feature_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Feature Id"
+          },
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "icon": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Icon"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "highlighted": {
+            "type": "boolean",
+            "title": "Highlighted",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "feature_id",
+          "key",
+          "title"
+        ],
+        "title": "PlanFeatureOut"
+      },
+      "PlanFunnelOut": {
+        "properties": {
+          "plan_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Plan Id"
+          },
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "viewed": {
+            "type": "integer",
+            "title": "Viewed"
+          },
+          "checkout_started": {
+            "type": "integer",
+            "title": "Checkout Started"
+          },
+          "paid": {
+            "type": "integer",
+            "title": "Paid"
+          },
+          "view_to_checkout_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "View To Checkout Rate"
+          },
+          "checkout_to_paid_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checkout To Paid Rate"
+          },
+          "view_to_paid_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "View To Paid Rate"
+          }
+        },
+        "type": "object",
+        "required": [
+          "plan_id",
+          "slug",
+          "viewed",
+          "checkout_started",
+          "paid"
+        ],
+        "title": "PlanFunnelOut"
+      },
+      "PlanStatsOut": {
+        "properties": {
+          "plan_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Plan Id"
+          },
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "plan_status": {
+            "type": "string",
+            "title": "Plan Status"
+          },
+          "billing_interval": {
+            "type": "string",
+            "title": "Billing Interval"
+          },
+          "currency_code": {
+            "type": "string",
+            "title": "Currency Code"
+          },
+          "active": {
+            "type": "integer",
+            "title": "Active"
+          },
+          "pending": {
+            "type": "integer",
+            "title": "Pending"
+          },
+          "past_due": {
+            "type": "integer",
+            "title": "Past Due"
+          },
+          "canceled": {
+            "type": "integer",
+            "title": "Canceled"
+          },
+          "expired": {
+            "type": "integer",
+            "title": "Expired"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "new_in_range": {
+            "type": "integer",
+            "title": "New In Range"
+          },
+          "churned_in_range": {
+            "type": "integer",
+            "title": "Churned In Range"
+          },
+          "mrr": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Mrr"
+          },
+          "revenue_in_range": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Revenue In Range"
+          }
+        },
+        "type": "object",
+        "required": [
+          "plan_id",
+          "slug",
+          "plan_status",
+          "billing_interval",
+          "currency_code",
+          "active",
+          "pending",
+          "past_due",
+          "canceled",
+          "expired",
+          "total",
+          "new_in_range",
+          "churned_in_range",
+          "mrr",
+          "revenue_in_range"
+        ],
+        "title": "PlanStatsOut"
+      },
       "PreviewBaseResponse": {
         "properties": {
           "kind": {
@@ -43057,7 +47957,7 @@
           "source": {
             "type": "string",
             "title": "Source",
-            "description": "`readme` when saved, `sections` when generated from legacy HTML sections, `empty`."
+            "description": "`readme` when saved; otherwise one generated from the product: `consultation` (its details), `sections` (legacy HTML sections), `description` (its description and learning outcomes), or `empty`."
           },
           "revalidated": {
             "type": "boolean",
@@ -43367,6 +48267,38 @@
           "context"
         ],
         "title": "RecommendationPageResponse"
+      },
+      "RecordLearningStartedRequest": {
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Customer Id"
+          },
+          "product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Product Id"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer_id",
+          "product_id"
+        ],
+        "title": "RecordLearningStartedRequest"
       },
       "RecordingResponse": {
         "properties": {
@@ -44028,6 +48960,26 @@
           "ids"
         ],
         "title": "ReorderRequest"
+      },
+      "ReplaceCourseRequest": {
+        "properties": {
+          "old_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Old Product Id"
+          },
+          "new_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "New Product Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "old_product_id",
+          "new_product_id"
+        ],
+        "title": "ReplaceCourseRequest"
       },
       "RequestPage": {
         "properties": {
@@ -45425,6 +50377,20 @@
         ],
         "title": "SearchResultResponse"
       },
+      "SelectCourseRequest": {
+        "properties": {
+          "product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Product Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id"
+        ],
+        "title": "SelectCourseRequest"
+      },
       "SessionAssetResponse": {
         "properties": {
           "asset_id": {
@@ -45592,6 +50558,100 @@
           "ends_at"
         ],
         "title": "SessionWrite"
+      },
+      "SetCardFeaturesRequest": {
+        "properties": {
+          "card_features": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object",
+            "title": "Card Features",
+            "description": "Plan card bullet items keyed by locale (ar/en); omitted locales are kept."
+          }
+        },
+        "type": "object",
+        "required": [
+          "card_features"
+        ],
+        "title": "SetCardFeaturesRequest"
+      },
+      "SetPlanBenefitsRequest": {
+        "properties": {
+          "benefits": {
+            "items": {
+              "$ref": "#/components/schemas/SubscriptionPlanBenefitIn"
+            },
+            "type": "array",
+            "title": "Benefits"
+          }
+        },
+        "type": "object",
+        "title": "SetPlanBenefitsRequest"
+      },
+      "SetPlanDiscountRequest": {
+        "properties": {
+          "discount": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PlanDiscountIn"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "New sale discount, or null to remove it."
+          }
+        },
+        "type": "object",
+        "title": "SetPlanDiscountRequest"
+      },
+      "SetPlanFeaturesRequest": {
+        "properties": {
+          "features": {
+            "items": {
+              "$ref": "#/components/schemas/PlanFeatureIn"
+            },
+            "type": "array",
+            "title": "Features"
+          }
+        },
+        "type": "object",
+        "title": "SetPlanFeaturesRequest"
+      },
+      "SetPlanProductsRequest": {
+        "properties": {
+          "products": {
+            "items": {
+              "$ref": "#/components/schemas/SubscriptionPlanProductIn"
+            },
+            "type": "array",
+            "title": "Products"
+          }
+        },
+        "type": "object",
+        "title": "SetPlanProductsRequest"
+      },
+      "SetPlanStatusRequest": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "published",
+              "archived"
+            ],
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "SetPlanStatusRequest"
       },
       "SkillResponse": {
         "properties": {
@@ -46422,6 +51482,1426 @@
           "legacy_sync_status"
         ],
         "title": "StudioVersionDetail"
+      },
+      "SubscriptionCheckoutRequest": {
+        "properties": {
+          "plan_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Id"
+          },
+          "product_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Product Id"
+          },
+          "seat_count": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seat Count"
+          },
+          "company_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company Name"
+          },
+          "initial_selected_product_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Initial Selected Product Ids"
+          },
+          "success_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Success Url"
+          },
+          "cancel_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cancel Url"
+          }
+        },
+        "type": "object",
+        "title": "SubscriptionCheckoutRequest"
+      },
+      "SubscriptionFeatureAdminOut": {
+        "properties": {
+          "feature_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Feature Id"
+          },
+          "feature_key": {
+            "type": "string",
+            "title": "Feature Key"
+          },
+          "icon": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Icon"
+          },
+          "title_ar": {
+            "type": "string",
+            "title": "Title Ar"
+          },
+          "title_en": {
+            "type": "string",
+            "title": "Title En"
+          },
+          "description_ar": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description Ar"
+          },
+          "description_en": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description En"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order",
+            "default": 0
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "feature_id",
+          "feature_key",
+          "title_ar",
+          "title_en"
+        ],
+        "title": "SubscriptionFeatureAdminOut"
+      },
+      "SubscriptionFeatureIn": {
+        "properties": {
+          "feature_key": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 2,
+            "title": "Feature Key"
+          },
+          "icon": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 60
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Icon"
+          },
+          "title_ar": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Title Ar"
+          },
+          "title_en": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Title En"
+          },
+          "description_ar": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 600
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description Ar"
+          },
+          "description_en": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 600
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description En"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order",
+            "default": 0
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "feature_key",
+          "title_ar",
+          "title_en"
+        ],
+        "title": "SubscriptionFeatureIn"
+      },
+      "SubscriptionFeatureOut": {
+        "properties": {
+          "feature_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Feature Id"
+          },
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "icon": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Icon"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "feature_id",
+          "key",
+          "title"
+        ],
+        "title": "SubscriptionFeatureOut",
+        "description": "A catalog feature, localized for the storefront."
+      },
+      "SubscriptionFunnelResponse": {
+        "properties": {
+          "start": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Start"
+          },
+          "end": {
+            "type": "string",
+            "format": "date-time",
+            "title": "End"
+          },
+          "plans": {
+            "items": {
+              "$ref": "#/components/schemas/PlanFunnelOut"
+            },
+            "type": "array",
+            "title": "Plans"
+          }
+        },
+        "type": "object",
+        "required": [
+          "start",
+          "end",
+          "plans"
+        ],
+        "title": "SubscriptionFunnelResponse"
+      },
+      "SubscriptionOutcomeSchema": {
+        "properties": {
+          "locale_code": {
+            "type": "string",
+            "maxLength": 15,
+            "minLength": 2,
+            "title": "Locale Code"
+          },
+          "outcome_text": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Outcome Text"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "locale_code",
+          "outcome_text"
+        ],
+        "title": "SubscriptionOutcomeSchema"
+      },
+      "SubscriptionPlanAdminResponse": {
+        "properties": {
+          "plan_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Plan Id"
+          },
+          "product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Product Id"
+          },
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "audience_type": {
+            "type": "string",
+            "enum": [
+              "individual",
+              "company"
+            ],
+            "title": "Audience Type"
+          },
+          "plan_type": {
+            "type": "string",
+            "enum": [
+              "standard",
+              "full_library",
+              "choose_x"
+            ],
+            "title": "Plan Type"
+          },
+          "billing_interval": {
+            "type": "string",
+            "enum": [
+              "month",
+              "year"
+            ],
+            "title": "Billing Interval"
+          },
+          "price": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Price"
+          },
+          "currency_code": {
+            "type": "string",
+            "title": "Currency Code"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "selection_allowance": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Selection Allowance"
+          },
+          "max_replacements_per_period": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Replacements Per Period"
+          },
+          "max_seats": {
+            "type": "integer",
+            "title": "Max Seats",
+            "default": 1
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "subtitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subtitle"
+          },
+          "short_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Short Description"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "thumbnail_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thumbnail Url"
+          },
+          "hero_media_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hero Media Url"
+          },
+          "benefits": {
+            "items": {
+              "$ref": "#/components/schemas/SubscriptionPlanBenefitOut"
+            },
+            "type": "array",
+            "title": "Benefits"
+          },
+          "included_products": {
+            "items": {
+              "$ref": "#/components/schemas/SubscriptionPlanProductOut"
+            },
+            "type": "array",
+            "title": "Included Products"
+          },
+          "selectable_products": {
+            "items": {
+              "$ref": "#/components/schemas/SubscriptionPlanProductOut"
+            },
+            "type": "array",
+            "title": "Selectable Products"
+          },
+          "effective_price": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Effective Price"
+          },
+          "compare_at_price": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Compare At Price",
+            "description": "Original price to show struck through while a discount is active."
+          },
+          "discount": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PlanDiscountOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "card_features": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Card Features",
+            "description": "Plan card bullet items for the requested language."
+          },
+          "is_featured": {
+            "type": "boolean",
+            "title": "Is Featured",
+            "default": false
+          },
+          "features": {
+            "items": {
+              "$ref": "#/components/schemas/PlanFeatureOut"
+            },
+            "type": "array",
+            "title": "Features",
+            "description": "Catalog features this plan offers, localized."
+          },
+          "stripe_product_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stripe Product Id"
+          },
+          "stripe_price_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stripe Price Id"
+          },
+          "products": {
+            "items": {
+              "$ref": "#/components/schemas/SubscriptionPlanProductOut"
+            },
+            "type": "array",
+            "title": "Products"
+          },
+          "translations": {
+            "items": {
+              "$ref": "#/components/schemas/SubscriptionTranslationSchema"
+            },
+            "type": "array",
+            "title": "Translations"
+          },
+          "sections": {
+            "items": {
+              "$ref": "#/components/schemas/SubscriptionSectionSchema"
+            },
+            "type": "array",
+            "title": "Sections"
+          },
+          "learning_outcomes": {
+            "items": {
+              "$ref": "#/components/schemas/SubscriptionOutcomeSchema"
+            },
+            "type": "array",
+            "title": "Learning Outcomes"
+          },
+          "card_features_by_locale": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object",
+            "title": "Card Features By Locale"
+          },
+          "plan_features": {
+            "items": {
+              "$ref": "#/components/schemas/PlanFeatureAdminOut"
+            },
+            "type": "array",
+            "title": "Plan Features"
+          },
+          "active_subscribers": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active Subscribers"
+          },
+          "total_subscribers": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Subscribers"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "plan_id",
+          "product_id",
+          "slug",
+          "audience_type",
+          "plan_type",
+          "billing_interval",
+          "price",
+          "currency_code",
+          "status",
+          "version",
+          "effective_price"
+        ],
+        "title": "SubscriptionPlanAdminResponse"
+      },
+      "SubscriptionPlanBenefitIn": {
+        "properties": {
+          "benefit_type": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Benefit Type"
+          },
+          "config": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Config"
+          }
+        },
+        "type": "object",
+        "required": [
+          "benefit_type"
+        ],
+        "title": "SubscriptionPlanBenefitIn"
+      },
+      "SubscriptionPlanBenefitOut": {
+        "properties": {
+          "benefit_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Benefit Id"
+          },
+          "benefit_type": {
+            "type": "string",
+            "title": "Benefit Type"
+          },
+          "config": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Config"
+          }
+        },
+        "type": "object",
+        "required": [
+          "benefit_type"
+        ],
+        "title": "SubscriptionPlanBenefitOut"
+      },
+      "SubscriptionPlanProductIn": {
+        "properties": {
+          "product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Product Id"
+          },
+          "access_mode": {
+            "type": "string",
+            "enum": [
+              "included",
+              "selectable"
+            ],
+            "title": "Access Mode",
+            "default": "included"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id"
+        ],
+        "title": "SubscriptionPlanProductIn"
+      },
+      "SubscriptionPlanProductOut": {
+        "properties": {
+          "plan_product_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Product Id"
+          },
+          "product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Product Id"
+          },
+          "access_mode": {
+            "type": "string",
+            "enum": [
+              "included",
+              "selectable"
+            ],
+            "title": "Access Mode",
+            "default": "included"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order",
+            "default": 0
+          },
+          "slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slug"
+          },
+          "product_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Product Type"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id"
+        ],
+        "title": "SubscriptionPlanProductOut"
+      },
+      "SubscriptionPlanPublicResponse": {
+        "properties": {
+          "plan_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Plan Id"
+          },
+          "product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Product Id"
+          },
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "audience_type": {
+            "type": "string",
+            "enum": [
+              "individual",
+              "company"
+            ],
+            "title": "Audience Type"
+          },
+          "plan_type": {
+            "type": "string",
+            "enum": [
+              "standard",
+              "full_library",
+              "choose_x"
+            ],
+            "title": "Plan Type"
+          },
+          "billing_interval": {
+            "type": "string",
+            "enum": [
+              "month",
+              "year"
+            ],
+            "title": "Billing Interval"
+          },
+          "price": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Price"
+          },
+          "currency_code": {
+            "type": "string",
+            "title": "Currency Code"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "selection_allowance": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Selection Allowance"
+          },
+          "max_replacements_per_period": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Replacements Per Period"
+          },
+          "max_seats": {
+            "type": "integer",
+            "title": "Max Seats",
+            "default": 1
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "subtitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subtitle"
+          },
+          "short_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Short Description"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "thumbnail_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thumbnail Url"
+          },
+          "hero_media_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hero Media Url"
+          },
+          "benefits": {
+            "items": {
+              "$ref": "#/components/schemas/SubscriptionPlanBenefitOut"
+            },
+            "type": "array",
+            "title": "Benefits"
+          },
+          "included_products": {
+            "items": {
+              "$ref": "#/components/schemas/SubscriptionPlanProductOut"
+            },
+            "type": "array",
+            "title": "Included Products"
+          },
+          "selectable_products": {
+            "items": {
+              "$ref": "#/components/schemas/SubscriptionPlanProductOut"
+            },
+            "type": "array",
+            "title": "Selectable Products"
+          },
+          "effective_price": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Effective Price"
+          },
+          "compare_at_price": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Compare At Price",
+            "description": "Original price to show struck through while a discount is active."
+          },
+          "discount": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PlanDiscountOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "card_features": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Card Features",
+            "description": "Plan card bullet items for the requested language."
+          },
+          "is_featured": {
+            "type": "boolean",
+            "title": "Is Featured",
+            "default": false
+          },
+          "features": {
+            "items": {
+              "$ref": "#/components/schemas/PlanFeatureOut"
+            },
+            "type": "array",
+            "title": "Features",
+            "description": "Catalog features this plan offers, localized."
+          }
+        },
+        "type": "object",
+        "required": [
+          "plan_id",
+          "product_id",
+          "slug",
+          "audience_type",
+          "plan_type",
+          "billing_interval",
+          "price",
+          "currency_code",
+          "status",
+          "version",
+          "effective_price"
+        ],
+        "title": "SubscriptionPlanPublicResponse"
+      },
+      "SubscriptionSeatOut": {
+        "properties": {
+          "seat_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Seat Id"
+          },
+          "subscription_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Subscription Id"
+          },
+          "assigned_customer_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assigned Customer Id"
+          },
+          "assigned_email": {
+            "type": "string",
+            "title": "Assigned Email"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "assigned_by_customer_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Assigned By Customer Id"
+          },
+          "assigned_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assigned At"
+          },
+          "revoked_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revoked At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "seat_id",
+          "subscription_id",
+          "assigned_email",
+          "status",
+          "assigned_by_customer_id"
+        ],
+        "title": "SubscriptionSeatOut"
+      },
+      "SubscriptionSectionSchema": {
+        "properties": {
+          "section_type": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Section Type"
+          },
+          "locale_code": {
+            "type": "string",
+            "maxLength": 15,
+            "minLength": 2,
+            "title": "Locale Code"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "subtitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subtitle"
+          },
+          "content_json": {
+            "title": "Content Json"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order",
+            "default": 0
+          },
+          "is_visible": {
+            "type": "boolean",
+            "title": "Is Visible",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "section_type",
+          "locale_code"
+        ],
+        "title": "SubscriptionSectionSchema"
+      },
+      "SubscriptionStatsOverviewResponse": {
+        "properties": {
+          "start": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Start"
+          },
+          "end": {
+            "type": "string",
+            "format": "date-time",
+            "title": "End"
+          },
+          "active": {
+            "type": "integer",
+            "title": "Active"
+          },
+          "pending": {
+            "type": "integer",
+            "title": "Pending"
+          },
+          "past_due": {
+            "type": "integer",
+            "title": "Past Due"
+          },
+          "total_customers": {
+            "type": "integer",
+            "title": "Total Customers"
+          },
+          "new_in_range": {
+            "type": "integer",
+            "title": "New In Range"
+          },
+          "churned_in_range": {
+            "type": "integer",
+            "title": "Churned In Range"
+          },
+          "churn_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Churn Rate"
+          },
+          "mrr": {
+            "items": {
+              "$ref": "#/components/schemas/CurrencyAmountOut"
+            },
+            "type": "array",
+            "title": "Mrr"
+          },
+          "arr": {
+            "items": {
+              "$ref": "#/components/schemas/CurrencyAmountOut"
+            },
+            "type": "array",
+            "title": "Arr"
+          },
+          "revenue_in_range": {
+            "items": {
+              "$ref": "#/components/schemas/CurrencyAmountOut"
+            },
+            "type": "array",
+            "title": "Revenue In Range",
+            "description": "First-payment checkout revenue of subscription orders in the window."
+          },
+          "plans": {
+            "items": {
+              "$ref": "#/components/schemas/PlanStatsOut"
+            },
+            "type": "array",
+            "title": "Plans"
+          },
+          "trend": {
+            "items": {
+              "$ref": "#/components/schemas/SubscriptionTrendPointOut"
+            },
+            "type": "array",
+            "title": "Trend"
+          }
+        },
+        "type": "object",
+        "required": [
+          "start",
+          "end",
+          "active",
+          "pending",
+          "past_due",
+          "total_customers",
+          "new_in_range",
+          "churned_in_range",
+          "mrr",
+          "arr",
+          "revenue_in_range",
+          "plans",
+          "trend"
+        ],
+        "title": "SubscriptionStatsOverviewResponse"
+      },
+      "SubscriptionTranslationSchema": {
+        "properties": {
+          "locale_code": {
+            "type": "string",
+            "maxLength": 15,
+            "minLength": 2,
+            "title": "Locale Code"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "subtitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subtitle"
+          },
+          "short_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Short Description"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "who_is_this_for": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Who Is This For"
+          },
+          "faq_json": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faq Json"
+          }
+        },
+        "type": "object",
+        "required": [
+          "locale_code",
+          "title"
+        ],
+        "title": "SubscriptionTranslationSchema"
+      },
+      "SubscriptionTrendPointOut": {
+        "properties": {
+          "day": {
+            "type": "string",
+            "format": "date",
+            "title": "Day"
+          },
+          "new": {
+            "type": "integer",
+            "title": "New"
+          },
+          "churned": {
+            "type": "integer",
+            "title": "Churned"
+          }
+        },
+        "type": "object",
+        "required": [
+          "day",
+          "new",
+          "churned"
+        ],
+        "title": "SubscriptionTrendPointOut"
       },
       "SupportMessage": {
         "properties": {
@@ -47691,6 +54171,266 @@
           "ends_at"
         ],
         "title": "UpdateSlotRequest"
+      },
+      "UpdateSubscriptionPlanRequest": {
+        "properties": {
+          "slug": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 160,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slug"
+          },
+          "audience_type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "individual",
+                  "company"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audience Type"
+          },
+          "plan_type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "standard",
+                  "full_library",
+                  "choose_x"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Type"
+          },
+          "billing_interval": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "month",
+                  "year"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Billing Interval"
+          },
+          "price": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price"
+          },
+          "currency_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 3,
+                "minLength": 3
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency Code"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "draft",
+                  "published",
+                  "archived"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "selection_allowance": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Selection Allowance"
+          },
+          "max_replacements_per_period": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Replacements Per Period"
+          },
+          "max_seats": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Seats"
+          },
+          "thumbnail_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thumbnail Url"
+          },
+          "hero_media_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hero Media Url"
+          },
+          "stripe_product_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stripe Product Id"
+          },
+          "stripe_price_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stripe Price Id"
+          },
+          "translations": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SubscriptionTranslationSchema"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Translations"
+          },
+          "sections": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SubscriptionSectionSchema"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sections"
+          },
+          "learning_outcomes": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SubscriptionOutcomeSchema"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Learning Outcomes"
+          },
+          "is_featured": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Featured"
+          },
+          "card_features": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Card Features"
+          }
+        },
+        "type": "object",
+        "title": "UpdateSubscriptionPlanRequest"
       },
       "UpdateUnitRequest": {
         "properties": {

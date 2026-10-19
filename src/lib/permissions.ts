@@ -21,6 +21,11 @@ const AREA_SCOPE: Record<string, string> = {
   // Add/edit availability and reschedule bookings.
   consultationsWrite: "admin:consultations:write",
   instructors: "admin:catalog:read",
+  // Subscription plans (catalog scopes) and subscribers (entitlement scopes).
+  subscriptions: "admin:catalog:read",
+  subscriptionsWrite: "admin:catalog:write",
+  subscribers: "admin:entitlements:read",
+  subscribersManage: "admin:entitlements:manage",
   certificates: "admin:operations:read",
   qa: "admin:operations:read",
   customers: "admin:customers:read",

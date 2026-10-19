@@ -474,6 +474,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Global admin search
+         * @description Unified back-office search across courses, diplomas, live diplomas, packages, bundles, instructors, students (customers), orders, coupons, offers, consultations, consultants, experts, subscription plans, subscribers, support tickets, categories, affiliates, and certificates across both B2C and legacy schemas. Each section is filtered according to the signed-in admin's RBAC scopes.
+         */
+        get: operations["global_admin_search_api_v1_admin_search_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/catalog/products": {
         parameters: {
             query?: never;
@@ -5034,10 +5054,652 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/subscriptions/plans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Public Subscription Plans */
+        get: operations["list_public_subscription_plans_api_v1_subscriptions_plans_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/subscriptions/features": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Public Subscription Features
+         * @description Active feature catalog, for the plan comparison table.
+         */
+        get: operations["list_public_subscription_features_api_v1_subscriptions_features_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/subscriptions/plans/{slug_or_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Public Subscription Plan */
+        get: operations["get_public_subscription_plan_api_v1_subscriptions_plans__slug_or_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/subscriptions/checkout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Subscription Checkout Session */
+        post: operations["create_subscription_checkout_session_api_v1_subscriptions_checkout_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/subscriptions/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List My Subscriptions */
+        get: operations["list_my_subscriptions_api_v1_subscriptions_me_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/subscriptions/me/perks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My Consultation Perks
+         * @description Free consultation credits left this period and the subscriber discount, if any.
+         *     Declared before `/me/{subscription_id}` so "perks" is not read as an id.
+         */
+        get: operations["my_consultation_perks_api_v1_subscriptions_me_perks_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/subscriptions/me/{subscription_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get My Subscription Detail */
+        get: operations["get_my_subscription_detail_api_v1_subscriptions_me__subscription_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/subscriptions/me/{subscription_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel My Subscription */
+        post: operations["cancel_my_subscription_api_v1_subscriptions_me__subscription_id__cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/subscriptions/me/{subscription_id}/selections": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get My Choose X Selections */
+        get: operations["get_my_choose_x_selections_api_v1_subscriptions_me__subscription_id__selections_get"];
+        put?: never;
+        /** Select Choose X Course */
+        post: operations["select_choose_x_course_api_v1_subscriptions_me__subscription_id__selections_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/subscriptions/me/{subscription_id}/selections/replace": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Replace Choose X Course */
+        post: operations["replace_choose_x_course_api_v1_subscriptions_me__subscription_id__selections_replace_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/subscriptions/me/{subscription_id}/seats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Company Subscription Seats */
+        get: operations["list_company_subscription_seats_api_v1_subscriptions_me__subscription_id__seats_get"];
+        put?: never;
+        /** Assign Company Subscription Seat */
+        post: operations["assign_company_subscription_seat_api_v1_subscriptions_me__subscription_id__seats_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/subscriptions/me/{subscription_id}/seats/{seat_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Revoke Company Subscription Seat */
+        delete: operations["revoke_company_subscription_seat_api_v1_subscriptions_me__subscription_id__seats__seat_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/subscriptions/me/{subscription_id}/selections/learning-started": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Mark My Selection Learning Started
+         * @description Mark a selected course as learning_started=true for the authenticated customer.
+         */
+        post: operations["mark_my_selection_learning_started_api_v1_subscriptions_me__subscription_id__selections_learning_started_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/subscriptions/events/course-started": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Record Lms Course Started Event
+         * @description Webhook/internal event receiver when a learner starts a course in the LMS (LMS-03).
+         */
+        post: operations["record_lms_course_started_event_api_v1_subscriptions_events_course_started_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/subscriptions/dev/activate-order/{order_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Dev Activate Subscription Order
+         * @description Development-only helper to simulate Stripe subscription payment webhook completion.
+         */
+        post: operations["dev_activate_subscription_order_api_v1_subscriptions_dev_activate_order__order_id__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/subscriptions/me/{subscription_id}/dev-renew": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Dev Renew My Subscription
+         * @description Development-only helper to simulate a recurring invoice.paid renewal cycle.
+         */
+        post: operations["dev_renew_my_subscription_api_v1_subscriptions_me__subscription_id__dev_renew_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/subscriptions/plans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin List Subscription Plans */
+        get: operations["admin_list_subscription_plans_api_v1_admin_subscriptions_plans_get"];
+        put?: never;
+        /** Admin Create Subscription Plan */
+        post: operations["admin_create_subscription_plan_api_v1_admin_subscriptions_plans_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/subscriptions/plans/{plan_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Get Subscription Plan */
+        get: operations["admin_get_subscription_plan_api_v1_admin_subscriptions_plans__plan_id__get"];
+        /** Admin Update Subscription Plan */
+        put: operations["admin_update_subscription_plan_api_v1_admin_subscriptions_plans__plan_id__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/subscriptions/plans/{plan_id}/products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Admin Set Subscription Plan Products */
+        put: operations["admin_set_subscription_plan_products_api_v1_admin_subscriptions_plans__plan_id__products_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/subscriptions/plans/{plan_id}/benefits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Admin Set Subscription Plan Benefits */
+        put: operations["admin_set_subscription_plan_benefits_api_v1_admin_subscriptions_plans__plan_id__benefits_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/subscriptions/features": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Admin List Subscription Features
+         * @description The feature catalog plans pick from (AI planner, expert consultations, ...).
+         */
+        get: operations["admin_list_subscription_features_api_v1_admin_subscriptions_features_get"];
+        put?: never;
+        /** Admin Create Subscription Feature */
+        post: operations["admin_create_subscription_feature_api_v1_admin_subscriptions_features_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/subscriptions/features/{feature_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Admin Update Subscription Feature */
+        put: operations["admin_update_subscription_feature_api_v1_admin_subscriptions_features__feature_id__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/subscriptions/plans/{plan_id}/features": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Admin Set Subscription Plan Features
+         * @description Replace the catalog features a plan offers, in display order.
+         */
+        put: operations["admin_set_subscription_plan_features_api_v1_admin_subscriptions_plans__plan_id__features_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/subscriptions/plans/{plan_id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Admin Set Subscription Plan Status
+         * @description Publish, move back to draft, or archive a plan. Publishing requires ar/en titles
+         *     and resources (Choose-X needs at least `selection_allowance` selectable resources).
+         */
+        post: operations["admin_set_subscription_plan_status_api_v1_admin_subscriptions_plans__plan_id__status_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/subscriptions/plans/{plan_id}/discount": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Admin Set Subscription Plan Discount
+         * @description Set (or clear with `{"discount": null}`) the plan sale price. New subscribers are
+         *     charged the discounted price; existing subscribers keep what they pay.
+         */
+        put: operations["admin_set_subscription_plan_discount_api_v1_admin_subscriptions_plans__plan_id__discount_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/subscriptions/plans/{plan_id}/card-features": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Admin Set Subscription Plan Card Features */
+        put: operations["admin_set_subscription_plan_card_features_api_v1_admin_subscriptions_plans__plan_id__card_features_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/subscriptions/plans/{plan_id}/duplicate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Admin Duplicate Subscription Plan
+         * @description Copy a plan into a new draft with a new slug.
+         */
+        post: operations["admin_duplicate_subscription_plan_api_v1_admin_subscriptions_plans__plan_id__duplicate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/subscriptions/plans/{plan_id}/abandoned-checkouts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Admin List Subscription Plan Abandoned Checkouts
+         * @description Customers who started checkout for this plan but never became subscribers.
+         */
+        get: operations["admin_list_subscription_plan_abandoned_checkouts_api_v1_admin_subscriptions_plans__plan_id__abandoned_checkouts_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/subscriptions/stats/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Admin Subscription Stats Overview
+         * @description Subscriber KPIs (active, MRR/ARR, new, churn), per-plan breakdown and a daily trend.
+         *     Requires `admin:catalog:read` or `admin:analytics:read`.
+         */
+        get: operations["admin_subscription_stats_overview_api_v1_admin_subscriptions_stats_overview_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/subscriptions/stats/funnel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Admin Subscription Stats Funnel
+         * @description Per plan: distinct visitors who viewed the plan page → customers who started
+         *     checkout → customers who paid. Requires `admin:catalog:read` or `admin:analytics:read`.
+         */
+        get: operations["admin_subscription_stats_funnel_api_v1_admin_subscriptions_stats_funnel_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/subscriptions/customer-subscriptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin List Customer Subscriptions */
+        get: operations["admin_list_customer_subscriptions_api_v1_admin_subscriptions_customer_subscriptions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/subscriptions/customer-subscriptions/{subscription_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Get Customer Subscription Detail */
+        get: operations["admin_get_customer_subscription_detail_api_v1_admin_subscriptions_customer_subscriptions__subscription_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/subscriptions/customer-subscriptions/{subscription_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Admin Cancel Customer Subscription */
+        post: operations["admin_cancel_customer_subscription_api_v1_admin_subscriptions_customer_subscriptions__subscription_id__cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AbandonedCheckoutListResponse */
+        AbandonedCheckoutListResponse: {
+            /** Items */
+            items: components["schemas"]["AbandonedCheckoutOut"][];
+            /** Total */
+            total: number;
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+        };
+        /** AbandonedCheckoutOut */
+        AbandonedCheckoutOut: {
+            /**
+             * Customer Id
+             * Format: uuid
+             */
+            customer_id: string;
+            /** Email */
+            email?: string | null;
+            /** Full Name */
+            full_name?: string | null;
+            /** Attempts */
+            attempts: number;
+            /** Last Attempt At */
+            last_attempt_at?: string | null;
+            /** Last Order Status */
+            last_order_status?: string | null;
+        };
         /** AccessExtensionCheckoutRequest */
         AccessExtensionCheckoutRequest: {
             /**
@@ -5482,6 +6144,17 @@ export interface components {
             lms_user_id?: string | null;
             /** Lms Numeric User Id */
             lms_numeric_user_id?: number | null;
+        };
+        /** AdminCustomerSubscriptionListResponse */
+        AdminCustomerSubscriptionListResponse: {
+            /** Items */
+            items: components["schemas"]["CustomerSubscriptionResponse"][];
+            /** Total */
+            total: number;
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
         };
         /** AdminDeleteServiceResponse */
         AdminDeleteServiceResponse: {
@@ -6200,6 +6873,42 @@ export interface components {
             /** Scopes */
             scopes: string[];
         };
+        /** AdminSearchHit */
+        AdminSearchHit: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "course" | "diploma" | "live_diploma" | "package" | "bundle" | "consultation" | "instructor" | "consultant" | "expert" | "student" | "order" | "coupon" | "offer" | "subscription_plan" | "subscriber" | "ticket" | "category" | "affiliate" | "certificate";
+            /** Id */
+            id: string;
+            /** Ref */
+            ref: string;
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "b2c" | "legacy";
+            /** Title */
+            title: string;
+            /** Href */
+            href: string;
+            /** Subtitle */
+            subtitle?: string | null;
+            /** Status */
+            status?: string | null;
+            /** Image Url */
+            image_url?: string | null;
+        };
+        /** AdminSearchResponse */
+        AdminSearchResponse: {
+            /** Query */
+            query: string;
+            /** Total */
+            total: number;
+            /** Items */
+            items?: components["schemas"]["AdminSearchHit"][];
+        };
         /** AdminSlot */
         AdminSlot: {
             /**
@@ -6454,6 +7163,13 @@ export interface components {
              * Format: uuid
              */
             role_id: string;
+        };
+        /** AssignSeatRequest */
+        AssignSeatRequest: {
+            /** Email */
+            email: string;
+            /** Customer Id */
+            customer_id?: string | null;
         };
         /** AuthResponse */
         AuthResponse: {
@@ -6935,7 +7651,22 @@ export interface components {
              * Format: uuid
              */
             booking_id: string;
-            checkout: components["schemas"]["CheckoutSessionResponse"];
+            /** @description Payment session; null when the booking is covered by a subscription. */
+            checkout?: components["schemas"]["CheckoutSessionResponse"] | null;
+            /**
+             * Covered By Subscription
+             * @default false
+             */
+            covered_by_subscription: boolean;
+            /** Order Id */
+            order_id?: string | null;
+            /** Payment Intent Id */
+            payment_intent_id?: string | null;
+            /**
+             * Discount Percent
+             * @description Subscriber discount applied to the session price.
+             */
+            discount_percent?: string | null;
         };
         /** BookingCustomerResponse */
         BookingCustomerResponse: {
@@ -7146,6 +7877,14 @@ export interface components {
              * @enum {string}
              */
             slots: "release" | "remove";
+        };
+        /** CancelSubscriptionRequest */
+        CancelSubscriptionRequest: {
+            /**
+             * Immediate
+             * @default false
+             */
+            immediate: boolean;
         };
         /** CartItemRequest */
         CartItemRequest: {
@@ -7672,6 +8411,36 @@ export interface components {
             /** Temporal Workflow Id */
             temporal_workflow_id?: string | null;
         };
+        /** ChooseXSelectionStateResponse */
+        ChooseXSelectionStateResponse: {
+            /**
+             * Subscription Id
+             * Format: uuid
+             */
+            subscription_id: string;
+            usage: components["schemas"]["ChooseXUsageOut"];
+            /** Active Selections */
+            active_selections: components["schemas"]["CourseSelectionOut"][];
+            /** Selection History */
+            selection_history: components["schemas"]["CourseSelectionOut"][];
+            /** Eligible Products */
+            eligible_products: components["schemas"]["SubscriptionPlanProductOut"][];
+        };
+        /** ChooseXUsageOut */
+        ChooseXUsageOut: {
+            /** Selection Allowance */
+            selection_allowance: number;
+            /** Used Selections */
+            used_selections: number;
+            /** Remaining Selections */
+            remaining_selections: number;
+            /** Replacements Used */
+            replacements_used: number;
+            /** Max Replacements Per Period */
+            max_replacements_per_period?: number | null;
+            /** Remaining Replacements */
+            remaining_replacements?: number | null;
+        };
         /** CohortEnrollmentView */
         CohortEnrollmentView: {
             /**
@@ -7961,6 +8730,37 @@ export interface components {
             /** Completed At */
             completed_at: string | null;
         };
+        /**
+         * ConsultationPerksResponse
+         * @description What the signed-in customer's subscription gives them on expert consultations.
+         */
+        ConsultationPerksResponse: {
+            /** Has Perks */
+            has_perks: boolean;
+            /** Subscription Id */
+            subscription_id?: string | null;
+            /** Plan Title */
+            plan_title?: string | null;
+            /**
+             * Credits Per Period
+             * @default 0
+             */
+            credits_per_period: number;
+            /**
+             * Credits Used
+             * @default 0
+             */
+            credits_used: number;
+            /**
+             * Credits Remaining
+             * @default 0
+             */
+            credits_remaining: number;
+            /** Discount Percent */
+            discount_percent?: string | null;
+            /** Period End */
+            period_end?: string | null;
+        };
         /** ConsultationResponse */
         ConsultationResponse: {
             /** Id */
@@ -8241,6 +9041,59 @@ export interface components {
             /** Original Price */
             original_price?: number | null;
         };
+        /** CourseSelectionOut */
+        CourseSelectionOut: {
+            /**
+             * Selection Id
+             * Format: uuid
+             */
+            selection_id: string;
+            /**
+             * Subscription Id
+             * Format: uuid
+             */
+            subscription_id: string;
+            /**
+             * Customer Id
+             * Format: uuid
+             */
+            customer_id: string;
+            /**
+             * Product Id
+             * Format: uuid
+             */
+            product_id: string;
+            /** Product Slug */
+            product_slug?: string | null;
+            /** Product Title */
+            product_title?: string | null;
+            /** Entitlement Id */
+            entitlement_id?: string | null;
+            /**
+             * Period Start
+             * Format: date-time
+             */
+            period_start: string;
+            /**
+             * Period End
+             * Format: date-time
+             */
+            period_end: string;
+            /** Status */
+            status: string;
+            /** Learning Started */
+            learning_started: boolean;
+            /** Learning Started At */
+            learning_started_at?: string | null;
+            /** Can Replace */
+            can_replace: boolean;
+            /** Replaced By Selection Id */
+            replaced_by_selection_id?: string | null;
+            /** Replaced At */
+            replaced_at?: string | null;
+            /** Created At */
+            created_at?: string | null;
+        };
         /** CreateExpertServiceRequest */
         CreateExpertServiceRequest: {
             /** Title */
@@ -8511,6 +9364,82 @@ export interface components {
             /** Created */
             created: number;
         };
+        /** CreateSubscriptionPlanRequest */
+        CreateSubscriptionPlanRequest: {
+            /** Slug */
+            slug: string;
+            /**
+             * Audience Type
+             * @default individual
+             * @enum {string}
+             */
+            audience_type: "individual" | "company";
+            /**
+             * Plan Type
+             * @default standard
+             * @enum {string}
+             */
+            plan_type: "standard" | "full_library" | "choose_x";
+            /**
+             * Billing Interval
+             * @default month
+             * @enum {string}
+             */
+            billing_interval: "month" | "year";
+            /** Price */
+            price: number | string;
+            /**
+             * Currency Code
+             * @default USD
+             */
+            currency_code: string;
+            /**
+             * Status
+             * @default draft
+             * @enum {string}
+             */
+            status: "draft" | "published" | "archived";
+            /** Selection Allowance */
+            selection_allowance?: number | null;
+            /** Max Replacements Per Period */
+            max_replacements_per_period?: number | null;
+            /**
+             * Max Seats
+             * @default 1
+             */
+            max_seats: number;
+            /** Thumbnail Url */
+            thumbnail_url?: string | null;
+            /** Hero Media Url */
+            hero_media_url?: string | null;
+            /** Stripe Product Id */
+            stripe_product_id?: string | null;
+            /** Stripe Price Id */
+            stripe_price_id?: string | null;
+            /** Translations */
+            translations?: components["schemas"]["SubscriptionTranslationSchema"][];
+            /** Sections */
+            sections?: components["schemas"]["SubscriptionSectionSchema"][];
+            /** Learning Outcomes */
+            learning_outcomes?: components["schemas"]["SubscriptionOutcomeSchema"][];
+            /** Benefits */
+            benefits?: components["schemas"]["SubscriptionPlanBenefitIn"][];
+            /** Products */
+            products?: components["schemas"]["SubscriptionPlanProductIn"][];
+            /**
+             * Is Featured
+             * @default false
+             */
+            is_featured: boolean;
+            /**
+             * Card Features
+             * @description Plan card bullet items keyed by locale (ar/en).
+             */
+            card_features?: {
+                [key: string]: string[];
+            };
+            discount?: components["schemas"]["PlanDiscountIn"] | null;
+        };
         /** CreateUnitRequest */
         CreateUnitRequest: {
             /**
@@ -8533,6 +9462,13 @@ export interface components {
              * @description Duration in minutes or seconds.
              */
             duration?: number | null;
+        };
+        /** CurrencyAmountOut */
+        CurrencyAmountOut: {
+            /** Currency Code */
+            currency_code: string;
+            /** Amount */
+            amount: string;
         };
         /**
          * CurriculumLesson
@@ -8756,6 +9692,150 @@ export interface components {
              */
             status: string;
         };
+        /** CustomerSubscriptionDetailResponse */
+        CustomerSubscriptionDetailResponse: {
+            /**
+             * Subscription Id
+             * Format: uuid
+             */
+            subscription_id: string;
+            /**
+             * Customer Id
+             * Format: uuid
+             */
+            customer_id: string;
+            /**
+             * Plan Id
+             * Format: uuid
+             */
+            plan_id: string;
+            /** Order Id */
+            order_id?: string | null;
+            /** Stripe Subscription Id */
+            stripe_subscription_id?: string | null;
+            /** Plan Slug */
+            plan_slug?: string | null;
+            /** Plan Title */
+            plan_title?: string | null;
+            /** Audience Type */
+            audience_type: string;
+            /** Plan Type */
+            plan_type: string;
+            /** Billing Interval */
+            billing_interval: string;
+            /** Price */
+            price?: string | null;
+            /** Currency Code */
+            currency_code?: string | null;
+            /** Plan Version */
+            plan_version: number;
+            /** Seat Limit */
+            seat_limit: number;
+            /** Company Name */
+            company_name?: string | null;
+            /** Status */
+            status: string;
+            /**
+             * Current Period Start
+             * Format: date-time
+             */
+            current_period_start: string;
+            /**
+             * Current Period End
+             * Format: date-time
+             */
+            current_period_end: string;
+            /** Auto Renew */
+            auto_renew: boolean;
+            /** Cancel At Period End */
+            cancel_at_period_end: boolean;
+            /** Canceled At */
+            canceled_at?: string | null;
+            /** Created At */
+            created_at?: string | null;
+            /** Plan Snapshot */
+            plan_snapshot?: {
+                [key: string]: unknown;
+            };
+            /** Customer Email */
+            customer_email?: string | null;
+            /** Customer Name */
+            customer_name?: string | null;
+            /** Seats */
+            seats?: components["schemas"]["SubscriptionSeatOut"][];
+            /** Selections */
+            selections?: components["schemas"]["CourseSelectionOut"][];
+        };
+        /** CustomerSubscriptionResponse */
+        CustomerSubscriptionResponse: {
+            /**
+             * Subscription Id
+             * Format: uuid
+             */
+            subscription_id: string;
+            /**
+             * Customer Id
+             * Format: uuid
+             */
+            customer_id: string;
+            /**
+             * Plan Id
+             * Format: uuid
+             */
+            plan_id: string;
+            /** Order Id */
+            order_id?: string | null;
+            /** Stripe Subscription Id */
+            stripe_subscription_id?: string | null;
+            /** Plan Slug */
+            plan_slug?: string | null;
+            /** Plan Title */
+            plan_title?: string | null;
+            /** Audience Type */
+            audience_type: string;
+            /** Plan Type */
+            plan_type: string;
+            /** Billing Interval */
+            billing_interval: string;
+            /** Price */
+            price?: string | null;
+            /** Currency Code */
+            currency_code?: string | null;
+            /** Plan Version */
+            plan_version: number;
+            /** Seat Limit */
+            seat_limit: number;
+            /** Company Name */
+            company_name?: string | null;
+            /** Status */
+            status: string;
+            /**
+             * Current Period Start
+             * Format: date-time
+             */
+            current_period_start: string;
+            /**
+             * Current Period End
+             * Format: date-time
+             */
+            current_period_end: string;
+            /** Auto Renew */
+            auto_renew: boolean;
+            /** Cancel At Period End */
+            cancel_at_period_end: boolean;
+            /** Canceled At */
+            canceled_at?: string | null;
+            /** Created At */
+            created_at?: string | null;
+            /** Plan Snapshot */
+            plan_snapshot?: {
+                [key: string]: unknown;
+            };
+            /** Customer Email */
+            customer_email?: string | null;
+            /** Customer Name */
+            customer_name?: string | null;
+        };
         /** CustomerTargetSkillResponse */
         CustomerTargetSkillResponse: {
             /**
@@ -8884,6 +9964,11 @@ export interface components {
              * @enum {string}
              */
             outcome: "deleted" | "archived";
+        };
+        /** DuplicatePlanRequest */
+        DuplicatePlanRequest: {
+            /** Slug */
+            slug: string;
         };
         /** EntitlementDetailResponse */
         EntitlementDetailResponse: {
@@ -10581,6 +11666,167 @@ export interface components {
             /** Parent Legacy Module Id */
             parent_legacy_module_id: number | null;
         };
+        /** PlanDiscountIn */
+        PlanDiscountIn: {
+            /**
+             * Discount Type
+             * @enum {string}
+             */
+            discount_type: "percent" | "fixed";
+            /** Value */
+            value: number | string;
+            /** Starts At */
+            starts_at?: string | null;
+            /** Ends At */
+            ends_at?: string | null;
+            /** Label */
+            label?: string | null;
+        };
+        /** PlanDiscountOut */
+        PlanDiscountOut: {
+            /**
+             * Discount Type
+             * @enum {string}
+             */
+            discount_type: "percent" | "fixed";
+            /** Value */
+            value: string;
+            /** Starts At */
+            starts_at?: string | null;
+            /** Ends At */
+            ends_at?: string | null;
+            /** Label */
+            label?: string | null;
+            /** Is Active */
+            is_active: boolean;
+        };
+        /** PlanFeatureAdminOut */
+        PlanFeatureAdminOut: {
+            /**
+             * Feature Id
+             * Format: uuid
+             */
+            feature_id: string;
+            /** Feature Key */
+            feature_key: string;
+            /** Icon */
+            icon?: string | null;
+            /** Title Ar */
+            title_ar: string;
+            /** Title En */
+            title_en: string;
+            /** Value Ar */
+            value_ar?: string | null;
+            /** Value En */
+            value_en?: string | null;
+            /**
+             * Is Highlighted
+             * @default false
+             */
+            is_highlighted: boolean;
+        };
+        /** PlanFeatureIn */
+        PlanFeatureIn: {
+            /**
+             * Feature Id
+             * Format: uuid
+             */
+            feature_id: string;
+            /** Value Ar */
+            value_ar?: string | null;
+            /** Value En */
+            value_en?: string | null;
+            /**
+             * Is Highlighted
+             * @default false
+             */
+            is_highlighted: boolean;
+        };
+        /** PlanFeatureOut */
+        PlanFeatureOut: {
+            /**
+             * Feature Id
+             * Format: uuid
+             */
+            feature_id: string;
+            /** Key */
+            key: string;
+            /** Icon */
+            icon?: string | null;
+            /** Title */
+            title: string;
+            /** Description */
+            description?: string | null;
+            /** Value */
+            value?: string | null;
+            /**
+             * Highlighted
+             * @default false
+             */
+            highlighted: boolean;
+        };
+        /** PlanFunnelOut */
+        PlanFunnelOut: {
+            /**
+             * Plan Id
+             * Format: uuid
+             */
+            plan_id: string;
+            /** Slug */
+            slug: string;
+            /** Title */
+            title?: string | null;
+            /** Viewed */
+            viewed: number;
+            /** Checkout Started */
+            checkout_started: number;
+            /** Paid */
+            paid: number;
+            /** View To Checkout Rate */
+            view_to_checkout_rate?: number | null;
+            /** Checkout To Paid Rate */
+            checkout_to_paid_rate?: number | null;
+            /** View To Paid Rate */
+            view_to_paid_rate?: number | null;
+        };
+        /** PlanStatsOut */
+        PlanStatsOut: {
+            /**
+             * Plan Id
+             * Format: uuid
+             */
+            plan_id: string;
+            /** Slug */
+            slug: string;
+            /** Title */
+            title?: string | null;
+            /** Plan Status */
+            plan_status: string;
+            /** Billing Interval */
+            billing_interval: string;
+            /** Currency Code */
+            currency_code: string;
+            /** Active */
+            active: number;
+            /** Pending */
+            pending: number;
+            /** Past Due */
+            past_due: number;
+            /** Canceled */
+            canceled: number;
+            /** Expired */
+            expired: number;
+            /** Total */
+            total: number;
+            /** New In Range */
+            new_in_range: number;
+            /** Churned In Range */
+            churned_in_range: number;
+            /** Mrr */
+            mrr: string;
+            /** Revenue In Range */
+            revenue_in_range: string;
+        };
         /**
          * PreviewBaseResponse
          * @description Storefront data the live preview renders under the draft, tagged with the product kind.
@@ -11343,7 +12589,7 @@ export interface components {
             markdown: string;
             /**
              * Source
-             * @description `readme` when saved, `sections` when generated from legacy HTML sections, `empty`.
+             * @description `readme` when saved; otherwise one generated from the product: `consultation` (its details), `sections` (legacy HTML sections), `description` (its description and learning outcomes), or `empty`.
              */
             source: string;
             /**
@@ -11444,6 +12690,21 @@ export interface components {
              * @default false
              */
             personalized: boolean;
+        };
+        /** RecordLearningStartedRequest */
+        RecordLearningStartedRequest: {
+            /**
+             * Customer Id
+             * Format: uuid
+             */
+            customer_id: string;
+            /**
+             * Product Id
+             * Format: uuid
+             */
+            product_id: string;
+            /** Started At */
+            started_at?: string | null;
         };
         /** RecordingResponse */
         RecordingResponse: {
@@ -11612,6 +12873,19 @@ export interface components {
              * @description List of IDs in the desired order.
              */
             ids: number[];
+        };
+        /** ReplaceCourseRequest */
+        ReplaceCourseRequest: {
+            /**
+             * Old Product Id
+             * Format: uuid
+             */
+            old_product_id: string;
+            /**
+             * New Product Id
+             * Format: uuid
+             */
+            new_product_id: string;
         };
         /** RequestPage */
         RequestPage: {
@@ -12047,6 +13321,14 @@ export interface components {
             /** @description Legacy consultation record; set for consultation products. */
             consultation?: components["schemas"]["ConsultationResponse"] | null;
         };
+        /** SelectCourseRequest */
+        SelectCourseRequest: {
+            /**
+             * Product Id
+             * Format: uuid
+             */
+            product_id: string;
+        };
         /** SessionAssetResponse */
         SessionAssetResponse: {
             /**
@@ -12115,6 +13397,44 @@ export interface components {
             ends_at: string;
             /** Meeting Url */
             meeting_url?: string | null;
+        };
+        /** SetCardFeaturesRequest */
+        SetCardFeaturesRequest: {
+            /**
+             * Card Features
+             * @description Plan card bullet items keyed by locale (ar/en); omitted locales are kept.
+             */
+            card_features: {
+                [key: string]: string[];
+            };
+        };
+        /** SetPlanBenefitsRequest */
+        SetPlanBenefitsRequest: {
+            /** Benefits */
+            benefits?: components["schemas"]["SubscriptionPlanBenefitIn"][];
+        };
+        /** SetPlanDiscountRequest */
+        SetPlanDiscountRequest: {
+            /** @description New sale discount, or null to remove it. */
+            discount?: components["schemas"]["PlanDiscountIn"] | null;
+        };
+        /** SetPlanFeaturesRequest */
+        SetPlanFeaturesRequest: {
+            /** Features */
+            features?: components["schemas"]["PlanFeatureIn"][];
+        };
+        /** SetPlanProductsRequest */
+        SetPlanProductsRequest: {
+            /** Products */
+            products?: components["schemas"]["SubscriptionPlanProductIn"][];
+        };
+        /** SetPlanStatusRequest */
+        SetPlanStatusRequest: {
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "draft" | "published" | "archived";
         };
         /** SkillResponse */
         SkillResponse: {
@@ -12398,6 +13718,516 @@ export interface components {
              */
             legacy_sync_status: "pending" | "synced" | "disabled" | "skipped_no_legacy" | "failed";
             document?: components["schemas"]["ContentDocument"] | null;
+        };
+        /** SubscriptionCheckoutRequest */
+        SubscriptionCheckoutRequest: {
+            /** Plan Id */
+            plan_id?: string | null;
+            /** Product Id */
+            product_id?: string | null;
+            /** Seat Count */
+            seat_count?: number | null;
+            /** Company Name */
+            company_name?: string | null;
+            /** Initial Selected Product Ids */
+            initial_selected_product_ids?: string[];
+            /** Success Url */
+            success_url?: string | null;
+            /** Cancel Url */
+            cancel_url?: string | null;
+        };
+        /** SubscriptionFeatureAdminOut */
+        SubscriptionFeatureAdminOut: {
+            /**
+             * Feature Id
+             * Format: uuid
+             */
+            feature_id: string;
+            /** Feature Key */
+            feature_key: string;
+            /** Icon */
+            icon?: string | null;
+            /** Title Ar */
+            title_ar: string;
+            /** Title En */
+            title_en: string;
+            /** Description Ar */
+            description_ar?: string | null;
+            /** Description En */
+            description_en?: string | null;
+            /**
+             * Sort Order
+             * @default 0
+             */
+            sort_order: number;
+            /**
+             * Is Active
+             * @default true
+             */
+            is_active: boolean;
+        };
+        /** SubscriptionFeatureIn */
+        SubscriptionFeatureIn: {
+            /** Feature Key */
+            feature_key: string;
+            /** Icon */
+            icon?: string | null;
+            /** Title Ar */
+            title_ar: string;
+            /** Title En */
+            title_en: string;
+            /** Description Ar */
+            description_ar?: string | null;
+            /** Description En */
+            description_en?: string | null;
+            /**
+             * Sort Order
+             * @default 0
+             */
+            sort_order: number;
+            /**
+             * Is Active
+             * @default true
+             */
+            is_active: boolean;
+        };
+        /**
+         * SubscriptionFeatureOut
+         * @description A catalog feature, localized for the storefront.
+         */
+        SubscriptionFeatureOut: {
+            /**
+             * Feature Id
+             * Format: uuid
+             */
+            feature_id: string;
+            /** Key */
+            key: string;
+            /** Icon */
+            icon?: string | null;
+            /** Title */
+            title: string;
+            /** Description */
+            description?: string | null;
+        };
+        /** SubscriptionFunnelResponse */
+        SubscriptionFunnelResponse: {
+            /**
+             * Start
+             * Format: date-time
+             */
+            start: string;
+            /**
+             * End
+             * Format: date-time
+             */
+            end: string;
+            /** Plans */
+            plans: components["schemas"]["PlanFunnelOut"][];
+        };
+        /** SubscriptionOutcomeSchema */
+        SubscriptionOutcomeSchema: {
+            /** Locale Code */
+            locale_code: string;
+            /** Outcome Text */
+            outcome_text: string;
+            /**
+             * Sort Order
+             * @default 0
+             */
+            sort_order: number;
+        };
+        /** SubscriptionPlanAdminResponse */
+        SubscriptionPlanAdminResponse: {
+            /**
+             * Plan Id
+             * Format: uuid
+             */
+            plan_id: string;
+            /**
+             * Product Id
+             * Format: uuid
+             */
+            product_id: string;
+            /** Slug */
+            slug: string;
+            /**
+             * Audience Type
+             * @enum {string}
+             */
+            audience_type: "individual" | "company";
+            /**
+             * Plan Type
+             * @enum {string}
+             */
+            plan_type: "standard" | "full_library" | "choose_x";
+            /**
+             * Billing Interval
+             * @enum {string}
+             */
+            billing_interval: "month" | "year";
+            /** Price */
+            price: string;
+            /** Currency Code */
+            currency_code: string;
+            /** Status */
+            status: string;
+            /** Version */
+            version: number;
+            /** Selection Allowance */
+            selection_allowance?: number | null;
+            /** Max Replacements Per Period */
+            max_replacements_per_period?: number | null;
+            /**
+             * Max Seats
+             * @default 1
+             */
+            max_seats: number;
+            /** Title */
+            title?: string | null;
+            /** Subtitle */
+            subtitle?: string | null;
+            /** Short Description */
+            short_description?: string | null;
+            /** Description */
+            description?: string | null;
+            /** Thumbnail Url */
+            thumbnail_url?: string | null;
+            /** Hero Media Url */
+            hero_media_url?: string | null;
+            /** Benefits */
+            benefits?: components["schemas"]["SubscriptionPlanBenefitOut"][];
+            /** Included Products */
+            included_products?: components["schemas"]["SubscriptionPlanProductOut"][];
+            /** Selectable Products */
+            selectable_products?: components["schemas"]["SubscriptionPlanProductOut"][];
+            /** Effective Price */
+            effective_price: string;
+            /**
+             * Compare At Price
+             * @description Original price to show struck through while a discount is active.
+             */
+            compare_at_price?: string | null;
+            discount?: components["schemas"]["PlanDiscountOut"] | null;
+            /**
+             * Card Features
+             * @description Plan card bullet items for the requested language.
+             */
+            card_features?: string[];
+            /**
+             * Is Featured
+             * @default false
+             */
+            is_featured: boolean;
+            /**
+             * Features
+             * @description Catalog features this plan offers, localized.
+             */
+            features?: components["schemas"]["PlanFeatureOut"][];
+            /** Stripe Product Id */
+            stripe_product_id?: string | null;
+            /** Stripe Price Id */
+            stripe_price_id?: string | null;
+            /** Products */
+            products?: components["schemas"]["SubscriptionPlanProductOut"][];
+            /** Translations */
+            translations?: components["schemas"]["SubscriptionTranslationSchema"][];
+            /** Sections */
+            sections?: components["schemas"]["SubscriptionSectionSchema"][];
+            /** Learning Outcomes */
+            learning_outcomes?: components["schemas"]["SubscriptionOutcomeSchema"][];
+            /** Card Features By Locale */
+            card_features_by_locale?: {
+                [key: string]: string[];
+            };
+            /** Plan Features */
+            plan_features?: components["schemas"]["PlanFeatureAdminOut"][];
+            /** Active Subscribers */
+            active_subscribers?: number | null;
+            /** Total Subscribers */
+            total_subscribers?: number | null;
+            /** Created At */
+            created_at?: string | null;
+            /** Updated At */
+            updated_at?: string | null;
+        };
+        /** SubscriptionPlanBenefitIn */
+        SubscriptionPlanBenefitIn: {
+            /** Benefit Type */
+            benefit_type: string;
+            /** Config */
+            config?: {
+                [key: string]: unknown;
+            };
+        };
+        /** SubscriptionPlanBenefitOut */
+        SubscriptionPlanBenefitOut: {
+            /** Benefit Id */
+            benefit_id?: string | null;
+            /** Benefit Type */
+            benefit_type: string;
+            /** Config */
+            config?: {
+                [key: string]: unknown;
+            };
+        };
+        /** SubscriptionPlanProductIn */
+        SubscriptionPlanProductIn: {
+            /**
+             * Product Id
+             * Format: uuid
+             */
+            product_id: string;
+            /**
+             * Access Mode
+             * @default included
+             * @enum {string}
+             */
+            access_mode: "included" | "selectable";
+            /**
+             * Sort Order
+             * @default 0
+             */
+            sort_order: number;
+        };
+        /** SubscriptionPlanProductOut */
+        SubscriptionPlanProductOut: {
+            /** Plan Product Id */
+            plan_product_id?: string | null;
+            /**
+             * Product Id
+             * Format: uuid
+             */
+            product_id: string;
+            /**
+             * Access Mode
+             * @default included
+             * @enum {string}
+             */
+            access_mode: "included" | "selectable";
+            /**
+             * Sort Order
+             * @default 0
+             */
+            sort_order: number;
+            /** Slug */
+            slug?: string | null;
+            /** Product Type */
+            product_type?: string | null;
+            /** Title */
+            title?: string | null;
+            /** Status */
+            status?: string | null;
+        };
+        /** SubscriptionPlanPublicResponse */
+        SubscriptionPlanPublicResponse: {
+            /**
+             * Plan Id
+             * Format: uuid
+             */
+            plan_id: string;
+            /**
+             * Product Id
+             * Format: uuid
+             */
+            product_id: string;
+            /** Slug */
+            slug: string;
+            /**
+             * Audience Type
+             * @enum {string}
+             */
+            audience_type: "individual" | "company";
+            /**
+             * Plan Type
+             * @enum {string}
+             */
+            plan_type: "standard" | "full_library" | "choose_x";
+            /**
+             * Billing Interval
+             * @enum {string}
+             */
+            billing_interval: "month" | "year";
+            /** Price */
+            price: string;
+            /** Currency Code */
+            currency_code: string;
+            /** Status */
+            status: string;
+            /** Version */
+            version: number;
+            /** Selection Allowance */
+            selection_allowance?: number | null;
+            /** Max Replacements Per Period */
+            max_replacements_per_period?: number | null;
+            /**
+             * Max Seats
+             * @default 1
+             */
+            max_seats: number;
+            /** Title */
+            title?: string | null;
+            /** Subtitle */
+            subtitle?: string | null;
+            /** Short Description */
+            short_description?: string | null;
+            /** Description */
+            description?: string | null;
+            /** Thumbnail Url */
+            thumbnail_url?: string | null;
+            /** Hero Media Url */
+            hero_media_url?: string | null;
+            /** Benefits */
+            benefits?: components["schemas"]["SubscriptionPlanBenefitOut"][];
+            /** Included Products */
+            included_products?: components["schemas"]["SubscriptionPlanProductOut"][];
+            /** Selectable Products */
+            selectable_products?: components["schemas"]["SubscriptionPlanProductOut"][];
+            /** Effective Price */
+            effective_price: string;
+            /**
+             * Compare At Price
+             * @description Original price to show struck through while a discount is active.
+             */
+            compare_at_price?: string | null;
+            discount?: components["schemas"]["PlanDiscountOut"] | null;
+            /**
+             * Card Features
+             * @description Plan card bullet items for the requested language.
+             */
+            card_features?: string[];
+            /**
+             * Is Featured
+             * @default false
+             */
+            is_featured: boolean;
+            /**
+             * Features
+             * @description Catalog features this plan offers, localized.
+             */
+            features?: components["schemas"]["PlanFeatureOut"][];
+        };
+        /** SubscriptionSeatOut */
+        SubscriptionSeatOut: {
+            /**
+             * Seat Id
+             * Format: uuid
+             */
+            seat_id: string;
+            /**
+             * Subscription Id
+             * Format: uuid
+             */
+            subscription_id: string;
+            /** Assigned Customer Id */
+            assigned_customer_id?: string | null;
+            /** Assigned Email */
+            assigned_email: string;
+            /** Status */
+            status: string;
+            /**
+             * Assigned By Customer Id
+             * Format: uuid
+             */
+            assigned_by_customer_id: string;
+            /** Assigned At */
+            assigned_at?: string | null;
+            /** Revoked At */
+            revoked_at?: string | null;
+        };
+        /** SubscriptionSectionSchema */
+        SubscriptionSectionSchema: {
+            /** Section Type */
+            section_type: string;
+            /** Locale Code */
+            locale_code: string;
+            /** Title */
+            title?: string | null;
+            /** Subtitle */
+            subtitle?: string | null;
+            /** Content Json */
+            content_json?: unknown;
+            /**
+             * Sort Order
+             * @default 0
+             */
+            sort_order: number;
+            /**
+             * Is Visible
+             * @default true
+             */
+            is_visible: boolean;
+        };
+        /** SubscriptionStatsOverviewResponse */
+        SubscriptionStatsOverviewResponse: {
+            /**
+             * Start
+             * Format: date-time
+             */
+            start: string;
+            /**
+             * End
+             * Format: date-time
+             */
+            end: string;
+            /** Active */
+            active: number;
+            /** Pending */
+            pending: number;
+            /** Past Due */
+            past_due: number;
+            /** Total Customers */
+            total_customers: number;
+            /** New In Range */
+            new_in_range: number;
+            /** Churned In Range */
+            churned_in_range: number;
+            /** Churn Rate */
+            churn_rate?: number | null;
+            /** Mrr */
+            mrr: components["schemas"]["CurrencyAmountOut"][];
+            /** Arr */
+            arr: components["schemas"]["CurrencyAmountOut"][];
+            /**
+             * Revenue In Range
+             * @description First-payment checkout revenue of subscription orders in the window.
+             */
+            revenue_in_range: components["schemas"]["CurrencyAmountOut"][];
+            /** Plans */
+            plans: components["schemas"]["PlanStatsOut"][];
+            /** Trend */
+            trend: components["schemas"]["SubscriptionTrendPointOut"][];
+        };
+        /** SubscriptionTranslationSchema */
+        SubscriptionTranslationSchema: {
+            /** Locale Code */
+            locale_code: string;
+            /** Title */
+            title: string;
+            /** Subtitle */
+            subtitle?: string | null;
+            /** Short Description */
+            short_description?: string | null;
+            /** Description */
+            description?: string | null;
+            /** Who Is This For */
+            who_is_this_for?: string | null;
+            /** Faq Json */
+            faq_json?: {
+                [key: string]: unknown;
+            }[] | null;
+        };
+        /** SubscriptionTrendPointOut */
+        SubscriptionTrendPointOut: {
+            /**
+             * Day
+             * Format: date
+             */
+            day: string;
+            /** New */
+            new: number;
+            /** Churned */
+            churned: number;
         };
         /** SupportMessage */
         SupportMessage: {
@@ -12787,6 +14617,49 @@ export interface components {
              * Format: date-time
              */
             ends_at: string;
+        };
+        /** UpdateSubscriptionPlanRequest */
+        UpdateSubscriptionPlanRequest: {
+            /** Slug */
+            slug?: string | null;
+            /** Audience Type */
+            audience_type?: ("individual" | "company") | null;
+            /** Plan Type */
+            plan_type?: ("standard" | "full_library" | "choose_x") | null;
+            /** Billing Interval */
+            billing_interval?: ("month" | "year") | null;
+            /** Price */
+            price?: number | string | null;
+            /** Currency Code */
+            currency_code?: string | null;
+            /** Status */
+            status?: ("draft" | "published" | "archived") | null;
+            /** Selection Allowance */
+            selection_allowance?: number | null;
+            /** Max Replacements Per Period */
+            max_replacements_per_period?: number | null;
+            /** Max Seats */
+            max_seats?: number | null;
+            /** Thumbnail Url */
+            thumbnail_url?: string | null;
+            /** Hero Media Url */
+            hero_media_url?: string | null;
+            /** Stripe Product Id */
+            stripe_product_id?: string | null;
+            /** Stripe Price Id */
+            stripe_price_id?: string | null;
+            /** Translations */
+            translations?: components["schemas"]["SubscriptionTranslationSchema"][] | null;
+            /** Sections */
+            sections?: components["schemas"]["SubscriptionSectionSchema"][] | null;
+            /** Learning Outcomes */
+            learning_outcomes?: components["schemas"]["SubscriptionOutcomeSchema"][] | null;
+            /** Is Featured */
+            is_featured?: boolean | null;
+            /** Card Features */
+            card_features?: {
+                [key: string]: string[];
+            } | null;
         };
         /** UpdateUnitRequest */
         UpdateUnitRequest: {
@@ -13907,6 +15780,45 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaymentBreakdownReport"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    global_admin_search_api_v1_admin_search_get: {
+        parameters: {
+            query?: {
+                /** @description Search term (title, name, email, phone, slug, coupon code, #order_id, UUID). */
+                q?: string;
+                /** @description Optional comma-separated resource kinds to include (e.g. `course,diploma,package,bundle,instructor,student`). */
+                kinds?: string | null;
+                /** @description Maximum items returned per resource kind. */
+                limit_per_kind?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminSearchResponse"];
                 };
             };
             /** @description Validation Error */
@@ -23549,6 +25461,1379 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_public_subscription_plans_api_v1_subscriptions_plans_get: {
+        parameters: {
+            query?: {
+                audience_type?: ("individual" | "company") | null;
+                billing_interval?: ("month" | "year") | null;
+                plan_type?: ("standard" | "full_library" | "choose_x") | null;
+                lang?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionPlanPublicResponse"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_public_subscription_features_api_v1_subscriptions_features_get: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionFeatureOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_public_subscription_plan_api_v1_subscriptions_plans__slug_or_id__get: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: {
+                Authorization?: string | null;
+            };
+            path: {
+                slug_or_id: string;
+            };
+            cookie?: {
+                b2c_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionPlanPublicResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_subscription_checkout_session_api_v1_subscriptions_checkout_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: string | null;
+            };
+            path?: never;
+            cookie?: {
+                b2c_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubscriptionCheckoutRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckoutSessionResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_my_subscriptions_api_v1_subscriptions_me_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                b2c_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerSubscriptionResponse"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    my_consultation_perks_api_v1_subscriptions_me_perks_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                b2c_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsultationPerksResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_my_subscription_detail_api_v1_subscriptions_me__subscription_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                subscription_id: string;
+            };
+            cookie?: {
+                b2c_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerSubscriptionDetailResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_my_subscription_api_v1_subscriptions_me__subscription_id__cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                subscription_id: string;
+            };
+            cookie?: {
+                b2c_access_token?: string | null;
+            };
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["CancelSubscriptionRequest"] | null;
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerSubscriptionResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_my_choose_x_selections_api_v1_subscriptions_me__subscription_id__selections_get: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path: {
+                subscription_id: string;
+            };
+            cookie?: {
+                b2c_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChooseXSelectionStateResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    select_choose_x_course_api_v1_subscriptions_me__subscription_id__selections_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                subscription_id: string;
+            };
+            cookie?: {
+                b2c_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SelectCourseRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseSelectionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    replace_choose_x_course_api_v1_subscriptions_me__subscription_id__selections_replace_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                subscription_id: string;
+            };
+            cookie?: {
+                b2c_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReplaceCourseRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseSelectionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_company_subscription_seats_api_v1_subscriptions_me__subscription_id__seats_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                subscription_id: string;
+            };
+            cookie?: {
+                b2c_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionSeatOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    assign_company_subscription_seat_api_v1_subscriptions_me__subscription_id__seats_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                subscription_id: string;
+            };
+            cookie?: {
+                b2c_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignSeatRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionSeatOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    revoke_company_subscription_seat_api_v1_subscriptions_me__subscription_id__seats__seat_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                subscription_id: string;
+                seat_id: string;
+            };
+            cookie?: {
+                b2c_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionSeatOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    mark_my_selection_learning_started_api_v1_subscriptions_me__subscription_id__selections_learning_started_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                subscription_id: string;
+            };
+            cookie?: {
+                b2c_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SelectCourseRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: number;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    record_lms_course_started_event_api_v1_subscriptions_events_course_started_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecordLearningStartedRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: number;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    dev_activate_subscription_order_api_v1_subscriptions_dev_activate_order__order_id__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                order_id: string;
+            };
+            cookie?: {
+                b2c_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerSubscriptionResponse"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    dev_renew_my_subscription_api_v1_subscriptions_me__subscription_id__dev_renew_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                subscription_id: string;
+            };
+            cookie?: {
+                b2c_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerSubscriptionResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_list_subscription_plans_api_v1_admin_subscriptions_plans_get: {
+        parameters: {
+            query?: {
+                audience_type?: ("individual" | "company") | null;
+                billing_interval?: ("month" | "year") | null;
+                plan_type?: ("standard" | "full_library" | "choose_x") | null;
+                status?: string | null;
+                /** @description Search title or slug. */
+                query?: string | null;
+                lang?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionPlanAdminResponse"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_create_subscription_plan_api_v1_admin_subscriptions_plans_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSubscriptionPlanRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionPlanAdminResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_get_subscription_plan_api_v1_admin_subscriptions_plans__plan_id__get: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path: {
+                plan_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionPlanAdminResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_update_subscription_plan_api_v1_admin_subscriptions_plans__plan_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateSubscriptionPlanRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionPlanAdminResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_set_subscription_plan_products_api_v1_admin_subscriptions_plans__plan_id__products_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetPlanProductsRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionPlanAdminResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_set_subscription_plan_benefits_api_v1_admin_subscriptions_plans__plan_id__benefits_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetPlanBenefitsRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionPlanAdminResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_list_subscription_features_api_v1_admin_subscriptions_features_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionFeatureAdminOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_create_subscription_feature_api_v1_admin_subscriptions_features_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubscriptionFeatureIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionFeatureAdminOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_update_subscription_feature_api_v1_admin_subscriptions_features__feature_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feature_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubscriptionFeatureIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionFeatureAdminOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_set_subscription_plan_features_api_v1_admin_subscriptions_plans__plan_id__features_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetPlanFeaturesRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionPlanAdminResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_set_subscription_plan_status_api_v1_admin_subscriptions_plans__plan_id__status_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetPlanStatusRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionPlanAdminResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_set_subscription_plan_discount_api_v1_admin_subscriptions_plans__plan_id__discount_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetPlanDiscountRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionPlanAdminResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_set_subscription_plan_card_features_api_v1_admin_subscriptions_plans__plan_id__card_features_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetCardFeaturesRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionPlanAdminResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_duplicate_subscription_plan_api_v1_admin_subscriptions_plans__plan_id__duplicate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DuplicatePlanRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionPlanAdminResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_list_subscription_plan_abandoned_checkouts_api_v1_admin_subscriptions_plans__plan_id__abandoned_checkouts_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path: {
+                plan_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AbandonedCheckoutListResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_subscription_stats_overview_api_v1_admin_subscriptions_stats_overview_get: {
+        parameters: {
+            query: {
+                /** @description Range start (ISO date or date-time, UTC), e.g. `2026-10-01`. */
+                start: string;
+                /** @description Range end, exclusive (ISO date or date-time, UTC). */
+                end: string;
+                lang?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionStatsOverviewResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_subscription_stats_funnel_api_v1_admin_subscriptions_stats_funnel_get: {
+        parameters: {
+            query: {
+                /** @description Range start (ISO date or date-time, UTC), e.g. `2026-10-01`. */
+                start: string;
+                /** @description Range end, exclusive (ISO date or date-time, UTC). */
+                end: string;
+                plan_id?: string | null;
+                lang?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionFunnelResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_list_customer_subscriptions_api_v1_admin_subscriptions_customer_subscriptions_get: {
+        parameters: {
+            query?: {
+                status?: string | null;
+                audience_type?: ("individual" | "company") | null;
+                plan_id?: string | null;
+                customer_id?: string | null;
+                /** @description Search customer email, name or company. */
+                query?: string | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminCustomerSubscriptionListResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_get_customer_subscription_detail_api_v1_admin_subscriptions_customer_subscriptions__subscription_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                subscription_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerSubscriptionDetailResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_cancel_customer_subscription_api_v1_admin_subscriptions_customer_subscriptions__subscription_id__cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                subscription_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["CancelSubscriptionRequest"] | null;
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerSubscriptionResponse"];
                 };
             };
             /** @description Validation Error */

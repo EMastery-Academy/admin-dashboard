@@ -268,7 +268,7 @@ export function ProductDetailPage() {
             <BundleTab productRef={productRef} productId={item.product_id ?? null} />
           )}
 
-          {activeTab === "consultation" && <ConsultationTab data={productData} />}
+          {activeTab === "consultation" && <ConsultationTab data={productData} productRef={productRef} />}
 
           {activeTab === "live_diploma" && <LiveDiplomaTab slug={item.slug} />}
 

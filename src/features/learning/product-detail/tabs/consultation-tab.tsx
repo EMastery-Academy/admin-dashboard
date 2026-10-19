@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { useT } from "@/lib/i18n";
 import { formatAmount, formatNumber } from "@/lib/format";
-import { productHref } from "@/lib/refs";
+import { productHref, studioHref } from "@/lib/refs";
 import { initialsOf } from "@/lib/status";
 import { AppLink } from "@/components/ui/app-link";
 import { Avatar, Badge, Card, Dl } from "@/components/ui/kit";
@@ -13,7 +13,7 @@ import { consultationAdminQueries, type ProductView } from "@/lib/api";
  * A consultation product in B2C (its price, currency prices and access). Booking sessions, availability and
  * revenue live on the legacy consultation service, reached from the Consultations section.
  */
-export function ConsultationTab({ data }: { data: ProductView }) {
+export function ConsultationTab({ data, productRef }: { data: ProductView; productRef: string }) {
   const t = useT();
   const b2c = data.b2c;
   const item = data.product;
@@ -91,6 +91,18 @@ export function ConsultationTab({ data }: { data: ProductView }) {
           />
         </Card>
       ) : null}
+
+      <Card title={t("محتوى صفحة الاستشارة", "Consultation page content")}>
+        <p className="ma-muted" style={{ marginBlockEnd: 12 }}>
+          {t(
+            "يُكتب وصف الاستشارة وكل محتوى صفحتها في الاستوديو (README والمحرر) ويظهر مباشرة على المتجر.",
+            "The consultation description and everything on its page are written in the Studio (README and editor) and show straight away on the storefront.",
+          )}
+        </p>
+        <AppLink className="ma-btn ma-btn--primary" to={studioHref(productRef)}>
+          {t("فتح استوديو الاستشارة", "Open the consultation studio")}
+        </AppLink>
+      </Card>
 
       <Card title={t("جلسات الاستشارة والمواعيد", "Sessions & availability")} className="ma-section-gap">
         <p className="ma-muted">

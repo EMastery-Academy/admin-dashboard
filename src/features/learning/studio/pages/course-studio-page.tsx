@@ -29,6 +29,7 @@ import { cn } from "@/lib/cn";
 import { StudioEditor } from "@/features/learning/studio/editor/studio-editor";
 import { StudioContext } from "@/features/learning/studio/editor/studio-context";
 import { ReadmeBuilderDialog } from "@/features/learning/studio/editor/readme-builder-dialog";
+import { markdownToStudioBlocks } from "@/features/learning/studio/editor/readme-parser";
 import type { StudioEditor as Editor, StudioPartialBlock } from "@/features/learning/studio/editor/schema";
 import { useDraftSaver, type SaveState } from "@/features/learning/studio/hooks/use-draft-saver";
 import { documentProblem, emptyMeta, outlineOf, toDocument } from "@/features/learning/studio/model/document";
@@ -40,7 +41,7 @@ import { ReadmePanel } from "@/features/learning/studio/panels/readme-panel";
 import { PreviewFrame, type PreviewDevice } from "@/features/learning/studio/preview/preview-frame";
 import { CurriculumTab } from "@/features/learning/curriculum";
 
-/** `/learning/catalog/:productId/studio`: the Course Studio of one product. */
+/** `/learning/catalog/:productId/studio`: the Studio of one product (any kind). */
 export default function CourseStudioPage() {
   const t = useT();
   const productRef = refParam(useParams().productId);
@@ -49,6 +50,22 @@ export default function CourseStudioPage() {
   if (page.isLoading) return <Loading label={t("جارٍ فتح الاستوديو…", "Opening the studio…")} />;
   if (page.error || !page.data) return <ErrorAlert error={page.error} title={t("تعذّر فتح الاستوديو", "Couldn't open the studio")} />;
   return <StudioWorkspace key={productRef} productRef={productRef} initial={page.data} />;
+}
+
+/** What the product is called in the studio, so the copy is not course-only. */
+function kindWords(productType: string | null | undefined, t: (ar: string, en: string) => string) {
+  switch (productType) {
+    case "package":
+      return { page: t("صفحة الباقة", "package page"), content: t("محتوى الباقة", "Package content") };
+    case "bundle":
+      return { page: t("صفحة الحزمة", "bundle page"), content: t("محتوى الحزمة", "Bundle content") };
+    case "consultation":
+      return { page: t("صفحة الاستشارة", "consultation page"), content: t("تفاصيل الاستشارة", "Consultation details") };
+    case "live_diploma":
+      return { page: t("صفحة الدبلوم المباشر", "live diploma page"), content: t("محتوى الدبلوم", "Diploma content") };
+    default:
+      return { page: t("صفحة الدورة", "course page"), content: t("محتوى الدورة", "Curriculum") };
+  }
 }
 
 type StudioSubPage = "editor" | "readme" | "package" | "curriculum" | "details" | "assets" | "history";
@@ -76,8 +93,9 @@ function StudioWorkspace({ productRef, initial }: { productRef: string; initial:
   const editable = can("studio.edit");
 
   const [meta, setMeta] = useState<StudioMeta>(initial.draft.meta ?? emptyMeta());
-  const [blocks, setBlocks] = useState<unknown[]>((initial.draft.blocks as unknown[]) ?? []);
-  const [seed, setSeed] = useState({ key: `${initial.draft_revision}-0`, blocks: (initial.draft.blocks as unknown[]) ?? [] });
+  const initialBlocks = useMemo(() => (initial.draft.blocks as unknown[]) ?? [], [initial.draft.blocks]);
+  const [blocks, setBlocks] = useState<unknown[]>(initialBlocks);
+  const [seed, setSeed] = useState({ key: `${initial.draft_revision}-0`, blocks: initialBlocks });
   const [status, setStatus] = useState({
     version: initial.published_version_no ?? null, changed: initial.has_unpublished_changes, seeded: initial.seeded,
   });
@@ -135,13 +153,44 @@ function StudioWorkspace({ productRef, initial }: { productRef: string; initial:
   const { reset } = saver;
   useEffect(() => reset(initial.draft_revision), [reset, initial.draft_revision]);
 
+  // The product README is the page's source of truth. When the studio opens a resource whose draft has no
+  // content yet, the README is parsed into blocks and rendered in the editor directly — no copy/paste
+  // through the README tab. A draft with blocks always wins, so studio edits are never overwritten.
+  const readmeQuery = useQuery(studioQueries.readme(productRef));
+  const readmeImport = useRef(false);
+  const userEdited = useRef(false);
+  /** True while the editor holds README blocks that were never saved (so Publish must save them first). */
+  const pendingImport = useRef(false);
+  const [importedFromReadme, setImportedFromReadme] = useState(false);
+  useEffect(() => {
+    if (readmeImport.current || readmeQuery.isLoading || readmeQuery.isError) return;
+    readmeImport.current = true;
+    // A draft with content wins, and so does anything typed while the README was loading. An empty draft
+    // means nothing was authored yet, so the README is the right starting point.
+    if (initialBlocks.length > 0 || userEdited.current) return;
+    const markdown = readmeQuery.data?.markdown ?? "";
+    if (!markdown.trim()) return;
+    const imported = markdownToStudioBlocks(markdown);
+    if (imported.length === 0) return;
+    // Seed only: the draft is written when the admin edits or publishes, so merely opening a page
+    // never creates one.
+    pendingImport.current = true;
+    setBlocks(imported);
+    setSeed({ key: `${initial.draft_revision}-readme`, blocks: imported });
+    setImportedFromReadme(true);
+    // Runs once per opened studio: afterwards the draft is the source of truth.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [readmeQuery.isLoading, readmeQuery.isError, readmeQuery.data]);
+
   const document = useMemo(() => toDocument(meta, blocks), [meta, blocks]);
   const problem = useMemo(() => documentProblem(document), [document]);
   const outline = useMemo(() => outlineOf(blocks), [blocks]);
 
-  const hasLegacyContent = initial.links.legacy_kind === "course" || initial.links.legacy_kind === "package";
+  // Units/lessons exist for courses and diplomas only; a package/bundle/consultation has none.
+  const hasCurriculum = initial.product_type === "course" || initial.product_type === "diploma";
   const base = useQuery(studioQueries.previewBase(productRef));
-  const unitsQuery = useQuery({ ...curriculumQueries.units(productRef), enabled: hasLegacyContent });
+  const unitsQuery = useQuery({ ...curriculumQueries.units(productRef), enabled: hasCurriculum });
+  const words = kindWords(initial.product_type, t);
 
   const kind: PreviewKind = (base.data?.kind as PreviewKind | undefined) ?? (initial.product_type as PreviewKind) ?? "course";
 
@@ -200,6 +249,8 @@ function StudioWorkspace({ productRef, initial }: { productRef: string; initial:
   };
   const onBlocks = useCallback(
     (next: unknown[]) => {
+      userEdited.current = true;
+      pendingImport.current = false;
       setBlocks(next);
       edit(meta, next);
     },
@@ -214,6 +265,7 @@ function StudioWorkspace({ productRef, initial }: { productRef: string; initial:
     setBlocks(nextBlocks);
     setSeed({ key: `${content.draft_revision}-${Date.now()}`, blocks: nextBlocks });
     setStatus({ version: content.published_version_no ?? null, changed: content.has_unpublished_changes, seeded: content.seeded });
+    pendingImport.current = false;
     saver.reset(content.draft_revision);
   };
 
@@ -225,11 +277,13 @@ function StudioWorkspace({ productRef, initial }: { productRef: string; initial:
   const publish = useMutation({
     mutationFn: async (note: string) => {
       if (problem) throw new Error(problem);
-      if (saver.revision.current === 0) saver.schedule(document);
+      // A draft seeded from the README (or a brand-new page) is not saved yet; persist it first.
+      if (saver.revision.current === 0 || pendingImport.current) saver.schedule(document);
       await saver.flush();
       return publishStudio(productRef, { note: note.trim() || null, base_revision: saver.revision.current });
     },
     onSuccess: (result) => {
+      pendingImport.current = false;
       setPublished(result);
       setPublishOpen(false);
       setStatus({ version: result.version.version_no, changed: result.content.has_unpublished_changes, seeded: false });
@@ -325,12 +379,17 @@ function StudioWorkspace({ productRef, initial }: { productRef: string; initial:
           {t("تحتاج صلاحية admin:catalog:write لتعديل الصفحة.", "You need admin:catalog:write to edit this page.")}
         </Alert>
       ) : null}
-      {status.seeded ? (
+      {status.seeded || importedFromReadme ? (
         <Alert kind="info" title={t("مسودة جديدة", "New draft")}>
-          {t(
-            "بُنيت هذه المسودة من صفحة الدورة الحالية. لن يتغير شيء على المتجر قبل النشر.",
-            "This draft was built from the course's current page. Nothing changes on the storefront until you publish.",
-          )}
+          {importedFromReadme
+            ? t(
+                `بُنيت هذه المسودة من README ${words.page} الحالي: حُوّل النص إلى كتل قابلة للتحرير. لن يتغير شيء على المتجر قبل النشر.`,
+                `This draft was built from the current README of the ${words.page}: the text was parsed into editable blocks. Nothing changes on the storefront until you publish.`,
+              )
+            : t(
+                `بُنيت هذه المسودة من ${words.page} الحالية. لن يتغير شيء على المتجر قبل النشر.`,
+                `This draft was built from the current ${words.page}. Nothing changes on the storefront until you publish.`,
+              )}
         </Alert>
       ) : null}
       {saver.state === "conflict" ? (
@@ -359,7 +418,7 @@ function StudioWorkspace({ productRef, initial }: { productRef: string; initial:
             ["editor", "المحرر والمعاينة", "Editor & Preview"],
             ["readme", "README (المحتوى)", "README (content)"],
             ...(kind === "package" ? [["package", "دورات الباقة", "Package courses"]] : []),
-            ...(hasLegacyContent ? [["curriculum", "محتوى الدورة", "Curriculum"]] : []),
+            ...(hasCurriculum ? [["curriculum", words.content, "Curriculum"]] : []),
             ["details", "بيانات الصفحة", "Page Details"],
             ["assets", "مكتبة الملفات", "Asset Library"],
             ["history", "سجل النسخ", "Version History"],
@@ -574,9 +633,10 @@ function StudioWorkspace({ productRef, initial }: { productRef: string; initial:
           onClose={() => setReadmeOpen(false)}
           editor={editorRef.current}
           meta={meta}
+          initialMarkdown={readmeText ?? readmeQuery.data?.markdown ?? ""}
           onUpdateMeta={onMeta}
           onApplyBlocks={handleApplyReadmeBlocks}
-          onSyncCurriculum={handleSyncCurriculum}
+          onSyncCurriculum={hasCurriculum ? handleSyncCurriculum : undefined}
         />
       ) : null}
     </StudioContext.Provider>

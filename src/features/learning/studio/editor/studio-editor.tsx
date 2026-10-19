@@ -9,11 +9,11 @@ import "@blocknote/mantine/style.css";
 import { uploadStudioAsset } from "@/lib/api";
 import { useLang, useT } from "@/lib/i18n";
 import { resolvedTheme, useThemeStore } from "@/lib/theme";
+import { toEditorBlocks } from "@/features/learning/studio/model/document";
 import {
   studioSchema,
   studioSlashItems,
   type StudioEditor as Editor,
-  type StudioPartialBlock,
 } from "@/features/learning/studio/editor/schema";
 
 /**
@@ -51,7 +51,7 @@ export function StudioEditor({
   const editor = useCreateBlockNote(
     {
       schema: studioSchema,
-      initialContent: initialBlocks.length ? (initialBlocks as StudioPartialBlock[]) : undefined,
+      initialContent: initialBlocks.length ? toEditorBlocks(initialBlocks) : undefined,
       dictionary: lang === "ar" ? locales.ar : locales.en,
       uploadFile: async (file: File) => (await uploadStudioAsset(productRef, file)).url,
     },

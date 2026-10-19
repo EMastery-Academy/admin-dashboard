@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 
 import { listInstructors, search, searchKeys, searchOptions, type SearchParams, type SearchResult } from "@/lib/api";
@@ -27,10 +28,21 @@ const EMPTY: Filters = { product_type: "", category: "", skill: "", tag: "", min
 
 export default function SearchPage() {
   const t = useT();
-  const [query, setQuery] = useState("");
-  const [submitted, setSubmitted] = useState("");
+  const [searchParams] = useSearchParams();
+  const initialQ = searchParams.get("q") ?? "";
+  const [query, setQuery] = useState(initialQ);
+  const [submitted, setSubmitted] = useState(initialQ);
   const [filters, setFilters] = useState<Filters>(EMPTY);
   const [offset, setOffset] = useState(0);
+
+  useEffect(() => {
+    const nextQ = searchParams.get("q") ?? "";
+    if (nextQ && nextQ !== submitted) {
+      setQuery(nextQ);
+      setSubmitted(nextQ);
+      setOffset(0);
+    }
+  }, [searchParams]);
 
   const params: SearchParams = {
     q: submitted || undefined,

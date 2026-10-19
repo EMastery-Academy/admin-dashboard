@@ -102,6 +102,22 @@ export const navigation: NavModule[] = [
     ],
   },
   {
+    id: "subscriptions",
+    title: { ar: "الاشتراكات", en: "Subscriptions" },
+    icon: "refresh",
+    sections: [
+      {
+        title: { ar: "الاشتراكات", en: "Subscriptions" },
+        items: [
+          { title: { ar: "نظرة عامة", en: "Overview" }, href: "/subscriptions", permission: "subscriptions.read" },
+          { title: { ar: "الباقات", en: "Plans" }, href: "/subscriptions/plans", permission: "subscriptions.read" },
+          { title: { ar: "المزايا", en: "Features" }, href: "/subscriptions/features", permission: "subscriptions.read" },
+          { title: { ar: "المشتركون", en: "Subscribers" }, href: "/subscriptions/subscribers", permission: "subscribers.read" },
+        ],
+      },
+    ],
+  },
+  {
     id: "customers",
     title: { ar: "العملاء", en: "Customers" },
     icon: "users",

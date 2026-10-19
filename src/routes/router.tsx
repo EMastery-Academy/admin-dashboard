@@ -38,6 +38,13 @@ import ExpertDetailPage from "@/features/consultations/pages/expert-detail-page"
 import ConsultationBookingsPage from "@/features/consultations/pages/bookings-page";
 import BookingDetailPage from "@/features/consultations/pages/booking-detail-page";
 import ConsultationOrdersPage from "@/features/consultations/pages/orders-page";
+import SubscriptionsOverviewPage from "@/features/subscriptions/pages/overview-page";
+import SubscriptionPlansPage from "@/features/subscriptions/pages/plans-page";
+import SubscriptionPlanNewPage from "@/features/subscriptions/pages/plan-new-page";
+import SubscriptionPlanDetailPage from "@/features/subscriptions/pages/plan-detail-page";
+import SubscribersPage from "@/features/subscriptions/pages/subscribers-page";
+import SubscriptionFeaturesPage from "@/features/subscriptions/pages/features-page";
+import SubscriberDetailPage from "@/features/subscriptions/pages/subscriber-detail-page";
 import ConsultationDetailPage from "@/features/learning/pages/consultation-detail-page";
 import ConsultantsPage from "@/features/learning/pages/consultants-page";
 import ConsultantDetailPage from "@/features/learning/pages/consultant-detail-page";
@@ -140,6 +147,15 @@ export const ROUTER = createBrowserRouter([
       { path: "consultations/bookings", element: <ConsultationBookingsPage /> },
       { path: "consultations/bookings/:id", element: <BookingDetailPage /> },
       { path: "consultations/orders", element: <ConsultationOrdersPage /> },
+
+      // Subscriptions (B2C)
+      { path: "subscriptions", element: <SubscriptionsOverviewPage /> },
+      { path: "subscriptions/plans", element: <SubscriptionPlansPage /> },
+      { path: "subscriptions/plans/new", element: <SubscriptionPlanNewPage /> },
+      { path: "subscriptions/plans/:id", element: <SubscriptionPlanDetailPage /> },
+      { path: "subscriptions/features", element: <SubscriptionFeaturesPage /> },
+      { path: "subscriptions/subscribers", element: <SubscribersPage /> },
+      { path: "subscriptions/subscribers/:id", element: <SubscriberDetailPage /> },
 
       // Customers
       { path: "customers", element: <CustomersPage /> },

@@ -40,6 +40,9 @@ export * from "@/lib/api/learning/instructors";
 // Consultations (B2C)
 export * from "@/lib/api/consultations/admin";
 
+// Subscriptions (B2C)
+export * from "@/lib/api/subscriptions/admin";
+
 // Marketing
 export * from "@/lib/api/marketing/promotions";
 export * from "@/lib/api/marketing/referrals";

@@ -31,6 +31,13 @@ import {
   listB2cExpertSlots,
   listB2cExperts,
   listB2cOrders,
+  listSubscriptionPlans,
+  getSubscriptionPlan,
+  listPlanAbandonedCheckouts,
+  getSubscriptionStatsOverview,
+  getSubscriptionFunnel,
+  listSubscribers,
+  getSubscriber,
   getCustomer,
   getCustomer360,
   getDatabaseHealth,
@@ -672,6 +679,36 @@ function liveEndpointTests(): LiveTest[] {
       },
     },
     { name: "GET /admin/consultations-b2c/orders", run: async () => { await listB2cOrders({ limit: 5 }); } },
+
+    // -- B2C subscriptions management
+    {
+      name: "GET /admin/subscriptions/plans[/{id}[/abandoned-checkouts]]",
+      run: async () => {
+        const plans = await listSubscriptionPlans({ lang: "en" });
+        const planId = plans[0]?.plan_id;
+        if (!planId) throw new SkipTest("no subscription plan");
+        await getSubscriptionPlan(planId, "en");
+        await listPlanAbandonedCheckouts(planId, { limit: 5 });
+      },
+    },
+    {
+      name: "GET /admin/subscriptions/stats/overview|funnel",
+      run: async () => {
+        const end = new Date().toISOString().slice(0, 10);
+        const start = new Date(Date.now() - 30 * 86_400_000).toISOString().slice(0, 10);
+        await getSubscriptionStatsOverview({ start, end });
+        await getSubscriptionFunnel({ start, end });
+      },
+    },
+    {
+      name: "GET /admin/subscriptions/customer-subscriptions[/{id}]",
+      run: async () => {
+        const page = await listSubscribers({ limit: 5 });
+        const id = page.items[0]?.subscription_id;
+        if (!id) throw new SkipTest("no subscriber");
+        await getSubscriber(id);
+      },
+    },
 
     // -- promotions
     {

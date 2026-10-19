@@ -73,6 +73,24 @@ export function productStatusBadge(status: string | null | undefined): BadgeDef 
   }
 }
 
+/** Customer subscription status (`b2c.subscriptions.status`). */
+export function subscriberStatusBadge(status: string | null | undefined): BadgeDef | null {
+  switch (status) {
+    case "active":
+      return { label: { ar: "نشط", en: "Active" }, tone: "success" };
+    case "pending":
+      return { label: { ar: "قيد التفعيل", en: "Pending" }, tone: "info" };
+    case "past_due":
+      return { label: { ar: "متأخر السداد", en: "Past due" }, tone: "warning" };
+    case "canceled":
+      return { label: { ar: "ملغي", en: "Canceled" }, tone: "danger" };
+    case "expired":
+      return { label: { ar: "منتهي", en: "Expired" }, tone: "neutral" };
+    default:
+      return status ? { label: { ar: status, en: status } } : null;
+  }
+}
+
 export function affiliateStatusBadge(status: string | null | undefined): BadgeDef | null {
   switch (status) {
     case "pending":
