@@ -24,6 +24,17 @@ const STATUSES: { value: string; ar: string; en: string }[] = [
 
 const PROVIDERS = ["stripe", "tamara", "free"];
 
+const PLAN_TYPES: { value: string; ar: string; en: string }[] = [
+  { value: "standard", ar: "قياسية", en: "Standard" },
+  { value: "full_library", ar: "المكتبة الكاملة", en: "Full library" },
+  { value: "choose_x", ar: "اختر عددًا من الدورات", en: "Choose X" },
+];
+
+const AUDIENCES: { value: string; ar: string; en: string }[] = [
+  { value: "company", ar: "اشتراكات الشركات", en: "Company subscriptions" },
+  { value: "individual", ar: "اشتراكات الأفراد", en: "Individual subscriptions" },
+];
+
 const PAYMENT_STATUSES: { value: string; ar: string; en: string }[] = [
   { value: "pending", ar: "بانتظار", en: "Pending" },
   { value: "succeeded", ar: "ناجح", en: "Succeeded" },
@@ -106,6 +117,16 @@ export default function OrdersPage() {
     { key: "status", label: t("كل الحالات", "All statuses"), options: STATUSES.map((item) => ({ value: item.value, label: t(item.ar, item.en) })) },
     { key: "payment_status", label: t("كل حالات الدفع", "All payments"), options: PAYMENT_STATUSES.map((item) => ({ value: item.value, label: t(item.ar, item.en) })) },
     { key: "provider", label: t("كل البوابات", "All gateways"), options: PROVIDERS.map((value) => ({ value, label: value })) },
+    {
+      key: "audience_type",
+      label: t("كل أنواع المشتركين", "All subscribers"),
+      options: AUDIENCES.map((item) => ({ value: item.value, label: t(item.ar, item.en) })),
+    },
+    {
+      key: "plan_type",
+      label: t("كل أنواع الباقات", "All plan types"),
+      options: PLAN_TYPES.map((item) => ({ value: item.value, label: t(item.ar, item.en) })),
+    },
   ];
 
   return (
@@ -123,6 +144,8 @@ export default function OrdersPage() {
             status: selected.status || undefined,
             payment_status: selected.payment_status || undefined,
             provider: selected.provider || undefined,
+            plan_type: (selected.plan_type || undefined) as "standard" | "full_library" | "choose_x" | undefined,
+            audience_type: (selected.audience_type || undefined) as "individual" | "company" | undefined,
             start: from || undefined,
             end: to || undefined,
             query,

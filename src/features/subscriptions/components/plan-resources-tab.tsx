@@ -16,15 +16,19 @@ import { Alert, Badge, Button, Card, Empty, ErrorAlert, FormActions, IconButton,
 import { SelectField } from "@/components/ui/select";
 import { CheckPicker, useProductCards } from "@/features/learning/product-form";
 
+import { HelpLabel } from "./help-label";
+import { usePlanPreviewPatch } from "./plan-preview-draft";
+
 type Mode = "included" | "selectable";
 type Item = { product_id: string; access_mode: Mode; title: string; product_type: string | null; slug: string | null; status: string | null };
 
 /**
  * The catalog resources a plan grants: `included` (every subscriber gets them) and, for Choose-X
- * plans, the `selectable` pool subscribers pick from. Any learning type is allowed — courses,
- * diplomas, live diplomas, packages, bundles and consultations.
+ * plans, the `selectable` pool subscribers pick from. Only types subscription fulfilment delivers
+ * are offered: courses, diplomas, packages and bundles. A full-library plan needs none: it grants
+ * every published course and diploma.
  */
-export function PlanResourcesTab({ plan }: { plan: SubscriptionPlan }) {
+export function PlanResourcesTab({ plan, libraryCount }: { plan: SubscriptionPlan; libraryCount: number | null }) {
   const t = useT();
   const queryClient = useQueryClient();
   const writable = can("subscriptionsWrite.write");
@@ -89,6 +93,12 @@ export function PlanResourcesTab({ plan }: { plan: SubscriptionPlan }) {
     },
   });
 
+  const asPreview = (mode: Mode) =>
+    items
+      .filter((i) => i.access_mode === mode)
+      .map((i, index) => ({ product_id: i.product_id, access_mode: i.access_mode, sort_order: index, slug: i.slug, product_type: i.product_type, title: i.title, status: i.status }));
+  usePlanPreviewPatch({ included_products: asPreview("included"), selectable_products: asPreview("selectable") });
+
   const selectableCount = items.filter((i) => i.access_mode === "selectable").length;
   const dirty =
     JSON.stringify(items.map((i) => [i.product_id, i.access_mode])) !==
@@ -119,9 +129,29 @@ export function PlanResourcesTab({ plan }: { plan: SubscriptionPlan }) {
     );
   };
 
+  const fullLibrary = plan.plan_type === "full_library";
+  if (fullLibrary && items.length === 0) {
+    return (
+      <Alert kind="info" title={t("هذه الباقة تمنح المكتبة الكاملة تلقائيًا", "This plan grants the whole library automatically")}>
+        {t(
+          `كل دورة ودبلوم منشور يُمنح للمشترك فور اشتراكه${libraryCount != null ? ` (${libraryCount} الآن)` : ""}، وكل ما يُنشر لاحقًا يُضاف لاشتراكه تلقائيًا. لا حاجة لإضافة موارد.`,
+          `Every published course and diploma is granted when someone subscribes${libraryCount != null ? ` (${libraryCount} today)` : ""}, and anything published later is added to their subscription automatically. There are no resources to add.`,
+        )}
+      </Alert>
+    );
+  }
+
   return (
     <div className="ma-cols ma-cols--main-side">
       <div style={{ display: "grid", gap: "var(--space-4)" }}>
+        {fullLibrary ? (
+          <Alert kind="info" title={t("المكتبة الكاملة تُمنح تلقائيًا", "The whole library is granted automatically")}>
+            {t(
+              "الموارد أدناه تُمنح إضافةً للمكتبة (مثل الحزم والباقات المخصصة).",
+              "The resources below are granted on top of the library (packages and bundles, for example).",
+            )}
+          </Alert>
+        ) : null}
         <Card title={t(`مضمّنة لكل المشتركين (${items.length - selectableCount})`, `Included for every subscriber (${items.length - selectableCount})`)}>
           {list("included")}
         </Card>
@@ -145,7 +175,7 @@ export function PlanResourcesTab({ plan }: { plan: SubscriptionPlan }) {
       </div>
 
       {writable ? (
-        <Card title={t("إضافة موارد", "Add resources")}>
+        <Card title={<HelpLabel text={t("إضافة موارد", "Add resources")} help="accessMode" />}>
           <div className="ma-form">
             {chooseX ? (
               <SelectField label={t("أضف إلى", "Add to")} value={addMode} onChange={(v) => setAddMode(v as Mode)} size="md"
@@ -157,7 +187,7 @@ export function PlanResourcesTab({ plan }: { plan: SubscriptionPlan }) {
               <CheckPicker id="plan-resources" label={t("الموارد المنشورة", "Published resources")} options={options}
                 selected={pickedInMode} onToggle={toggle}
                 hint={t(`المحدّد في كل الباقة: ${selectedIds.size}`, `Selected across the plan: ${selectedIds.size}`)}
-                searchPlaceholder={t("ابحث عن دورة أو دبلوم أو استشارة…", "Search courses, diplomas, consultations…")} />
+                searchPlaceholder={t("ابحث عن دورة أو دبلوم أو حزمة…", "Search courses, diplomas, packages…")} />
             )}
           </div>
         </Card>

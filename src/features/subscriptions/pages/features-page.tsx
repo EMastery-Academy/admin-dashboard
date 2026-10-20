@@ -107,7 +107,7 @@ function FeatureEditor({
   );
 }
 
-/** The catalog of plan features (AI planner, expert consultations, custom bundles, …). */
+/** The catalog of plan features (expert consultations, full library, …); unimplemented ones stay inactive. */
 export default function SubscriptionFeaturesPage() {
   const t = useT();
   const features = useQuery(subscriptionQueries.features());
@@ -131,7 +131,7 @@ export default function SubscriptionFeaturesPage() {
     { key: "order", header: t("الترتيب", "Order"), align: "end", exportKind: "number", sortValue: (f) => f.sort_order ?? 0, exportValue: (f) => f.sort_order ?? 0, cell: (f) => <span className="ma-num">{f.sort_order}</span> },
     {
       key: "active", header: t("الحالة", "Status"), exportValue: (f) => (f.is_active ? "active" : "inactive"),
-      cell: (f) => <Badge def={f.is_active ? { label: { ar: "فعّالة", en: "Active" }, tone: "success" } : { label: { ar: "معطّلة", en: "Inactive" }, tone: "neutral" }} />,
+      cell: (f) => <Badge def={f.is_active ? { label: { ar: "فعّالة", en: "Active" }, tone: "success" } : { label: { ar: "غير متاحة بعد", en: "Not available yet" }, tone: "neutral" }} />,
     },
     ...(writable
       ? [{ key: "edit", header: "", exportable: false, cell: (f: SubscriptionFeature) => <Button sm kind="soft" icon="edit" label={t("تعديل", "Edit")} onClick={() => setEditing(f)} /> }]
@@ -143,8 +143,8 @@ export default function SubscriptionFeaturesPage() {
       <PageHead
         title={t("مزايا الاشتراكات", "Subscription features")}
         sub={t(
-          "قائمة المزايا التي تختار منها كل باقة: المخطط الذكي، الاستشارات مع الخبراء، الباقات المخصصة وغيرها.",
-          "The features each plan picks from: AI planner, expert consultations, custom bundles and more.",
+          "قائمة المزايا التي تختار منها كل باقة. فعّل الميزة فقط عندما تكون متاحة فعلًا للمشتركين؛ المعطّلة لا تظهر على الموقع ولا يمكن إضافتها لباقة.",
+          "The features each plan picks from. Activate a feature only once subscribers can actually use it; inactive ones are hidden on the site and can't be added to a plan.",
         )}
         actions={writable ? <Button kind="primary" icon="plus" label={t("ميزة جديدة", "New feature")} onClick={() => setEditing("new")} /> : null}
       />

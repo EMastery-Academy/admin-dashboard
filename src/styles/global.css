@@ -14,6 +14,8 @@
 @import "./consultations.css" layer(components);
 /* Subscriptions management: plan cards, funnel. */
 @import "./subscriptions.css" layer(components);
+/* Support tickets: chat-style conversation console (detail page). */
+@import "./support-chat.css" layer(components);
 @import "./print.css" layer(components);
 
 /* Kit breakpoints: mobile-first 600 · 900 · 1200. */

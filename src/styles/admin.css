@@ -110,6 +110,34 @@ svg.ma-icon--fill { fill: currentColor; stroke: none; }
 }
 .ma-sidebar__count { margin-inline-start: auto; font-size: 12px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
 .ma-sidebar__empty { padding: var(--space-3); color: var(--text-muted); font-size: 14px; }
+.ma-sidebar__item { position: relative; }
+.ma-sidebar__row { display: flex; align-items: center; position: relative; width: 100%; }
+.ma-sidebar__row .ma-sidebar__link { flex: 1; min-width: 0; }
+.ma-sidebar__sub-toggle {
+  display: flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; margin-inline-end: var(--space-2);
+  border: 0; border-radius: var(--radius-control);
+  background: transparent; color: var(--text-muted); cursor: pointer;
+  transition: color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.ma-sidebar__sub-toggle:hover { color: var(--text); background: var(--fill-soft); }
+.ma-sidebar__sub-chevron { width: 14px; height: 14px; transition: transform var(--dur) var(--ease); }
+.ma-sidebar__sub-toggle[aria-expanded="false"] .ma-sidebar__sub-chevron { transform: rotate(-90deg); }
+[dir="rtl"] .ma-sidebar__sub-toggle[aria-expanded="false"] .ma-sidebar__sub-chevron { transform: rotate(90deg); }
+.ma-sidebar__sublist { list-style: none; margin: 0; padding: 0; padding-inline-start: var(--space-4); position: relative; }
+.ma-sidebar__sublist::before {
+  content: ""; position: absolute; inset-inline-start: 18px; top: 4px; bottom: 8px; width: 1px; background: var(--line);
+}
+.ma-sidebar__sublink {
+  display: flex; align-items: center; min-height: 36px;
+  padding: var(--space-1) var(--space-3); margin-block: 2px;
+  border-radius: var(--radius-control); font-size: 13px; color: var(--text-muted);
+  text-decoration: none; transition: background-color var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+.ma-sidebar__sublink:hover { background: var(--fill-soft); color: var(--text); }
+.ma-sidebar__sublink.is-active, .ma-sidebar__sublink[aria-current="page"] {
+  background: var(--fill-soft-hover); color: var(--accent); font-weight: 600;
+}
 /* Hover preview of another domain; with the sidebar collapsed it opens as a fly-out over the page. */
 @media (min-width: 1024px) {
   .ma-shell.is-peek .ma-sidebar {
@@ -343,7 +371,11 @@ a.ma-list__title:hover { text-decoration: underline; text-decoration-color: var(
 /* Wrapper rendered by the Base UI Modal: centres the popup above the backdrop. */
 .ma-modal-viewport { position: fixed; inset: 0; z-index: 81; display: flex; overflow-y: auto; padding: var(--space-4); }
 .ma-drawer { display: flex; flex-direction: column; width: min(480px, 100vw); height: 100%; margin-inline-start: auto; background: var(--surface); border-inline-start: 1px solid var(--line); }
-.ma-modal { display: flex; flex-direction: column; width: min(520px, calc(100vw - 32px)); max-height: calc(100vh - 32px); margin: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-card); overflow: hidden; }
+.ma-modal { display: flex; flex-direction: column; width: min(560px, calc(100vw - 32px)); max-height: calc(100vh - 32px); margin: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-card); overflow: hidden; }
+.ma-modal--sm { width: min(420px, calc(100vw - 32px)); }
+.ma-modal--md { width: min(560px, calc(100vw - 32px)); }
+.ma-modal--lg { width: min(820px, calc(100vw - 32px)); }
+.ma-modal--xl { width: min(1040px, calc(100vw - 32px)); }
 .ma-drawer__head, .ma-modal__head { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-3) var(--space-4) var(--space-3) var(--space-6); border-block-end: 1px solid var(--line); }
 .ma-drawer__head h2, .ma-modal__head h2 { flex: 1; font-size: 18px; line-height: 26px; font-weight: 700; }
 .ma-drawer__body, .ma-modal__body { flex: 1; overflow-y: auto; padding: var(--space-6); }
@@ -625,7 +657,7 @@ a.ma-list__title:hover { text-decoration: underline; text-decoration-color: var(
 .ma-share__pct { font-variant-numeric: tabular-nums; color: var(--text-muted); }
 
 /* ---------- Radix shadcn-structure primitives (kit tokens) ---------- */
-.ma-menu, .ma-dropdown { z-index: 70; min-width: 180px; max-height: var(--radix-dropdown-menu-content-available-height, 60vh); overflow: auto; padding: var(--space-1); border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--surface); color: var(--text); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12); }
+.ma-menu, .ma-dropdown { z-index: 100; min-width: 180px; max-height: var(--radix-dropdown-menu-content-available-height, 60vh); overflow: auto; padding: var(--space-1); border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--surface); color: var(--text); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12); }
 .ma-menu__label, .ma-dropdown__label { padding: var(--space-2) var(--space-3); color: var(--text-muted); font-size: 12px; font-weight: 500; }
 .ma-menu__item, .ma-dropdown__item { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-3); border-radius: var(--radius-control); font-size: 14px; line-height: 20px; cursor: pointer; user-select: none; outline: none; color: var(--text); }
 .ma-menu__item[data-highlighted], .ma-menu__item:hover, .ma-dropdown__item[data-highlighted], .ma-dropdown__item:hover { background: var(--fill-soft); color: var(--text); }
@@ -640,7 +672,7 @@ a.ma-list__title:hover { text-decoration: underline; text-decoration-color: var(
 .ma-select-trigger { display: inline-flex; align-items: center; justify-content: space-between; gap: var(--space-2); min-height: 40px; min-width: 150px; padding: var(--space-2) var(--space-3); border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--surface); color: var(--text); font: inherit; font-size: 14px; text-align: start; cursor: pointer; }
 .ma-select-trigger[data-placeholder] { color: var(--text-muted); }
 .ma-select-trigger:focus-visible { outline: 2px solid var(--focus); outline-offset: 0; }
-.ma-select-content { z-index: 40; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--surface); color: var(--text); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12); }
+.ma-select-content { z-index: 100; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--surface); color: var(--text); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12); }
 .ma-select-item { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-6) var(--space-2) var(--space-3); font-size: 14px; cursor: pointer; outline: none; }
 .ma-select-item[data-highlighted] { background: var(--fill-soft); }
 .ma-select-item .ma-menu__indicator { position: absolute; inset-inline-start: var(--space-3); }
@@ -716,6 +748,16 @@ a.ma-list__title:hover { text-decoration: underline; text-decoration-color: var(
 .ma-studio-preview.is-mobile .ma-studio-preview__viewport { inline-size: min(390px, 100%); }
 .ma-studio-preview__frame { inline-size: 100%; block-size: 100%; border: 0; background: var(--white); }
 .ma-studio-preview__state { position: absolute; inset: 0; display: grid; place-items: center; padding: var(--space-6); text-align: center; color: var(--text-muted); background: var(--surface-alt); }
+
+/* Subscription plan page: editing tabs beside the live storefront preview (stacked below 1280px). */
+.ma-plan-workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 40%); gap: var(--space-4); align-items: start; }
+.ma-plan-workspace__main { min-inline-size: 0; }
+.ma-plan-workspace__preview { position: sticky; inset-block-start: var(--space-4); }
+.ma-plan-workspace .ma-cols--main-side { grid-template-columns: minmax(0, 1fr); }
+@media (max-width: 1280px) {
+  .ma-plan-workspace { grid-template-columns: minmax(0, 1fr); }
+  .ma-plan-workspace__preview { position: static; }
+}
 
 .ma-studio-dialog { margin: auto; inline-size: min(760px, calc(100vw - 32px)); max-block-size: calc(100dvh - 64px); overflow: auto; padding: var(--space-4); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-card); display: grid; gap: var(--space-3); }
 .ma-studio-dialog--sm { inline-size: min(480px, calc(100vw - 32px)); }

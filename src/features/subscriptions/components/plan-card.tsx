@@ -34,6 +34,11 @@ export function PlanCard({ plan, actions, showStats = true }: { plan: Subscripti
       <div className="ma-plancard__badges">
         <span className="ma-badge ma-badge--neutral">{t(labelOf(PLAN_TYPE_LABELS, plan.plan_type).ar, labelOf(PLAN_TYPE_LABELS, plan.plan_type).en)}</span>
         <span className="ma-badge ma-badge--neutral">{t(labelOf(AUDIENCE_LABELS, plan.audience_type).ar, labelOf(AUDIENCE_LABELS, plan.audience_type).en)}</span>
+        {plan.audience_type === "company" ? (
+          <span className="ma-badge ma-badge--neutral">
+            {t(`${plan.min_seats ?? 1}–${plan.max_seats} موظفًا`, `${plan.min_seats ?? 1}–${plan.max_seats} employees`)}
+          </span>
+        ) : null}
         {plan.is_featured ? <span className="ma-badge ma-badge--info">{t("مميّزة", "Featured")}</span> : null}
         {discount ? (
           <span className={cn("ma-badge", discount.is_active ? "ma-badge--success" : "ma-badge--warning")}>
@@ -46,7 +51,9 @@ export function PlanCard({ plan, actions, showStats = true }: { plan: Subscripti
 
       <div className="ma-plancard__price">
         <span className="ma-plancard__amount">{formatAmount(toNumber(plan.effective_price), plan.currency_code)}</span>
-        <span className="ma-plancard__interval">{t(per.ar, per.en)}</span>
+        <span className="ma-plancard__interval">
+          {plan.audience_type === "company" ? t(`لكل موظف ${per.ar}`, `per employee ${per.en}`) : t(per.ar, per.en)}
+        </span>
         {plan.compare_at_price ? (
           <span className="ma-plancard__was">{formatAmount(toNumber(plan.compare_at_price), plan.currency_code)}</span>
         ) : null}

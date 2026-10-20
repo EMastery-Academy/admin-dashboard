@@ -21,7 +21,7 @@ export function DropdownMenuContent({
       <DropdownMenuPrimitive.Content
         sideOffset={sideOffset}
         align={align}
-        className={cn("ma-dropdown", className)}
+        className={cn("ma-dropdown z-[100]", className)}
         {...props}
       />
     </DropdownMenuPrimitive.Portal>

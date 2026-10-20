@@ -79,7 +79,12 @@ export function Shell() {
     if (!active) return [];
     const moduleHref = active.module.sections[0]?.items[0]?.href;
     const out: [string, string][] = [[translate(lang, active.module.title.ar, active.module.title.en), moduleHref]];
-    if (active.href !== moduleHref) out.push([translate(lang, active.title.ar, active.title.en), active.href]);
+    if (active.parent && active.parent.href !== moduleHref) {
+      out.push([translate(lang, active.parent.title.ar, active.parent.title.en), active.parent.href]);
+    }
+    if (active.href !== moduleHref && (!active.parent || active.href !== active.parent.href)) {
+      out.push([translate(lang, active.title.ar, active.title.en), active.href]);
+    }
     return out;
   }, [active, lang]);
 
@@ -184,9 +189,11 @@ export function Shell() {
 function Sidebar({ module, activeHref, onCollapse }: { module: NavModule; activeHref?: string; onCollapse?: () => void }) {
   const t = useT();
   const lang = useLang();
+  const location = useLocation();
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
+  const [openSubMenus, setOpenSubMenus] = useState<Record<string, boolean>>({});
 
   const rawTerm = query.trim();
   const q = rawTerm.toLowerCase();
@@ -200,7 +207,13 @@ function Sidebar({ module, activeHref, onCollapse }: { module: NavModule; active
             !q ||
             translate(lang, item.title.ar, item.title.en).toLowerCase().includes(q) ||
             item.title.en.toLowerCase().includes(q) ||
-            item.title.ar.toLowerCase().includes(q),
+            item.title.ar.toLowerCase().includes(q) ||
+            item.children?.some(
+              (c) =>
+                translate(lang, c.title.ar, c.title.en).toLowerCase().includes(q) ||
+                c.title.en.toLowerCase().includes(q) ||
+                c.title.ar.toLowerCase().includes(q),
+            ),
         );
         return { section, si, items };
       })
@@ -309,16 +322,69 @@ function Sidebar({ module, activeHref, onCollapse }: { module: NavModule; active
                 {translate(lang, section.title.ar, section.title.en)}
               </button>
               <ul className="ma-sidebar__list" hidden={q ? false : !open}>
-                {items.map((item) => (
-                  <li key={item.href}>
-                    <NavLink
-                      className={({ isActive }) => cn("ma-sidebar__link", (isActive || item.href === activeHref) && "is-active")}
-                      to={item.href}
-                    >
-                      <span>{translate(lang, item.title.ar, item.title.en)}</span>
-                    </NavLink>
-                  </li>
-                ))}
+                {items.map((item) => {
+                  const hasChildren = Boolean(item.children && item.children.length > 0);
+                  const isChildActive = Boolean(
+                    hasChildren &&
+                      item.children!.some(
+                        (c) =>
+                          c.href === activeHref ||
+                          location.pathname === c.href ||
+                          (c.href !== item.href && location.pathname.startsWith(`${c.href}/`)),
+                      ),
+                  );
+                  const isItemActive = item.href === activeHref || (!isChildActive && location.pathname === item.href);
+                  const itemKey = `${module.id}:${item.href}`;
+                  const isSubOpen = Boolean(q || isChildActive || (openSubMenus[itemKey] ?? isItemActive));
+
+                  return (
+                    <li key={item.href} className={cn("ma-sidebar__item", hasChildren && "has-children")}>
+                      <div className="ma-sidebar__row">
+                        <NavLink
+                          className={cn("ma-sidebar__link", (isItemActive || isChildActive) && "is-active")}
+                          to={item.href}
+                        >
+                          <span>{translate(lang, item.title.ar, item.title.en)}</span>
+                        </NavLink>
+                        {hasChildren ? (
+                          <button
+                            type="button"
+                            className="ma-sidebar__sub-toggle"
+                            aria-expanded={isSubOpen}
+                            aria-label={t("تبديل القائمة الفرعية", "Toggle sub-menu")}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setOpenSubMenus((prev) => ({ ...prev, [itemKey]: !isSubOpen }));
+                            }}
+                          >
+                            <Icon name="chevron" className="ma-sidebar__sub-chevron" />
+                          </button>
+                        ) : null}
+                      </div>
+                      {hasChildren && isSubOpen ? (
+                        <ul className="ma-sidebar__sublist">
+                          {item.children!.map((child) => {
+                            const isThisChildActive =
+                              child.href === activeHref ||
+                              location.pathname === child.href ||
+                              location.pathname.startsWith(`${child.href}/`);
+                            return (
+                              <li key={child.href}>
+                                <NavLink
+                                  className={cn("ma-sidebar__sublink", isThisChildActive && "is-active")}
+                                  to={child.href}
+                                >
+                                  <span>{translate(lang, child.title.ar, child.title.en)}</span>
+                                </NavLink>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      ) : null}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           );

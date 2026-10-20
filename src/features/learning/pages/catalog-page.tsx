@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import {
   listProducts,
@@ -32,21 +32,29 @@ import { productTypeLabel } from "@/lib/product-types";
  */
 const ALL_PRODUCT_TYPES = "course,diploma,package,bundle,consultation,live_diploma";
 
-export default function CatalogPage() {
+export default function CatalogPage({ defaultType }: { defaultType?: string } = {}) {
   const t = useT();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const type = searchParams.get("type") ?? "all";
+  const type = defaultType ?? searchParams.get("type") ?? "all";
 
   const selectType = (next: string) => {
-    setSearchParams(
-      (prev) => {
-        const params = new URLSearchParams(prev);
-        if (next === "all") params.delete("type");
-        else params.set("type", next);
-        return params;
-      },
-      { replace: true },
-    );
+    if (next === "all") navigate("/learning/catalog");
+    else if (next === "course") navigate("/learning/courses");
+    else if (next === "diploma") navigate("/learning/diplomas");
+    else if (next === "live_diploma") navigate("/learning/live");
+    else if (next === "package") navigate("/learning/bundles");
+    else if (next === "bundle") navigate("/learning/packages");
+    else {
+      setSearchParams(
+        (prev) => {
+          const params = new URLSearchParams(prev);
+          params.set("type", next);
+          return params;
+        },
+        { replace: true },
+      );
+    }
   };
 
   const facets = useQuery(productQueries.facets()).data;
@@ -56,18 +64,34 @@ export default function CatalogPage() {
     { value: "all", ar: "الكل", en: "All" },
     { value: "course", ...productTypeLabel("course"), count: counts.get("course") },
     { value: "diploma", ...productTypeLabel("diploma"), count: counts.get("diploma") },
+    { value: "live_diploma", ...productTypeLabel("live_diploma"), count: counts.get("live_diploma") },
     { value: "package", ...productTypeLabel("package"), count: counts.get("package") },
     { value: "bundle", ...productTypeLabel("bundle"), count: counts.get("bundle") },
-    { value: "consultation", ...productTypeLabel("consultation"), count: counts.get("consultation") },
-    { value: "live_diploma", ...productTypeLabel("live_diploma"), count: counts.get("live_diploma") },
   ];
+
+  const pageTitle = (() => {
+    switch (type) {
+      case "course":
+        return t("الدورات", "Courses");
+      case "diploma":
+        return t("الدبلومات", "Diplomas");
+      case "live_diploma":
+        return t("الدبلومات المباشرة", "Live diplomas");
+      case "package":
+        return t("الباقات", "Bundles");
+      case "bundle":
+        return t("الحزم", "Packages");
+      default:
+        return t("الكتالوج", "Catalog");
+    }
+  })();
 
   const createHref = (() => {
     switch (type) {
       case "package":
-        return "/learning/packages/new";
-      case "bundle":
         return "/learning/bundles/new";
+      case "bundle":
+        return "/learning/packages/new";
       case "consultation":
         return "/learning/consultations/new";
       case "live_diploma":
@@ -80,9 +104,9 @@ export default function CatalogPage() {
   const createLabel = (() => {
     switch (type) {
       case "package":
-        return t("إنشاء حزمة", "Create package");
-      case "bundle":
         return t("إنشاء باقة", "Create bundle");
+      case "bundle":
+        return t("إنشاء حزمة", "Create package");
       case "consultation":
         return t("إنشاء استشارة", "Create consultation");
       case "live_diploma":
@@ -97,7 +121,7 @@ export default function CatalogPage() {
   return (
     <>
       <PageHead
-        title={t("الكتالوج", "Catalog")}
+        title={pageTitle}
         sub={t("كل منتجات المتجر وحالة نشرها.", "Every storefront product and its publishing state.")}
         actions={<Button kind="primary" icon="plus" label={createLabel} href={createHref} />}
       />

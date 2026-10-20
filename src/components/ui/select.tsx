@@ -33,7 +33,7 @@ export function SelectContent({
 }: React.ComponentProps<typeof SelectPrimitive.Content>) {
   return (
     <SelectPrimitive.Portal>
-      <SelectPrimitive.Content className={cn("ma-select-content", className)} position={position} sideOffset={sideOffset} {...props}>
+      <SelectPrimitive.Content className={cn("ma-select-content z-[100]", className)} position={position} sideOffset={sideOffset} {...props}>
         <SelectPrimitive.Viewport className="ma-select-viewport">{children}</SelectPrimitive.Viewport>
       </SelectPrimitive.Content>
     </SelectPrimitive.Portal>

@@ -1,6 +1,12 @@
 export type Label = { ar: string; en: string };
 
-export type NavItem = { title: Label; href: string; permission?: string; badge?: string };
+export type NavItem = {
+  title: Label;
+  href: string;
+  permission?: string;
+  badge?: string;
+  children?: NavItem[];
+};
 export type NavSection = { title: Label; items: NavItem[] };
 export type NavModule = {
   id: string;
@@ -64,22 +70,80 @@ export const navigation: NavModule[] = [
     icon: "book",
     sections: [
       {
+        title: { ar: "البرامج والمقررات", en: "Courses & Programs" },
+        items: [
+          {
+            title: { ar: "الدورات", en: "Courses" },
+            href: "/learning/courses",
+            permission: "courses.read",
+            children: [
+              { title: { ar: "قائمة الدورات", en: "All courses" }, href: "/learning/courses", permission: "courses.read" },
+              { title: { ar: "إضافة دورة", en: "Add course" }, href: "/learning/courses/new", permission: "courses.read" },
+            ],
+          },
+          {
+            title: { ar: "الدبلومات", en: "Diplomas" },
+            href: "/learning/diplomas",
+            permission: "courses.read",
+            children: [
+              { title: { ar: "قائمة الدبلومات", en: "All diplomas" }, href: "/learning/diplomas", permission: "courses.read" },
+            ],
+          },
+          {
+            title: { ar: "الدبلومات المباشرة", en: "Live diplomas" },
+            href: "/learning/live",
+            permission: "courses.read",
+            children: [
+              { title: { ar: "قائمة الدبلومات المباشرة", en: "All live diplomas" }, href: "/learning/live", permission: "courses.read" },
+              { title: { ar: "إضافة دبلوم مباشر", en: "Add live diploma" }, href: "/learning/live-diplomas/new", permission: "courses.read" },
+            ],
+          },
+          {
+            title: { ar: "الباقات", en: "Bundles" },
+            href: "/learning/bundles",
+            permission: "packages.read",
+            children: [
+              { title: { ar: "قائمة الباقات", en: "All bundles" }, href: "/learning/bundles", permission: "packages.read" },
+              { title: { ar: "إضافة باقة", en: "Add bundle" }, href: "/learning/bundles/new", permission: "packages.read" },
+            ],
+          },
+          {
+            title: { ar: "الحزم", en: "Packages" },
+            href: "/learning/packages",
+            permission: "packages.read",
+            children: [
+              { title: { ar: "قائمة الحزم", en: "All packages" }, href: "/learning/packages", permission: "packages.read" },
+              { title: { ar: "إضافة حزمة", en: "Add package" }, href: "/learning/packages/new", permission: "packages.read" },
+            ],
+          },
+        ],
+      },
+      {
         title: { ar: "الكتالوج", en: "Catalog" },
         items: [
-          { title: { ar: "الكتالوج", en: "Catalog" }, href: "/learning/catalog", permission: "courses.read" },
+          { title: { ar: "الكتالوج العام", en: "All catalog" }, href: "/learning/catalog", permission: "courses.read" },
           { title: { ar: "التصنيفات", en: "Categories" }, href: "/learning/categories", permission: "categories.read" },
-          { title: { ar: "الاستشارات", en: "Consultations" }, href: "/learning/consultations", permission: "consultations.read" },
-          { title: { ar: "المستشارون", en: "Consultants" }, href: "/learning/consultants", permission: "consultations.read" },
         ],
       },
       {
         title: { ar: "التقديم", en: "Delivery" },
         items: [
-          { title: { ar: "المدربون", en: "Instructors" }, href: "/learning/instructors", permission: "instructors.read" },
-          { title: { ar: "طلبات المدربين", en: "Instructor applications" }, href: "/learning/applications", permission: "instructors.read", badge: "applications" },
-          { title: { ar: "طلبات الشركات", en: "Company requests" }, href: "/learning/company-requests", permission: "instructors.read" },
           { title: { ar: "الشهادات", en: "Certificates" }, href: "/learning/certificates", permission: "certificates.read" },
           { title: { ar: "أسئلة المتدربين", en: "Q&A inbox" }, href: "/learning/qa", permission: "qa.read", badge: "qa" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "trainers",
+    title: { ar: "المدربون", en: "Trainers" },
+    icon: "user",
+    sections: [
+      {
+        title: { ar: "إدارة المدربين", en: "Trainers management" },
+        items: [
+          { title: { ar: "المدربون", en: "Instructors" }, href: "/learning/instructors", permission: "instructors.read" },
+          { title: { ar: "طلبات المدربين", en: "Trainer requests" }, href: "/learning/applications", permission: "instructors.read", badge: "applications" },
         ],
       },
     ],
@@ -90,13 +154,28 @@ export const navigation: NavModule[] = [
     icon: "calendar",
     sections: [
       {
-        title: { ar: "الاستشارات", en: "Consultations" },
+        title: { ar: "الجلسات والمواعيد", en: "Sessions & bookings" },
         items: [
           { title: { ar: "نظرة عامة", en: "Overview" }, href: "/consultations", permission: "consultations.read" },
           { title: { ar: "مباشر الآن", en: "Live now" }, href: "/consultations/live", permission: "consultations.read" },
-          { title: { ar: "الخبراء", en: "Experts" }, href: "/consultations/experts", permission: "consultations.read" },
           { title: { ar: "الحجوزات", en: "Bookings" }, href: "/consultations/bookings", permission: "consultations.read" },
           { title: { ar: "الطلبات", en: "Orders" }, href: "/consultations/orders", permission: "consultations.read" },
+        ],
+      },
+      {
+        title: { ar: "الخدمات والخبراء", en: "Services & experts" },
+        items: [
+          {
+            title: { ar: "خدمات الاستشارات", en: "Consultation services" },
+            href: "/learning/consultations",
+            permission: "consultations.read",
+            children: [
+              { title: { ar: "جميع الاستشارات", en: "All consultations" }, href: "/learning/consultations", permission: "consultations.read" },
+              { title: { ar: "إضافة استشارة", en: "Add consultation" }, href: "/learning/consultations/new", permission: "consultations.read" },
+            ],
+          },
+          { title: { ar: "الخبراء", en: "Experts" }, href: "/consultations/experts", permission: "consultations.read" },
+          { title: { ar: "المستشارون", en: "Consultants" }, href: "/learning/consultants", permission: "consultations.read" },
         ],
       },
     ],
@@ -113,6 +192,8 @@ export const navigation: NavModule[] = [
           { title: { ar: "الباقات", en: "Plans" }, href: "/subscriptions/plans", permission: "subscriptions.read" },
           { title: { ar: "المزايا", en: "Features" }, href: "/subscriptions/features", permission: "subscriptions.read" },
           { title: { ar: "المشتركون", en: "Subscribers" }, href: "/subscriptions/subscribers", permission: "subscribers.read" },
+          { title: { ar: "طلبات الشركات", en: "Company leads" }, href: "/subscriptions/team-leads", permission: "subscribers.read" },
+          { title: { ar: "مؤشرات الشركات", en: "Company insights" }, href: "/subscriptions/company-insights", permission: "subscriptions.read" },
         ],
       },
     ],
@@ -202,21 +283,37 @@ export const navigation: NavModule[] = [
     ],
   },
   {
-    id: "b2b",
-    title: { ar: "الشركات", en: "B2B" },
+    id: "companies",
+    title: { ar: "الشركات", en: "Companies" },
     icon: "building",
-    href: "/b2b",
-    disabled: true,
-    note: { ar: "تبقى في اللوحة القديمة", en: "Stays in the legacy panel" },
-    sections: [],
+    sections: [{
+      title: { ar: "الطلبات والاشتراكات", en: "Requests & subscriptions" },
+      items: [
+        { title: { ar: "طلبات التدريب", en: "Training requests" }, href: "/companies", permission: "instructors.read" },
+        { title: { ar: "طلبات اشتراكات الشركات", en: "Subscription requests" }, href: "/companies/leads", permission: "subscribers.read" },
+        { title: { ar: "مؤشرات الشركات", en: "Company insights" }, href: "/companies/insights", permission: "subscriptions.read" },
+      ],
+    }],
   },
 ];
 
-export type FlatNavItem = NavItem & { module: NavModule; section: NavSection };
+export type FlatNavItem = NavItem & { module: NavModule; section: NavSection; parent?: NavItem };
 
 /** Flat list of visible destinations for search and active matching. */
 export function flatItems(nav: NavModule[] = navigation): FlatNavItem[] {
-  return nav.flatMap((module) => module.sections.flatMap((section) => section.items.map((item) => ({ ...item, module, section }))));
+  return nav.flatMap((module) =>
+    module.sections.flatMap((section) =>
+      section.items.flatMap((item) => {
+        const out: FlatNavItem[] = [{ ...item, module, section }];
+        if (item.children) {
+          for (const child of item.children) {
+            out.push({ ...child, module, section, parent: item });
+          }
+        }
+        return out;
+      }),
+    ),
+  );
 }
 
 /**

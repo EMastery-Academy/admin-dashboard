@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useSearchParams } from "react-router-dom";
 
@@ -16,11 +17,16 @@ import { PlanCardItemsTab } from "../components/plan-card-items-tab";
 import { PlanDetailsTab } from "../components/plan-details-tab";
 import { PlanDiscountTab } from "../components/plan-discount-tab";
 import { PlanFeaturesTab } from "../components/plan-features-tab";
+import { PlanPreviewPanel } from "../components/plan-preview";
+import { PlanPreviewDraft, usePlanPreviewDraft } from "../components/plan-preview-draft";
 import { PlanResourcesTab } from "../components/plan-resources-tab";
 import { PlanSubscribersTab } from "../components/plan-subscribers-tab";
-import { AUDIENCE_LABELS, INTERVAL_LABELS, PLAN_TYPE_LABELS, labelOf, planTitle, toNumber, useStatsWindow } from "../lib";
+import { AUDIENCE_LABELS, INTERVAL_LABELS, adminPlanToPreview, PLAN_TYPE_LABELS, labelOf, planTitle, toNumber, useStatsWindow } from "../lib";
 
 type Tab = "overview" | "details" | "card" | "features" | "resources" | "benefits" | "discount" | "subscribers";
+
+/** Tabs whose edits change what customers see, so the live storefront preview sits beside them. */
+const PREVIEW_TABS = new Set<Tab>(["overview", "details", "card", "features", "resources", "discount"]);
 
 /** What still blocks publishing (mirrors the API check, so the admin sees it before clicking). */
 function publishBlockers(plan: SubscriptionPlan, t: (ar: string, en: string) => string): string[] {
@@ -83,7 +89,9 @@ function OverviewTab({ plan }: { plan: SubscriptionPlan }) {
             ? ([[t("عدد الدورات المسموح", "Courses allowed"), String(plan.selection_allowance ?? "—")],
                 [t("حد الاستبدال", "Replacement limit"), plan.max_replacements_per_period == null ? t("بلا حد", "No limit") : String(plan.max_replacements_per_period)]] as [string, string][])
             : []),
-          ...(plan.audience_type === "company" ? ([[t("أقصى عدد مقاعد", "Max seats"), String(plan.max_seats)]] as [string, string][]) : []),
+          ...(plan.audience_type === "company"
+            ? ([[t("حجم الفريق", "Team size"), t(`${plan.min_seats ?? 1}–${plan.max_seats} موظفًا`, `${plan.min_seats ?? 1}–${plan.max_seats} employees`)]] as [string, string][])
+            : []),
           [t("الموارد", "Resources"), t(`${(plan.included_products ?? []).length} مضمّنة · ${(plan.selectable_products ?? []).length} للاختيار`, `${(plan.included_products ?? []).length} included · ${(plan.selectable_products ?? []).length} selectable`)],
           [t("الإصدار", "Version"), `v${plan.version}`],
           [t("أُنشئت", "Created"), formatDate(plan.created_at)],
@@ -102,6 +110,12 @@ export default function SubscriptionPlanDetailPage() {
   const tab = (params.get("tab") as Tab | null) ?? "overview";
   const plan = useQuery(subscriptionQueries.plan(id, lang));
   const p = plan.data;
+  const storefront = useQuery({ ...subscriptionQueries.preview(id), retry: false });
+  // The storefront-shaped plan; the admin plan stands in while it loads or if the API lacks the endpoint.
+  const base = useMemo(() => storefront.data ?? (p ? adminPlanToPreview(p) : undefined), [storefront.data, p]);
+  const draft = usePlanPreviewDraft(base);
+  const [previewOpen, setPreviewOpen] = useState(true);
+  const withPreview = previewOpen && PREVIEW_TABS.has(tab);
 
   const tabs: [Tab, string][] = [
     ["overview", t("نظرة عامة", "Overview")],
@@ -128,19 +142,37 @@ export default function SubscriptionPlanDetailPage() {
         {tabs.map(([key, label]) => (
           <Button key={key} kind={tab === key ? "primary" : "soft"} sm label={label} onClick={() => select(key)} />
         ))}
+        {PREVIEW_TABS.has(tab) ? (
+          <span style={{ marginInlineStart: "auto" }}>
+            <Button kind="ghost" sm icon="eye"
+              label={previewOpen ? t("إخفاء المعاينة", "Hide preview") : t("المعاينة الحية", "Live preview")}
+              onClick={() => setPreviewOpen((open) => !open)} />
+          </span>
+        ) : null}
       </nav>
-      <PageState error={plan.error}>
-        {plan.isLoading ? <Loading /> : null}
-        {/* Keyed by version + update time so editors reset to the saved plan after each save. */}
-        {p && tab === "overview" ? <OverviewTab plan={p} /> : null}
-        {p && tab === "details" ? <PlanDetailsTab key={`${p.version}-${p.updated_at}`} plan={p} /> : null}
-        {p && tab === "card" ? <PlanCardItemsTab key={p.updated_at ?? ""} plan={p} /> : null}
-        {p && tab === "features" ? <PlanFeaturesTab key={`f-${(p.plan_features ?? []).map((f) => f.feature_id).join()}`} plan={p} /> : null}
-        {p && tab === "resources" ? <PlanResourcesTab key={p.updated_at ?? ""} plan={p} /> : null}
-        {p && tab === "benefits" ? <PlanBenefitsTab key={p.updated_at ?? ""} plan={p} /> : null}
-        {p && tab === "discount" ? <PlanDiscountTab key={p.updated_at ?? ""} plan={p} /> : null}
-        {p && tab === "subscribers" ? <PlanSubscribersTab plan={p} /> : null}
-      </PageState>
+      <PlanPreviewDraft.Provider value={draft.context}>
+        <div className={withPreview ? "ma-plan-workspace" : undefined}>
+          <div className="ma-plan-workspace__main">
+            <PageState error={plan.error}>
+              {plan.isLoading ? <Loading /> : null}
+              {/* Keyed by version + update time so editors reset to the saved plan after each save. */}
+              {p && tab === "overview" ? <OverviewTab plan={p} /> : null}
+              {p && tab === "details" ? <PlanDetailsTab key={`${p.version}-${p.updated_at}`} plan={p} /> : null}
+              {p && tab === "card" ? <PlanCardItemsTab key={p.updated_at ?? ""} plan={p} /> : null}
+              {p && tab === "features" ? <PlanFeaturesTab key={`f-${(p.plan_features ?? []).map((f) => f.feature_id).join()}`} plan={p} /> : null}
+              {p && tab === "resources" ? <PlanResourcesTab key={p.updated_at ?? ""} plan={p} libraryCount={storefront.data?.library_count ?? null} /> : null}
+              {p && tab === "benefits" ? <PlanBenefitsTab key={p.updated_at ?? ""} plan={p} /> : null}
+              {p && tab === "discount" ? <PlanDiscountTab key={p.updated_at ?? ""} plan={p} /> : null}
+              {p && tab === "subscribers" ? <PlanSubscribersTab plan={p} /> : null}
+            </PageState>
+          </div>
+          {withPreview ? (
+            <aside className="ma-plan-workspace__preview">
+              <PlanPreviewPanel plan={draft.plan} />
+            </aside>
+          ) : null}
+        </div>
+      </PlanPreviewDraft.Provider>
     </>
   );
 }

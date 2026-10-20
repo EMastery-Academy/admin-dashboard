@@ -8,6 +8,7 @@ import type { PathParams, QueryParams, RequestBody, SuccessResponse } from "@/li
 type PlansOp = "admin_list_subscription_plans_api_v1_admin_subscriptions_plans_get";
 type CreatePlanOp = "admin_create_subscription_plan_api_v1_admin_subscriptions_plans_post";
 type PlanOp = "admin_get_subscription_plan_api_v1_admin_subscriptions_plans__plan_id__get";
+type PreviewPlanOp = "admin_preview_subscription_plan_api_v1_admin_subscriptions_plans__plan_id__preview_get";
 type UpdatePlanOp = "admin_update_subscription_plan_api_v1_admin_subscriptions_plans__plan_id__put";
 type SetProductsOp = "admin_set_subscription_plan_products_api_v1_admin_subscriptions_plans__plan_id__products_put";
 type SetBenefitsOp = "admin_set_subscription_plan_benefits_api_v1_admin_subscriptions_plans__plan_id__benefits_put";
@@ -20,9 +21,14 @@ type AbandonedOp =
   "admin_list_subscription_plan_abandoned_checkouts_api_v1_admin_subscriptions_plans__plan_id__abandoned_checkouts_get";
 type OverviewOp = "admin_subscription_stats_overview_api_v1_admin_subscriptions_stats_overview_get";
 type FunnelOp = "admin_subscription_stats_funnel_api_v1_admin_subscriptions_stats_funnel_get";
+type CompanyInsightsOp =
+  "admin_subscription_company_insights_api_v1_admin_subscriptions_stats_company_insights_get";
 type SubscribersOp = "admin_list_customer_subscriptions_api_v1_admin_subscriptions_customer_subscriptions_get";
 type SubscriberOp =
   "admin_get_customer_subscription_detail_api_v1_admin_subscriptions_customer_subscriptions__subscription_id__get";
+type TeamLeadsOp = "admin_list_team_leads_api_v1_admin_subscriptions_team_leads_get";
+type TeamLeadOp =
+  "admin_get_team_lead_api_v1_admin_subscriptions_team_leads__lead_id__get";
 type FeaturesOp = "admin_list_subscription_features_api_v1_admin_subscriptions_features_get";
 type CreateFeatureOp = "admin_create_subscription_feature_api_v1_admin_subscriptions_features_post";
 type UpdateFeatureOp = "admin_update_subscription_feature_api_v1_admin_subscriptions_features__feature_id__put";
@@ -33,6 +39,8 @@ type CancelOp =
 
 export type SubscriptionPlan = SuccessResponse<PlanOp>;
 export type SubscriptionPlansParams = QueryParams<PlansOp>;
+/** A plan in the storefront's shape (`GET /subscriptions/plans/{slug}`), drafts included: what the live preview renders. */
+export type SubscriptionPlanPreview = SuccessResponse<PreviewPlanOp>;
 export type SubscriptionPlanProduct = NonNullable<SubscriptionPlan["products"]>[number];
 export type SubscriptionPlanBenefit = NonNullable<SubscriptionPlan["benefits"]>[number];
 export type SubscriptionPlanTranslation = NonNullable<SubscriptionPlan["translations"]>[number];
@@ -51,29 +59,36 @@ export type SubscriptionPlanStats = SubscriptionStatsOverview["plans"][number];
 export type SubscriptionFunnel = SuccessResponse<FunnelOp>;
 export type SubscriptionFunnelParams = QueryParams<FunnelOp>;
 export type SubscriptionFunnelRow = SubscriptionFunnel["plans"][number];
+export type CompanyInsights = SuccessResponse<CompanyInsightsOp>;
+export type CompanyInsightsParams = QueryParams<CompanyInsightsOp>;
+export type CompanyInsightStage = CompanyInsights["stages"][number];
+export type CompanyInsightsTrendPoint = CompanyInsights["trend"][number];
 export type SubscriberPage = SuccessResponse<SubscribersOp>;
 export type SubscriberRow = SubscriberPage["items"][number];
 export type SubscribersParams = QueryParams<SubscribersOp>;
 export type SubscriberDetail = SuccessResponse<SubscriberOp>;
+export type TeamLeadPage = SuccessResponse<TeamLeadsOp>;
+export type TeamLeadRow = TeamLeadPage["items"][number];
+export type TeamLeadsParams = QueryParams<TeamLeadsOp>;
+export type TeamLeadDetail = SuccessResponse<TeamLeadOp>;
+export type TeamLeadId = PathParams<TeamLeadOp>["lead_id"];
+export const TEAM_LEAD_STATUSES = ["details", "checkout_started", "converted"] as const;
 export type SubscriptionFeature = SuccessResponse<FeaturesOp>[number];
 export type SubscriptionFeatureBody = RequestBody<CreateFeatureOp>;
 export type SubscriptionPlanFeature = NonNullable<SubscriptionPlan["plan_features"]>[number];
 export type SetSubscriptionPlanFeaturesBody = RequestBody<SetPlanFeaturesOp>;
 
-/** Catalog resource types a plan may grant (a plan can never include another subscription). */
-export const SUBSCRIPTION_RESOURCE_TYPES = [
-  "course",
-  "diploma",
-  "live_diploma",
-  "package",
-  "bundle",
-  "consultation",
-] as const;
+/**
+ * Catalog resource types a plan may grant: the ones subscription fulfilment delivers to the LMS. Live diplomas
+ * (cohort seats) and consultations are not fulfilled from a subscription; a plan never includes another subscription.
+ */
+export const SUBSCRIPTION_RESOURCE_TYPES = ["course", "diploma", "package", "bundle"] as const;
 export const SUBSCRIBER_STATUSES = ["pending", "active", "past_due", "canceled", "expired"] as const;
 
 export const subscriptionPaths = {
   plans: "admin/subscriptions/plans",
   plan: "admin/subscriptions/plans/{plan_id}",
+  preview: "admin/subscriptions/plans/{plan_id}/preview",
   products: "admin/subscriptions/plans/{plan_id}/products",
   benefits: "admin/subscriptions/plans/{plan_id}/benefits",
   status: "admin/subscriptions/plans/{plan_id}/status",
@@ -83,7 +98,10 @@ export const subscriptionPaths = {
   abandoned: "admin/subscriptions/plans/{plan_id}/abandoned-checkouts",
   overview: "admin/subscriptions/stats/overview",
   funnel: "admin/subscriptions/stats/funnel",
+  companyInsights: "admin/subscriptions/stats/company-insights",
   subscribers: "admin/subscriptions/customer-subscriptions",
+  teamLeads: "admin/subscriptions/team-leads",
+  teamLead: "admin/subscriptions/team-leads/{lead_id}",
   subscriber: "admin/subscriptions/customer-subscriptions/{subscription_id}",
   cancel: "admin/subscriptions/customer-subscriptions/{subscription_id}/cancel",
   features: "admin/subscriptions/features",
@@ -95,10 +113,14 @@ export const subscriptionKeys = {
   all: ["subscriptions"] as const,
   plans: (params?: object) => [...subscriptionKeys.all, "plans", params ?? {}] as const,
   plan: (id: string, lang?: string) => [...subscriptionKeys.all, "plan", id, lang ?? "ar"] as const,
+  preview: (id: string) => [...subscriptionKeys.all, "preview", id] as const,
   abandoned: (id: string, params?: object) => [...subscriptionKeys.all, "abandoned", id, params ?? {}] as const,
   overview: (params: object) => [...subscriptionKeys.all, "overview", params] as const,
   funnel: (params: object) => [...subscriptionKeys.all, "funnel", params] as const,
+  companyInsights: (params: object) => [...subscriptionKeys.all, "company-insights", params] as const,
   subscribers: (params?: object) => [...subscriptionKeys.all, "subscribers", params ?? {}] as const,
+  teamLeads: (params?: object) => [...subscriptionKeys.all, "team-leads", params ?? {}] as const,
+  teamLead: (id: string) => [...subscriptionKeys.all, "team-lead", id] as const,
   subscriber: (id: string) => [...subscriptionKeys.all, "subscriber", id] as const,
   features: () => [...subscriptionKeys.all, "features"] as const,
 };
@@ -110,6 +132,9 @@ export const listSubscriptionPlans = (query: SubscriptionPlansParams = {}): Prom
   apiGet(subscriptionPaths.plans, { query });
 export const getSubscriptionPlan = (plan_id: PlanId, lang?: string): Promise<SubscriptionPlan> =>
   apiGet(subscriptionPaths.plan, { path: { plan_id }, query: lang ? { lang } : undefined });
+/** Arabic, like the storefront. */
+export const getSubscriptionPlanPreview = (plan_id: PlanId): Promise<SubscriptionPlanPreview> =>
+  apiGet(subscriptionPaths.preview, { path: { plan_id }, query: { lang: "ar" } });
 export const listPlanAbandonedCheckouts = (
   plan_id: PlanId,
   query: QueryParams<AbandonedOp> = {},
@@ -118,8 +143,17 @@ export const getSubscriptionStatsOverview = (query: SubscriptionStatsWindow): Pr
   apiGet(subscriptionPaths.overview, { query });
 export const getSubscriptionFunnel = (query: SubscriptionFunnelParams): Promise<SubscriptionFunnel> =>
   apiGet(subscriptionPaths.funnel, { query });
+/** Company checkout funnel: details submitted vs checkouts started vs paid, and average team sizes. */
+export const getCompanyInsights = (query: CompanyInsightsParams): Promise<CompanyInsights> =>
+  apiGet(subscriptionPaths.companyInsights, { query });
 export const listSubscribers = (query: SubscribersParams = {}): Promise<SubscriberPage> =>
   apiGet(subscriptionPaths.subscribers, { query });
+/** Companies that started a team checkout, paid or not (for the business team's follow-up). */
+export const listTeamLeads = (query: TeamLeadsParams = {}): Promise<TeamLeadPage> =>
+  apiGet(subscriptionPaths.teamLeads, { query });
+/** One company's pre-checkout details and where it stopped. */
+export const getTeamLead = (lead_id: TeamLeadId): Promise<TeamLeadDetail> =>
+  apiGet(subscriptionPaths.teamLead, { path: { lead_id } });
 export const getSubscriber = (subscription_id: SubscriptionId): Promise<SubscriberDetail> =>
   apiGet(subscriptionPaths.subscriber, { path: { subscription_id } });
 
@@ -169,12 +203,17 @@ export const subscriptionQueries = {
     queryOptions({ queryKey: subscriptionKeys.plans(params), queryFn: () => listSubscriptionPlans(params) }),
   plan: (id: string, lang?: string) =>
     queryOptions({ queryKey: subscriptionKeys.plan(id, lang), queryFn: () => getSubscriptionPlan(id, lang) }),
+  preview: (id: string) =>
+    queryOptions({ queryKey: subscriptionKeys.preview(id), queryFn: () => getSubscriptionPlanPreview(id) }),
   abandoned: (id: string, params: QueryParams<AbandonedOp> = {}) =>
     queryOptions({ queryKey: subscriptionKeys.abandoned(id, params), queryFn: () => listPlanAbandonedCheckouts(id, params) }),
   overview: (params: SubscriptionStatsWindow) =>
     queryOptions({ queryKey: subscriptionKeys.overview(params), queryFn: () => getSubscriptionStatsOverview(params) }),
   funnel: (params: SubscriptionFunnelParams) =>
     queryOptions({ queryKey: subscriptionKeys.funnel(params), queryFn: () => getSubscriptionFunnel(params) }),
+  companyInsights: (params: CompanyInsightsParams) =>
+    queryOptions({ queryKey: subscriptionKeys.companyInsights(params), queryFn: () => getCompanyInsights(params) }),
   subscriber: (id: string) => queryOptions({ queryKey: subscriptionKeys.subscriber(id), queryFn: () => getSubscriber(id) }),
+  teamLead: (id: string) => queryOptions({ queryKey: subscriptionKeys.teamLead(id), queryFn: () => getTeamLead(id) }),
   features: () => queryOptions({ queryKey: subscriptionKeys.features(), queryFn: listSubscriptionFeatures }),
 };

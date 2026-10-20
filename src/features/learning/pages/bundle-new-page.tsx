@@ -100,7 +100,7 @@ export default function BundleNewPage() {
         skill_ids: skillIds,
       }),
     onSuccess: (bundle) => {
-      toast.success(t("تم إنشاء الباقة بنجاح", "Bundle created"));
+      toast.success(t("تم إنشاء الحزمة بنجاح", "Package created"));
       navigate(productTabHref(bundle.ref, "bundle"));
     },
   });
@@ -116,12 +116,12 @@ export default function BundleNewPage() {
   return (
     <>
       <PageHead
-        title={t("إنشاء باقة", "Create a bundle")}
+        title={t("إنشاء حزمة", "Create a package")}
         sub={t(
-          "باقة تجمع دورات ودبلومات واستشارات بسعر واحد مع ترتيب العناصر.",
+          "حزمة تجمع دورات ودبلومات واستشارات بسعر واحد مع ترتيب العناصر.",
           "Sell courses, diplomas and consultations together for one price, in a set order.",
         )}
-        back={{ href: "/learning/catalog?type=bundle", label: t("المنتجات", "Products") }}
+        back={{ href: "/learning/packages", label: t("المنتجات", "Products") }}
       />
 
       <form
@@ -304,7 +304,7 @@ export default function BundleNewPage() {
         </div>
 
         <ProductFormAside
-          typeLabel={t("باقة", "Bundle")}
+          typeLabel={t("حزمة", "Package")}
           price={amount}
           priceLabel={t("السعر (USD)", "Price (USD)")}
           counts={[
@@ -313,12 +313,12 @@ export default function BundleNewPage() {
           ]}
           published={published}
           onPublishedChange={setPublished}
-          submitLabel={t("حفظ الباقة", "Save bundle")}
+          submitLabel={t("حفظ الحزمة", "Save package")}
           pending={create.isPending}
           disabled={invalid}
-          cancelHref="/learning/catalog?type=bundle"
+          cancelHref="/learning/packages"
           error={create.error}
-          errorTitle={t("تعذّر حفظ الباقة", "Couldn't save the bundle")}
+          errorTitle={t("تعذّر حفظ الحزمة", "Couldn't save the package")}
         />
       </form>
     </>

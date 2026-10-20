@@ -9,6 +9,8 @@ import { Button, Card, Empty, ErrorAlert, FormActions, IconButton, Loading } fro
 import { ToggleField } from "@/features/learning/product-form";
 
 import { FeatureIcon } from "./feature-icon";
+import { HelpLabel } from "./help-label";
+import { usePlanPreviewPatch } from "./plan-preview-draft";
 
 type Row = { feature_id: string; value_ar: string; value_en: string; is_highlighted: boolean };
 
@@ -66,12 +68,29 @@ export function PlanFeaturesTab({ plan }: { plan: SubscriptionPlan }) {
     },
   });
 
+  usePlanPreviewPatch({
+    features: rows.flatMap((r) => {
+      const feature = byId.get(r.feature_id);
+      return feature
+        ? [{
+            feature_id: r.feature_id,
+            key: feature.feature_key,
+            icon: feature.icon ?? null,
+            title: feature.title_ar,
+            description: feature.description_ar ?? null,
+            value: r.value_ar.trim() || null,
+            highlighted: r.is_highlighted,
+          }]
+        : [];
+    }),
+  });
+
   if (catalog.isLoading) return <Loading />;
   const available = (catalog.data ?? []).filter((f) => f.is_active && !included.has(f.feature_id));
 
   return (
     <div className="ma-cols ma-cols--main-side">
-      <Card title={t(`مزايا الباقة (${rows.length})`, `Plan features (${rows.length})`)}>
+      <Card title={<HelpLabel text={t(`مزايا الباقة (${rows.length})`, `Plan features (${rows.length})`)} help="features" />}>
         {rows.length === 0 ? <Empty text={t("لم تُضف مزايا بعد.", "No features added yet.")} /> : null}
         <ol className="ma-orderlist">
           {rows.map((row, index) => {

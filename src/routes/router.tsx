@@ -17,6 +17,7 @@ import CustomersPage from "@/features/customers/pages/customers-page";
 import CustomerDetailPage from "@/features/customers/pages/customer-detail-page";
 import AccountsPage from "@/features/customers/pages/accounts-page";
 import TicketsPage from "@/features/customers/pages/tickets-page";
+import TicketDetailPage from "@/features/customers/pages/ticket-detail-page";
 import TeamPage from "@/features/settings/pages/team-page";
 import AuditPage from "@/features/settings/pages/audit-page";
 import GeneralSettingsPage from "@/features/settings/pages/general-settings-page";
@@ -45,6 +46,9 @@ import SubscriptionPlanDetailPage from "@/features/subscriptions/pages/plan-deta
 import SubscribersPage from "@/features/subscriptions/pages/subscribers-page";
 import SubscriptionFeaturesPage from "@/features/subscriptions/pages/features-page";
 import SubscriberDetailPage from "@/features/subscriptions/pages/subscriber-detail-page";
+import TeamLeadsPage from "@/features/subscriptions/pages/team-leads-page";
+import TeamLeadDetailPage from "@/features/subscriptions/pages/team-lead-detail-page";
+import CompanyInsightsPage from "@/features/subscriptions/pages/company-insights-page";
 import ConsultationDetailPage from "@/features/learning/pages/consultation-detail-page";
 import ConsultantsPage from "@/features/learning/pages/consultants-page";
 import ConsultantDetailPage from "@/features/learning/pages/consultant-detail-page";
@@ -114,12 +118,16 @@ export const ROUTER = createBrowserRouter([
       { path: "sales/offers", element: <OffersPage /> },
 
       // Learning
-      { path: "learning/courses", element: <Navigate to="/learning/catalog?type=course" replace /> },
+      { path: "learning/courses", element: <CatalogPage defaultType="course" /> },
       { path: "learning/courses/new", element: <CourseNewPage /> },
-      { path: "learning/packages", element: <Navigate to="/learning/catalog?type=package" replace /> },
-      { path: "learning/packages/new", element: <PackageNewPage /> },
-      { path: "learning/bundles/new", element: <BundleNewPage /> },
+      { path: "learning/diplomas", element: <CatalogPage defaultType="diploma" /> },
+      { path: "learning/live", element: <CatalogPage defaultType="live_diploma" /> },
+      { path: "learning/live-diplomas", element: <Navigate to="/learning/live" replace /> },
       { path: "learning/live-diplomas/new", element: <LiveDiplomaNewPage /> },
+      { path: "learning/bundles", element: <CatalogPage defaultType="package" /> },
+      { path: "learning/bundles/new", element: <PackageNewPage /> },
+      { path: "learning/packages", element: <CatalogPage defaultType="bundle" /> },
+      { path: "learning/packages/new", element: <BundleNewPage /> },
       { path: "learning/catalog", element: <CatalogPage /> },
       { path: "learning/catalog/:productId", element: <ProductDetailPage /> },
       // Full-width workspace: the shell hides its sidebar for routes with `handle.studio`.
@@ -135,13 +143,22 @@ export const ROUTER = createBrowserRouter([
       { path: "learning/instructors", element: <InstructorsPage /> },
       { path: "learning/instructors/:trainerId", element: <InstructorDetailPage /> },
       { path: "learning/applications", element: <InstructorApplicationsPage /> },
-      { path: "learning/company-requests", element: <CompanyRequestsPage /> },
+      { path: "learning/applications/:id", element: <InstructorApplicationsPage /> },
+      { path: "trainers", element: <Navigate to="/learning/instructors" replace /> },
+      { path: "trainers/applications", element: <Navigate to="/learning/applications" replace /> },
+      { path: "instructors", element: <Navigate to="/learning/instructors" replace /> },
+      { path: "instructors/applications", element: <Navigate to="/learning/applications" replace /> },
+      { path: "learning/company-requests", element: <Navigate to="/companies" replace /> },
+      { path: "companies", element: <CompanyRequestsPage /> },
+      { path: "companies/:id", element: <CompanyRequestsPage /> },
       { path: "learning/certificates", element: <CertificatesPage /> },
       { path: "learning/qa", element: ph("أسئلة المتدربين", "Q&A inbox") },
 
       // Consultations (B2C)
       { path: "consultations", element: <ConsultationsOverviewPage /> },
       { path: "consultations/live", element: <LiveMeetingsPage /> },
+      { path: "consultations/services", element: <Navigate to="/learning/consultations" replace /> },
+      { path: "consultations/consultants", element: <Navigate to="/learning/consultants" replace /> },
       { path: "consultations/experts", element: <ConsultationExpertsPage /> },
       { path: "consultations/experts/:id", element: <ExpertDetailPage /> },
       { path: "consultations/bookings", element: <ConsultationBookingsPage /> },
@@ -156,6 +173,12 @@ export const ROUTER = createBrowserRouter([
       { path: "subscriptions/features", element: <SubscriptionFeaturesPage /> },
       { path: "subscriptions/subscribers", element: <SubscribersPage /> },
       { path: "subscriptions/subscribers/:id", element: <SubscriberDetailPage /> },
+      { path: "subscriptions/team-leads", element: <TeamLeadsPage /> },
+      { path: "subscriptions/team-leads/:id", element: <TeamLeadDetailPage /> },
+      { path: "subscriptions/company-insights", element: <CompanyInsightsPage /> },
+      { path: "companies/leads", element: <TeamLeadsPage /> },
+      { path: "companies/leads/:id", element: <TeamLeadDetailPage /> },
+      { path: "companies/insights", element: <CompanyInsightsPage /> },
 
       // Customers
       { path: "customers", element: <CustomersPage /> },
@@ -163,6 +186,9 @@ export const ROUTER = createBrowserRouter([
       { path: "customers/accounts", element: <AccountsPage /> },
       { path: "customers/segments", element: <SegmentsPage /> },
       { path: "customers/tickets", element: <TicketsPage /> },
+      { path: "customers/tickets/:ticketId", element: <TicketDetailPage /> },
+      { path: "admin/support/b2c", element: <Navigate to="/customers/tickets" replace /> },
+      { path: "admin/support/b2c/:ticketId", element: <Navigate to="/customers/tickets/:ticketId" replace /> },
 
       // Marketing
       { path: "marketing/affiliates", element: <AffiliatesPage /> },

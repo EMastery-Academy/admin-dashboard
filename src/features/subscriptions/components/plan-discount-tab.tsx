@@ -11,6 +11,7 @@ import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { SegmentedChoice } from "@/features/learning/product-form";
 
 import { PlanCard } from "./plan-card";
+import { usePlanPreviewPatch } from "./plan-preview-draft";
 import { toNumber } from "../lib";
 
 type DiscountType = "percent" | "fixed";
@@ -84,6 +85,12 @@ export function PlanDiscountTab({ plan }: { plan: SubscriptionPlan }) {
         compare_at_price: String(price),
         discount: { discount_type: type, value: String(amount), label: label.trim() || null, starts_at: toUtcIso(startsAt), ends_at: toUtcIso(endsAt), is_active: true },
       };
+
+  usePlanPreviewPatch(
+    preview === plan
+      ? {}
+      : { effective_price: preview.effective_price, compare_at_price: preview.compare_at_price, discount: preview.discount },
+  );
 
   return (
     <div className="ma-cols ma-cols--main-side">

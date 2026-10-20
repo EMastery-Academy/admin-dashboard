@@ -3644,6 +3644,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/catalog/menu": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Header explore menu: groups, categories and top items */
+        get: operations["menu_api_v1_catalog_menu_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/catalog/live-diplomas": {
         parameters: {
             query?: never;
@@ -4619,6 +4636,80 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/requests/countries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search Countries
+         * @description Every country (Arabic name first) when `q` is omitted, otherwise a name search.
+         */
+        get: operations["search_countries_api_v1_requests_countries_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/requests/countries/{code}/cities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Country Cities
+         * @description Cities of one country (English names, from CountriesNow).
+         */
+        get: operations["country_cities_api_v1_requests_countries__code__cities_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/requests/trainer-attachments/presign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Presign Trainer Attachment */
+        post: operations["presign_trainer_attachment_api_v1_requests_trainer_attachments_presign_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/requests/trainer-attachments/{attachment_id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm Trainer Attachment */
+        post: operations["confirm_trainer_attachment_api_v1_requests_trainer_attachments__attachment_id__confirm_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/requests/company-training": {
         parameters: {
             query?: never;
@@ -4653,6 +4744,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/requests/stats/{kind}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Request Stats */
+        get: operations["request_stats_api_v1_admin_requests_stats__kind__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/requests/assignees": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Request Assignees */
+        get: operations["request_assignees_api_v1_admin_requests_assignees_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/requests/{request_id}": {
         parameters: {
             query?: never;
@@ -4662,6 +4787,59 @@ export interface paths {
         };
         /** Admin Request Detail */
         get: operations["admin_request_detail_api_v1_admin_requests__request_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Request */
+        patch: operations["update_request_api_v1_admin_requests__request_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/admin/requests/{request_id}/notes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Request Notes */
+        get: operations["request_notes_api_v1_admin_requests__request_id__notes_get"];
+        put?: never;
+        /** Add Request Note */
+        post: operations["add_request_note_api_v1_admin_requests__request_id__notes_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/requests/{request_id}/attachments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Request Attachments */
+        get: operations["request_attachments_api_v1_admin_requests__request_id__attachments_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/requests/{request_id}/attachments/{attachment_id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Request Attachment Download */
+        get: operations["request_attachment_download_api_v1_admin_requests__request_id__attachments__attachment_id__download_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -5108,6 +5286,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/subscriptions/team-leads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Save a company's details from the team checkout
+         * @description Step 1 of a company plan checkout: company and contact details (and the team size, if known), saved before any price or payment so the business team can follow up even if the purchase is not completed. Calling it again for the same plan updates the customer's open lead.
+         */
+        post: operations["save_team_lead_api_v1_subscriptions_team_leads_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/subscriptions/checkout": {
         parameters: {
             query?: never;
@@ -5383,6 +5581,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/subscriptions/plans/{plan_id}/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Storefront view of a plan in any status
+         * @description The plan exactly as the public `GET /subscriptions/plans/{slug}` returns it, but for drafts too and without recording a view. Feeds the admin live preview. Requires `admin:catalog:read`.
+         */
+        get: operations["admin_preview_subscription_plan_api_v1_admin_subscriptions_plans__plan_id__preview_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/subscriptions/plans/{plan_id}/products": {
         parameters: {
             query?: never;
@@ -5616,6 +5834,68 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/subscriptions/stats/company-insights": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Admin Subscription Company Insights
+         * @description Company checkout funnel for the period: companies that submitted their details, started
+         *     checkout or paid, with average team sizes and the companies that stopped before paying.
+         *     Requires `admin:catalog:read` or `admin:analytics:read`.
+         */
+        get: operations["admin_subscription_company_insights_api_v1_admin_subscriptions_stats_company_insights_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/subscriptions/team-leads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Companies that started a team checkout
+         * @description Company and contact details saved on the first step of a company plan checkout, newest first, whether or not they paid: `details` (never reached Stripe), `checkout_started` (unpaid order) or `converted`. Requires `admin:entitlements:read`.
+         */
+        get: operations["admin_list_team_leads_api_v1_admin_subscriptions_team_leads_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/subscriptions/team-leads/{lead_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Company request detail
+         * @description Everything a company submitted before paying (company, contact, team size), plus how far it got: no order (`details`), an unfinished checkout (`checkout_started`) or a subscription (`converted`). Requires `admin:entitlements:read`.
+         */
+        get: operations["admin_get_team_lead_api_v1_admin_subscriptions_team_leads__lead_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/subscriptions/customer-subscriptions": {
         parameters: {
             query?: never;
@@ -5661,6 +5941,435 @@ export interface paths {
         put?: never;
         /** Admin Cancel Customer Subscription */
         post: operations["admin_cancel_customer_subscription_api_v1_admin_subscriptions_customer_subscriptions__subscription_id__cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/support/categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List ticket categories */
+        get: operations["list_categories_api_v1_support_categories_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/support/related-options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Customer orders/courses to link to ticket */
+        get: operations["get_related_options_api_v1_support_related_options_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/support/attachments/presign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Authorize attachment upload */
+        post: operations["presign_attachment_api_v1_support_attachments_presign_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/support/attachments/{attachment_id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm attachment upload */
+        post: operations["confirm_attachment_api_v1_support_attachments__attachment_id__confirm_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/support/attachments/{attachment_id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get short-lived download URL */
+        get: operations["get_attachment_download_api_v1_support_attachments__attachment_id__download_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/support/tickets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List my tickets */
+        get: operations["list_tickets_api_v1_support_tickets_get"];
+        put?: never;
+        /** Create support ticket */
+        post: operations["create_ticket_api_v1_support_tickets_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/support/tickets/{ticket_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get ticket detail and conversation */
+        get: operations["get_ticket_api_v1_support_tickets__ticket_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/support/tickets/{ticket_id}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get ticket public messages */
+        get: operations["list_ticket_messages_api_v1_support_tickets__ticket_id__messages_get"];
+        put?: never;
+        /** Reply to ticket as customer */
+        post: operations["reply_ticket_api_v1_support_tickets__ticket_id__messages_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/support/tickets/{ticket_id}/reopen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reopen resolved ticket */
+        post: operations["reopen_ticket_api_v1_support_tickets__ticket_id__reopen_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/support/tickets/{ticket_id}/feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit customer satisfaction rating */
+        post: operations["submit_feedback_api_v1_support_tickets__ticket_id__feedback_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/support/categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List all support categories */
+        get: operations["list_admin_categories_api_v1_admin_support_categories_get"];
+        put?: never;
+        /** Create support category */
+        post: operations["create_admin_category_api_v1_admin_support_categories_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/support/categories/{category_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update support category */
+        patch: operations["update_admin_category_api_v1_admin_support_categories__category_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/admin/support/analytics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Support KPIs and resolution metrics */
+        get: operations["get_analytics_api_v1_admin_support_analytics_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/support/agents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List eligible support agents */
+        get: operations["list_agents_api_v1_admin_support_agents_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/support/b2c/tickets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Filter and list B2C support tickets */
+        get: operations["list_b2c_tickets_api_v1_admin_support_b2c_tickets_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/support/b2c/tickets/{ticket_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get full B2C ticket details */
+        get: operations["get_b2c_ticket_api_v1_admin_support_b2c_tickets__ticket_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update ticket status/priority */
+        patch: operations["update_b2c_ticket_api_v1_admin_support_b2c_tickets__ticket_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/admin/support/b2c/tickets/{ticket_id}/assign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Assign or transfer ticket */
+        post: operations["assign_b2c_ticket_api_v1_admin_support_b2c_tickets__ticket_id__assign_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/support/b2c/tickets/{ticket_id}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reply to ticket (emails customer) */
+        post: operations["reply_b2c_ticket_api_v1_admin_support_b2c_tickets__ticket_id__messages_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/support/b2c/tickets/{ticket_id}/notes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add internal staff note */
+        post: operations["add_internal_note_api_v1_admin_support_b2c_tickets__ticket_id__notes_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/support/b2c/tickets/{ticket_id}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Resolve ticket with summary */
+        post: operations["resolve_b2c_ticket_api_v1_admin_support_b2c_tickets__ticket_id__resolve_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/support/b2c/tickets/{ticket_id}/activity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get ticket activity audit trail */
+        get: operations["list_ticket_activities_api_v1_admin_support_b2c_tickets__ticket_id__activity_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/support/b2c/tickets/{ticket_id}/customer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get customer 360 context */
+        get: operations["get_ticket_customer_api_v1_admin_support_b2c_tickets__ticket_id__customer_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/support/attachments/presign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Authorize admin attachment upload */
+        post: operations["presign_admin_attachment_api_v1_admin_support_attachments_presign_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/support/attachments/{attachment_id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm admin attachment upload */
+        post: operations["confirm_admin_attachment_api_v1_admin_support_attachments__attachment_id__confirm_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/support/attachments/{attachment_id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get admin authorized download URL */
+        get: operations["get_admin_attachment_download_api_v1_admin_support_attachments__attachment_id__download_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -5743,6 +6452,42 @@ export interface components {
              */
             active: boolean;
         };
+        /** ActivityResponse */
+        ActivityResponse: {
+            /**
+             * Activity Id
+             * Format: uuid
+             */
+            activity_id: string;
+            /**
+             * Ticket Id
+             * Format: uuid
+             */
+            ticket_id: string;
+            /** Actor Type */
+            actor_type: string;
+            /** Actor Id */
+            actor_id?: string | null;
+            /** Actor Name */
+            actor_name?: string | null;
+            /** Action */
+            action: string;
+            /** Previous Value */
+            previous_value?: {
+                [key: string]: unknown;
+            } | null;
+            /** New Value */
+            new_value?: {
+                [key: string]: unknown;
+            } | null;
+            /** Reason */
+            reason?: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
         /** AddPackageCourseRequest */
         AddPackageCourseRequest: {
             /**
@@ -5790,6 +6535,16 @@ export interface components {
         AdminAssetsResponse: {
             /** Items */
             items: components["schemas"]["AdminAssetResponse"][];
+        };
+        /** AdminAssignTicketRequest */
+        AdminAssignTicketRequest: {
+            /**
+             * Assigned Admin Id
+             * Format: uuid
+             */
+            assigned_admin_id: string;
+            /** Reason */
+            reason?: string | null;
         };
         /** AdminAuditLogPageResponse */
         AdminAuditLogPageResponse: {
@@ -6293,6 +7048,13 @@ export interface components {
             currency_code: string | null;
             /** Bookings Count */
             bookings_count: number;
+        };
+        /** AdminInternalNoteRequest */
+        AdminInternalNoteRequest: {
+            /** Body */
+            body: string;
+            /** Attachment Ids */
+            attachment_ids?: string[];
         };
         /** AdminLegacyImportResponse */
         AdminLegacyImportResponse: {
@@ -6825,6 +7587,15 @@ export interface components {
              */
             entitlement_count: number;
         };
+        /** AdminReplyRequest */
+        AdminReplyRequest: {
+            /** Body */
+            body: string;
+            /** Attachment Ids */
+            attachment_ids?: string[];
+            /** Status After */
+            status_after?: string | null;
+        };
         /** AdminRescheduleOptions */
         AdminRescheduleOptions: {
             /**
@@ -6845,6 +7616,17 @@ export interface components {
             slot_ids: string[];
             /** Reason */
             reason?: string | null;
+        };
+        /** AdminResolveTicketRequest */
+        AdminResolveTicketRequest: {
+            /**
+             * Resolution Type
+             * @default SOLVED
+             * @enum {string}
+             */
+            resolution_type: "SOLVED" | "WORKAROUND" | "COURSE_ACCESS_RESTORED" | "REFUND_PROCESSED" | "DUPLICATE" | "NOT_REPRODUCIBLE" | "OTHER";
+            /** Resolution Summary */
+            resolution_summary: string;
         };
         /** AdminRoleCreateRequest */
         AdminRoleCreateRequest: {
@@ -7059,6 +7841,17 @@ export interface components {
              */
             ends_at: string;
         };
+        /** AdminUpdateTicketRequest */
+        AdminUpdateTicketRequest: {
+            /** Status */
+            status?: string | null;
+            /** Priority */
+            priority?: string | null;
+            /** Category Id */
+            category_id?: string | null;
+            /** Reason */
+            reason?: string | null;
+        };
         /** AdminUserPageResponse */
         AdminUserPageResponse: {
             /** Items */
@@ -7085,6 +7878,22 @@ export interface components {
             status: string;
             /** Scopes */
             scopes: string[];
+        };
+        /** AgentInfoResponse */
+        AgentInfoResponse: {
+            /**
+             * Admin User Id
+             * Format: uuid
+             */
+            admin_user_id: string;
+            /** Email */
+            email: string;
+            /** Full Name */
+            full_name?: string | null;
+            /** Roles */
+            roles?: string[];
+            /** Active Ticket Count */
+            active_ticket_count: number;
         };
         /** Announcement */
         Announcement: {
@@ -7170,6 +7979,73 @@ export interface components {
             email: string;
             /** Customer Id */
             customer_id?: string | null;
+        };
+        /** AttachmentPresignRequest */
+        AttachmentPresignRequest: {
+            /** Filename */
+            filename: string;
+            /** Content Type */
+            content_type: string;
+            /** Size Bytes */
+            size_bytes: number;
+            /** Ticket Id */
+            ticket_id?: string | null;
+        };
+        /** AttachmentPresignResponse */
+        AttachmentPresignResponse: {
+            /**
+             * Attachment Id
+             * Format: uuid
+             */
+            attachment_id: string;
+            /** Upload Url */
+            upload_url: string;
+            /** Bucket */
+            bucket: string;
+            /** Storage Key */
+            storage_key: string;
+            /** Content Type */
+            content_type: string;
+            /** Expires In Seconds */
+            expires_in_seconds: number;
+        };
+        /** AttachmentResponse */
+        AttachmentResponse: {
+            /**
+             * Attachment Id
+             * Format: uuid
+             */
+            attachment_id: string;
+            /** Ticket Id */
+            ticket_id?: string | null;
+            /** Message Id */
+            message_id?: string | null;
+            /** Uploader Type */
+            uploader_type: string;
+            /**
+             * Uploader Id
+             * Format: uuid
+             */
+            uploader_id: string;
+            /** Original Filename */
+            original_filename: string;
+            /** Content Type */
+            content_type: string;
+            /** Size Bytes */
+            size_bytes: number;
+            /** Status */
+            status: string;
+            /** Scan Status */
+            scan_status: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Confirmed At */
+            confirmed_at?: string | null;
+            /** Download Url */
+            download_url?: string | null;
         };
         /** AuthResponse */
         AuthResponse: {
@@ -8204,27 +9080,6 @@ export interface components {
             b2c?: components["schemas"]["CatalogItemDetail"] | null;
             legacy?: components["schemas"]["CatalogProductDetail"] | null;
         };
-        /** CategoryResponse */
-        CategoryResponse: {
-            /**
-             * Category Id
-             * Format: uuid
-             */
-            category_id: string;
-            /** Slug */
-            slug: string;
-            /** Name */
-            name: string | null;
-            /** Parent Id */
-            parent_id: string | null;
-            /** Sort Order */
-            sort_order: number;
-            /**
-             * Product Count
-             * @default 0
-             */
-            product_count: number;
-        };
         /** CategorySalesReport */
         CategorySalesReport: {
             /**
@@ -8578,6 +9433,86 @@ export interface components {
             /** Original Price */
             original_price?: number | null;
         };
+        /**
+         * CompanyContactIn
+         * @description Who to contact about a company subscription (from the team checkout form).
+         */
+        CompanyContactIn: {
+            /** Name */
+            name: string;
+            /** Email */
+            email: string;
+            /** Phone */
+            phone?: string | null;
+            /** Job Title */
+            job_title?: string | null;
+        };
+        /**
+         * CompanyInsightsResponse
+         * @description Company checkout funnel: details submitted vs checkouts started vs paid, and team sizes.
+         */
+        CompanyInsightsResponse: {
+            /**
+             * Start
+             * Format: date-time
+             */
+            start: string;
+            /**
+             * End
+             * Format: date-time
+             */
+            end: string;
+            /** Submitted */
+            submitted: number;
+            /** Details Only */
+            details_only: number;
+            /** Checkout Started */
+            checkout_started: number;
+            /** Converted */
+            converted: number;
+            /** Abandoned */
+            abandoned: number;
+            /** Conversion Rate */
+            conversion_rate?: number | null;
+            /** Avg Seats */
+            avg_seats?: number | null;
+            /** Avg Seats Converted */
+            avg_seats_converted?: number | null;
+            /** Paid Subscriptions */
+            paid_subscriptions: number;
+            /** Avg Seats Paid */
+            avg_seats_paid?: number | null;
+            /** Stages */
+            stages: components["schemas"]["CompanyStageInsightOut"][];
+            /** Trend */
+            trend: components["schemas"]["CompanyInsightsTrendPointOut"][];
+        };
+        /** CompanyInsightsTrendPointOut */
+        CompanyInsightsTrendPointOut: {
+            /**
+             * Month
+             * Format: date
+             */
+            month: string;
+            /** Submitted */
+            submitted: number;
+            /** Converted */
+            converted: number;
+            /** Avg Seats */
+            avg_seats?: number | null;
+        };
+        /** CompanyStageInsightOut */
+        CompanyStageInsightOut: {
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "details" | "checkout_started" | "converted";
+            /** Companies */
+            companies: number;
+            /** Avg Seats */
+            avg_seats?: number | null;
+        };
         /** CompanyTrainingRequest */
         CompanyTrainingRequest: {
             /** Companyname */
@@ -8596,6 +9531,37 @@ export interface components {
             country: string;
             /** City */
             city: string;
+            /** Industry */
+            industry: string;
+            /**
+             * Websiteurl
+             * Format: uri
+             */
+            websiteUrl: string;
+            /** Teamsize */
+            teamSize: number;
+            /** Trainingtypes */
+            trainingTypes: ("recorded" | "live" | "in_person")[];
+            /** Traininggoals */
+            trainingGoals: ("solve_problem" | "employee_performance" | "increase_sales" | "knowledge_skills" | "disclosure_compliance")[];
+            /** Departments */
+            departments: ("sales" | "finance" | "it" | "quality_control" | "top_management" | "warehouses" | "ohs" | "all" | "other")[];
+            /** Otherdepartment */
+            otherDepartment?: string | null;
+            /** Hastrainingbudget */
+            hasTrainingBudget?: boolean | null;
+            /** Usedplatformbefore */
+            usedPlatformBefore: boolean;
+            /** Previousplatforms */
+            previousPlatforms?: ("coursera" | "udemy" | "linkedin_learning" | "edraak" | "rwaq" | "doroob" | "internal_lms" | "other")[];
+            /** Otherplatform */
+            otherPlatform?: string | null;
+            /** Categoryids */
+            categoryIds: string[];
+            /** Skillids */
+            skillIds: string[];
+            /** Summary */
+            summary: string;
         };
         /** CompleteUploadRequest */
         CompleteUploadRequest: {
@@ -9094,6 +10060,35 @@ export interface components {
             /** Created At */
             created_at?: string | null;
         };
+        /** CreateCategoryRequest */
+        CreateCategoryRequest: {
+            /** Code */
+            code: string;
+            /** Name Ar */
+            name_ar: string;
+            /** Name En */
+            name_en: string;
+            /** Description Ar */
+            description_ar?: string | null;
+            /** Description En */
+            description_en?: string | null;
+            /**
+             * Default Priority
+             * @default MEDIUM
+             * @enum {string}
+             */
+            default_priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+            /**
+             * Display Order
+             * @default 0
+             */
+            display_order: number;
+            /**
+             * Is Active
+             * @default true
+             */
+            is_active: boolean;
+        };
         /** CreateExpertServiceRequest */
         CreateExpertServiceRequest: {
             /** Title */
@@ -9408,6 +10403,12 @@ export interface components {
              * @default 1
              */
             max_seats: number;
+            /**
+             * Min Seats
+             * @description Company plans: smallest team that can buy.
+             * @default 1
+             */
+            min_seats: number;
             /** Thumbnail Url */
             thumbnail_url?: string | null;
             /** Hero Media Url */
@@ -9439,6 +10440,32 @@ export interface components {
                 [key: string]: string[];
             };
             discount?: components["schemas"]["PlanDiscountIn"] | null;
+        };
+        /** CreateTicketRequest */
+        CreateTicketRequest: {
+            /** Subject */
+            subject: string;
+            /**
+             * Category Id
+             * Format: uuid
+             */
+            category_id: string;
+            /** Description */
+            description: string;
+            /**
+             * Requested Priority
+             * @default MEDIUM
+             * @enum {string}
+             */
+            requested_priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+            /** Related Entity Type */
+            related_entity_type?: ("ORDER" | "PRODUCT" | "SUBSCRIPTION" | "CONSULTATION") | null;
+            /** Related Entity Id */
+            related_entity_id?: string | null;
+            /** Related Entity Label */
+            related_entity_label?: string | null;
+            /** Attachment Ids */
+            attachment_ids?: string[];
         };
         /** CreateUnitRequest */
         CreateUnitRequest: {
@@ -9548,6 +10575,42 @@ export interface components {
             /** Lms Numeric User Id */
             lms_numeric_user_id?: number | null;
         };
+        /** CustomerContextResponse */
+        CustomerContextResponse: {
+            /**
+             * Customer Id
+             * Format: uuid
+             */
+            customer_id: string;
+            /** Full Name */
+            full_name?: string | null;
+            /** Email */
+            email: string;
+            /** Phone */
+            phone?: string | null;
+            /** Country Code */
+            country_code?: string | null;
+            /** Status */
+            status: string;
+            /** Created At */
+            created_at?: string | null;
+            /** Total Tickets */
+            total_tickets: number;
+            /** Open Tickets */
+            open_tickets: number;
+            /** Orders */
+            orders?: {
+                [key: string]: unknown;
+            }[];
+            /** Entitlements */
+            entitlements?: {
+                [key: string]: unknown;
+            }[];
+            /** Subscriptions */
+            subscriptions?: {
+                [key: string]: unknown;
+            }[];
+        };
         /** CustomerImportRequest */
         CustomerImportRequest: {
             /**
@@ -9631,6 +10694,13 @@ export interface components {
             preferred_currency?: string | null;
             /** Preferred Locale */
             preferred_locale?: string | null;
+        };
+        /** CustomerReplyRequest */
+        CustomerReplyRequest: {
+            /** Body */
+            body: string;
+            /** Attachment Ids */
+            attachment_ids?: string[];
         };
         /** CustomerSalesReport */
         CustomerSalesReport: {
@@ -10780,6 +11850,11 @@ export interface components {
             seats_available: number;
             /** Cohorts */
             cohorts?: components["schemas"]["CohortView"][];
+            /**
+             * Readme
+             * @description Saved page README (markdown with `:::` card elements); when set it replaces `marketing.details`.
+             */
+            readme?: string | null;
             /** Ref */
             readonly ref: string;
         };
@@ -10904,6 +11979,82 @@ export interface components {
             /** Sort Order */
             sort_order: number;
         };
+        /** MenuCategoryResponse */
+        MenuCategoryResponse: {
+            /**
+             * Category Id
+             * Format: uuid
+             */
+            category_id: string;
+            /**
+             * Legacy Category Id
+             * @description Id used in storefront category URLs.
+             */
+            legacy_category_id?: number | null;
+            /** Slug */
+            slug: string;
+            /** Name */
+            name: string;
+            /**
+             * Product Count
+             * @default 0
+             */
+            product_count: number;
+            /**
+             * Products
+             * @description Newest published items of the group in the category.
+             */
+            products?: components["schemas"]["ProductCardResponse"][];
+        };
+        /** MenuGroupResponse */
+        MenuGroupResponse: {
+            /** Product Type */
+            product_type: string;
+            /**
+             * Count
+             * @default 0
+             */
+            count: number;
+            /** Categories */
+            categories?: components["schemas"]["MenuCategoryResponse"][];
+        };
+        /** MenuResponse */
+        MenuResponse: {
+            /** Groups */
+            groups?: components["schemas"]["MenuGroupResponse"][];
+        };
+        /** MessageResponse */
+        MessageResponse: {
+            /**
+             * Message Id
+             * Format: uuid
+             */
+            message_id: string;
+            /**
+             * Ticket Id
+             * Format: uuid
+             */
+            ticket_id: string;
+            /** Sender Type */
+            sender_type: string;
+            /** Sender Customer Id */
+            sender_customer_id?: string | null;
+            /** Sender Admin Id */
+            sender_admin_id?: string | null;
+            /** Sender Name */
+            sender_name: string;
+            /** Visibility */
+            visibility: string;
+            /** Body */
+            body: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Attachments */
+            attachments?: components["schemas"]["AttachmentResponse"][];
+        };
         /**
          * MoneyAmount
          * @description An amount in one currency (major units, e.g. 143.23 AED).
@@ -10913,6 +12064,11 @@ export interface components {
             currency: string;
             /** Amount */
             amount: number;
+        };
+        /** NoteCreate */
+        NoteCreate: {
+            /** Body */
+            body: string;
         };
         /** NotificationEmail */
         NotificationEmail: {
@@ -11068,6 +12224,13 @@ export interface components {
              * @default 0
              */
             invoice_count: number;
+            /** Subtotal Minor */
+            subtotal_minor?: number | null;
+            /**
+             * Tax Minor
+             * @default 0
+             */
+            tax_minor: number;
             /**
              * Lines
              * @default []
@@ -11238,6 +12401,13 @@ export interface components {
              * @default 0
              */
             invoice_count: number;
+            /** Subtotal Minor */
+            subtotal_minor?: number | null;
+            /**
+             * Tax Minor
+             * @default 0
+             */
+            tax_minor: number;
         };
         /** OrderTransaction */
         OrderTransaction: {
@@ -12046,7 +13216,7 @@ export interface components {
             /** Resources */
             resources: components["schemas"]["ResourceResponse"][];
             /** Categories */
-            categories: components["schemas"]["CategoryResponse"][];
+            categories: components["schemas"]["app__modules__catalog__presentation__schemas__CategoryResponse"][];
             /** Instructors */
             instructors: components["schemas"]["InstructorResponse"][];
             /** Media */
@@ -12159,7 +13329,7 @@ export interface components {
             /** Product Types */
             product_types?: components["schemas"]["ProductTypeResponse"][];
             /** Categories */
-            categories?: components["schemas"]["CategoryResponse"][];
+            categories?: components["schemas"]["app__modules__catalog__presentation__schemas__CategoryResponse"][];
         };
         /** ProductPrice */
         ProductPrice: {
@@ -12589,7 +13759,7 @@ export interface components {
             markdown: string;
             /**
              * Source
-             * @description `readme` when saved; otherwise one generated from the product: `consultation` (its details), `sections` (legacy HTML sections), `description` (its description and learning outcomes), or `empty`.
+             * @description `readme` when saved; otherwise one generated from the product: `consultation` (its details), `sections` (legacy HTML sections), `live_marketing` (a live diploma's page content), `description` (its description and learning outcomes), or `empty`.
              */
             source: string;
             /**
@@ -12818,6 +13988,34 @@ export interface components {
             /** City */
             city?: string | null;
         };
+        /** RelatedOptionResponse */
+        RelatedOptionResponse: {
+            /** Entity Type */
+            entity_type: string;
+            /** Entity Id */
+            entity_id: string;
+            /** Label */
+            label: string;
+            /** Subtitle */
+            subtitle?: string | null;
+            /** Status */
+            status?: string | null;
+            /**
+             * Group
+             * @default OTHER
+             */
+            group: string;
+            /**
+             * Group Name Ar
+             * @default أخرى
+             */
+            group_name_ar: string;
+            /**
+             * Group Name En
+             * @default Other
+             */
+            group_name_en: string;
+        };
         /** RelatedResourceCardResponse */
         RelatedResourceCardResponse: {
             /** Resource Type */
@@ -12865,6 +14063,11 @@ export interface components {
             consultations?: components["schemas"]["RelatedResourceCardResponse"][];
             /** Instructors */
             instructors?: components["schemas"]["RelatedInstructorCardResponse"][];
+        };
+        /** ReopenTicketRequest */
+        ReopenTicketRequest: {
+            /** Reason */
+            reason: string;
         };
         /** ReorderRequest */
         ReorderRequest: {
@@ -12946,6 +14149,46 @@ export interface components {
             payload: {
                 [key: string]: unknown;
             };
+            /** Assigned Admin Id */
+            assigned_admin_id?: string | null;
+            /** Updated At */
+            updated_at?: string | null;
+        };
+        /** RequestUpdate */
+        RequestUpdate: {
+            /** Status */
+            status?: string | null;
+            /** Assigned Admin Id */
+            assigned_admin_id?: string | null;
+        };
+        /** ResolutionResponse */
+        ResolutionResponse: {
+            /**
+             * Resolution Id
+             * Format: uuid
+             */
+            resolution_id: string;
+            /**
+             * Ticket Id
+             * Format: uuid
+             */
+            ticket_id: string;
+            /**
+             * Resolved By Admin Id
+             * Format: uuid
+             */
+            resolved_by_admin_id: string;
+            /** Resolved By Name */
+            resolved_by_name: string;
+            /** Resolution Type */
+            resolution_type: string;
+            /** Resolution Summary */
+            resolution_summary: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
         };
         /** ResourceInstructorResponse */
         ResourceInstructorResponse: {
@@ -13436,6 +14679,18 @@ export interface components {
              */
             status: "draft" | "published" | "archived";
         };
+        /** SkillPoint */
+        SkillPoint: {
+            /** Label */
+            label: string;
+            /** Value */
+            value: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+        };
         /** SkillResponse */
         SkillResponse: {
             /**
@@ -13476,6 +14731,32 @@ export interface components {
              * @default 0
              */
             sort_order: number;
+        };
+        /** SlaStateResponse */
+        SlaStateResponse: {
+            /**
+             * Ticket Id
+             * Format: uuid
+             */
+            ticket_id: string;
+            /**
+             * Response Due At
+             * Format: date-time
+             */
+            response_due_at: string;
+            /**
+             * Resolution Due At
+             * Format: date-time
+             */
+            resolution_due_at: string;
+            /** First Response At */
+            first_response_at?: string | null;
+            /** Resolved At */
+            resolved_at?: string | null;
+            /** Response Breached */
+            response_breached: boolean;
+            /** Resolution Breached */
+            resolution_breached: boolean;
         };
         /** Slider */
         Slider: {
@@ -13555,6 +14836,28 @@ export interface components {
             gross: number;
             /** Gross By Currency */
             gross_by_currency?: components["schemas"]["MoneyAmount"][];
+        };
+        /** StatPoint */
+        StatPoint: {
+            /** Label */
+            label: string;
+            /** Value */
+            value: number;
+        };
+        /** StatsResponse */
+        StatsResponse: {
+            /** Total */
+            total: number;
+            /** By Status */
+            by_status: components["schemas"]["StatPoint"][];
+            /** By Month */
+            by_month: components["schemas"]["StatPoint"][];
+            /** Categories */
+            categories: components["schemas"]["StatPoint"][];
+            /** Skills */
+            skills: components["schemas"]["SkillPoint"][];
+            /** Skills Request Count */
+            skills_request_count: number;
         };
         /** StudioAsset */
         StudioAsset: {
@@ -13725,10 +15028,19 @@ export interface components {
             plan_id?: string | null;
             /** Product Id */
             product_id?: string | null;
-            /** Seat Count */
+            /**
+             * Seat Count
+             * @description Company plans: team size, within the plan's min/max seats.
+             */
             seat_count?: number | null;
             /** Company Name */
             company_name?: string | null;
+            contact?: components["schemas"]["CompanyContactIn"] | null;
+            /**
+             * Lead Id
+             * @description The team lead saved on step 1; checkout links its order.
+             */
+            lead_id?: string | null;
             /** Initial Selected Product Ids */
             initial_selected_product_ids?: string[];
             /** Success Url */
@@ -13883,6 +15195,29 @@ export interface components {
              * @default 1
              */
             max_seats: number;
+            /**
+             * Min Seats
+             * @description Company plans: smallest team that can buy.
+             * @default 1
+             */
+            min_seats: number;
+            /**
+             * Per Seat
+             * @description True for company plans: `effective_price` is per seat (employee).
+             * @default false
+             */
+            per_seat: boolean;
+            /**
+             * Tax Percent
+             * @description VAT added at checkout on the subtotal (seats x price).
+             * @default 0
+             */
+            tax_percent: string;
+            /**
+             * Tax Label
+             * @default VAT
+             */
+            tax_label: string;
             /** Title */
             title?: string | null;
             /** Subtitle */
@@ -13924,6 +15259,11 @@ export interface components {
              * @description Catalog features this plan offers, localized.
              */
             features?: components["schemas"]["PlanFeatureOut"][];
+            /**
+             * Library Count
+             * @description Full-library plans only: how many published courses and diplomas it grants today.
+             */
+            library_count?: number | null;
             /** Stripe Product Id */
             stripe_product_id?: string | null;
             /** Stripe Price Id */
@@ -14065,6 +15405,29 @@ export interface components {
              * @default 1
              */
             max_seats: number;
+            /**
+             * Min Seats
+             * @description Company plans: smallest team that can buy.
+             * @default 1
+             */
+            min_seats: number;
+            /**
+             * Per Seat
+             * @description True for company plans: `effective_price` is per seat (employee).
+             * @default false
+             */
+            per_seat: boolean;
+            /**
+             * Tax Percent
+             * @description VAT added at checkout on the subtotal (seats x price).
+             * @default 0
+             */
+            tax_percent: string;
+            /**
+             * Tax Label
+             * @default VAT
+             */
+            tax_label: string;
             /** Title */
             title?: string | null;
             /** Subtitle */
@@ -14106,6 +15469,11 @@ export interface components {
              * @description Catalog features this plan offers, localized.
              */
             features?: components["schemas"]["PlanFeatureOut"][];
+            /**
+             * Library Count
+             * @description Full-library plans only: how many published courses and diplomas it grants today.
+             */
+            library_count?: number | null;
         };
         /** SubscriptionSeatOut */
         SubscriptionSeatOut: {
@@ -14229,6 +15597,47 @@ export interface components {
             /** Churned */
             churned: number;
         };
+        /** SupportAnalyticsResponse */
+        SupportAnalyticsResponse: {
+            /** Total Tickets */
+            total_tickets: number;
+            /** Open Tickets */
+            open_tickets: number;
+            /** Unassigned Tickets */
+            unassigned_tickets: number;
+            /** Urgent Tickets */
+            urgent_tickets: number;
+            /** Waiting For Customer Tickets */
+            waiting_for_customer_tickets: number;
+            /** Resolved Tickets */
+            resolved_tickets: number;
+            /** Closed Tickets */
+            closed_tickets: number;
+            /** Sla Breached Tickets */
+            sla_breached_tickets: number;
+            /** Sla Compliance Rate */
+            sla_compliance_rate: number;
+            /** Avg First Response Minutes */
+            avg_first_response_minutes?: number | null;
+            /** Avg Resolution Minutes */
+            avg_resolution_minutes?: number | null;
+            /** Csat Average */
+            csat_average?: number | null;
+            /** Csat Count */
+            csat_count: number;
+            /** By Category */
+            by_category?: {
+                [key: string]: unknown;
+            }[];
+            /** By Status */
+            by_status?: {
+                [key: string]: unknown;
+            }[];
+            /** Agent Workload */
+            agent_workload?: {
+                [key: string]: unknown;
+            }[];
+        };
         /** SupportMessage */
         SupportMessage: {
             /** Legacy Message Id */
@@ -14347,6 +15756,129 @@ export interface components {
              */
             source: string;
         };
+        /** TeamLeadListResponse */
+        TeamLeadListResponse: {
+            /** Items */
+            items: components["schemas"]["TeamLeadOut"][];
+            /** Total */
+            total: number;
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+        };
+        /** TeamLeadOut */
+        TeamLeadOut: {
+            /**
+             * Lead Id
+             * Format: uuid
+             */
+            lead_id: string;
+            /**
+             * Customer Id
+             * Format: uuid
+             */
+            customer_id: string;
+            /**
+             * Plan Id
+             * Format: uuid
+             */
+            plan_id: string;
+            /** Plan Slug */
+            plan_slug?: string | null;
+            /** Plan Title */
+            plan_title?: string | null;
+            /** Company Name */
+            company_name: string;
+            /** Contact Name */
+            contact_name: string;
+            /** Email */
+            email: string;
+            /** Phone */
+            phone?: string | null;
+            /** Job Title */
+            job_title?: string | null;
+            /** Customer Email */
+            customer_email?: string | null;
+            /** Seat Count */
+            seat_count?: number | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "details" | "checkout_started" | "converted";
+            /** Order Id */
+            order_id?: string | null;
+            /** Subscription Id */
+            subscription_id?: string | null;
+            /** Order Status */
+            order_status?: string | null;
+            /** Order Total */
+            order_total?: string | null;
+            /** Order Currency Code */
+            order_currency_code?: string | null;
+            /** Order Created At */
+            order_created_at?: string | null;
+            /** Subscription Status */
+            subscription_status?: string | null;
+            /** Created At */
+            created_at?: string | null;
+            /** Updated At */
+            updated_at?: string | null;
+        };
+        /**
+         * TeamLeadRequest
+         * @description Step 1 of the team checkout: who the company is, saved before any price or payment.
+         */
+        TeamLeadRequest: {
+            /**
+             * Plan Id
+             * Format: uuid
+             */
+            plan_id: string;
+            /** Company Name */
+            company_name: string;
+            contact: components["schemas"]["CompanyContactIn"];
+            /** Seat Count */
+            seat_count?: number | null;
+        };
+        /** TicketDetailResponse */
+        TicketDetailResponse: {
+            ticket: components["schemas"]["TicketSummaryResponse"];
+            /** Description */
+            description: string;
+            /** Csat Comment */
+            csat_comment?: string | null;
+            /** Csat Submitted At */
+            csat_submitted_at?: string | null;
+            /** Can Reopen */
+            can_reopen: boolean;
+            /** Initial Attachments */
+            initial_attachments?: components["schemas"]["AttachmentResponse"][];
+            /** Messages */
+            messages?: components["schemas"]["MessageResponse"][];
+            sla?: components["schemas"]["SlaStateResponse"] | null;
+            /** Resolutions */
+            resolutions?: components["schemas"]["ResolutionResponse"][];
+        };
+        /** TicketFeedbackRequest */
+        TicketFeedbackRequest: {
+            /** Rating */
+            rating: number;
+            /** Comment */
+            comment?: string | null;
+        };
+        /** TicketPageResponse */
+        TicketPageResponse: {
+            /** Items */
+            items: components["schemas"]["TicketSummaryResponse"][];
+            /** Total */
+            total: number;
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+        };
         /** TicketReplyRequest */
         TicketReplyRequest: {
             /**
@@ -14367,6 +15899,89 @@ export interface components {
              * @description Optional new priority (`2`-`4`).
              */
             priority?: number | null;
+        };
+        /** TicketSummaryResponse */
+        TicketSummaryResponse: {
+            /**
+             * Ticket Id
+             * Format: uuid
+             */
+            ticket_id: string;
+            /** Ticket Number */
+            ticket_number: string;
+            /**
+             * Customer Id
+             * Format: uuid
+             */
+            customer_id: string;
+            /** Customer Name */
+            customer_name?: string | null;
+            /** Customer Email */
+            customer_email?: string | null;
+            /**
+             * Category Id
+             * Format: uuid
+             */
+            category_id: string;
+            /** Category Code */
+            category_code: string;
+            /** Category Name Ar */
+            category_name_ar: string;
+            /** Category Name En */
+            category_name_en: string;
+            /** Assigned Admin Id */
+            assigned_admin_id?: string | null;
+            /** Assigned Admin Name */
+            assigned_admin_name?: string | null;
+            /** Subject */
+            subject: string;
+            /** Status */
+            status: string;
+            /** Priority */
+            priority: string;
+            /** Requested Priority */
+            requested_priority: string;
+            /** Related Entity Type */
+            related_entity_type?: string | null;
+            /** Related Entity Id */
+            related_entity_id?: string | null;
+            /** Related Entity Label */
+            related_entity_label?: string | null;
+            /** Customer Unread Count */
+            customer_unread_count: number;
+            /** Admin Unread Count */
+            admin_unread_count: number;
+            /** Message Count */
+            message_count: number;
+            /** First Response At */
+            first_response_at?: string | null;
+            /**
+             * Last Activity At
+             * Format: date-time
+             */
+            last_activity_at: string;
+            /** Resolved At */
+            resolved_at?: string | null;
+            /** Closed At */
+            closed_at?: string | null;
+            /** Csat Rating */
+            csat_rating?: number | null;
+            /** Sla Response Due At */
+            sla_response_due_at?: string | null;
+            /** Sla Resolution Due At */
+            sla_resolution_due_at?: string | null;
+            /** Sla Breached */
+            sla_breached: boolean;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
         };
         /** TokenResponse */
         TokenResponse: {
@@ -14474,6 +16089,14 @@ export interface components {
              * @default false
              */
             recorded: boolean;
+            /** Categoryids */
+            categoryIds: string[];
+            /** Skillids */
+            skillIds: string[];
+            /** Cvattachmentid */
+            cvAttachmentId?: string | null;
+            /** Portfolioattachmentids */
+            portfolioAttachmentIds?: string[];
         };
         /** TwoFactorCheckRequest */
         TwoFactorCheckRequest: {
@@ -14483,6 +16106,23 @@ export interface components {
             userId: string;
             /** Code */
             code: string;
+        };
+        /** UpdateCategoryRequest */
+        UpdateCategoryRequest: {
+            /** Name Ar */
+            name_ar?: string | null;
+            /** Name En */
+            name_en?: string | null;
+            /** Description Ar */
+            description_ar?: string | null;
+            /** Description En */
+            description_en?: string | null;
+            /** Default Priority */
+            default_priority?: ("LOW" | "MEDIUM" | "HIGH" | "URGENT") | null;
+            /** Display Order */
+            display_order?: number | null;
+            /** Is Active */
+            is_active?: boolean | null;
         };
         /** UpdateExpertProfileRequest */
         UpdateExpertProfileRequest: {
@@ -14640,6 +16280,8 @@ export interface components {
             max_replacements_per_period?: number | null;
             /** Max Seats */
             max_seats?: number | null;
+            /** Min Seats */
+            min_seats?: number | null;
             /** Thumbnail Url */
             thumbnail_url?: string | null;
             /** Hero Media Url */
@@ -14671,6 +16313,25 @@ export interface components {
             order?: number | null;
             /** Duration */
             duration?: number | null;
+        };
+        /** UploadConfirmation */
+        UploadConfirmation: {
+            /** Token */
+            token: string;
+        };
+        /** UploadIntent */
+        UploadIntent: {
+            /** Filename */
+            filename: string;
+            /** Content Type */
+            content_type: string;
+            /** Size Bytes */
+            size_bytes: number;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "cv" | "portfolio";
         };
         /** UploadIntentRequest */
         UploadIntentRequest: {
@@ -14838,6 +16499,27 @@ export interface components {
              */
             consultation_count: number;
         };
+        /** CategoryResponse */
+        app__modules__catalog__presentation__schemas__CategoryResponse: {
+            /**
+             * Category Id
+             * Format: uuid
+             */
+            category_id: string;
+            /** Slug */
+            slug: string;
+            /** Name */
+            name: string | null;
+            /** Parent Id */
+            parent_id: string | null;
+            /** Sort Order */
+            sort_order: number;
+            /**
+             * Product Count
+             * @default 0
+             */
+            product_count: number;
+        };
         /**
          * ProductPriceResponse
          * @description The product's current price (B2C source of truth).
@@ -14882,6 +16564,30 @@ export interface components {
              * Format: uuid
              */
             product_id: string;
+        };
+        /** CategoryResponse */
+        app__modules__support__presentation__schemas__CategoryResponse: {
+            /**
+             * Category Id
+             * Format: uuid
+             */
+            category_id: string;
+            /** Code */
+            code: string;
+            /** Name Ar */
+            name_ar: string;
+            /** Name En */
+            name_en: string;
+            /** Description Ar */
+            description_ar?: string | null;
+            /** Description En */
+            description_en?: string | null;
+            /** Default Priority */
+            default_priority: string;
+            /** Is Active */
+            is_active: boolean;
+            /** Display Order */
+            display_order: number;
         };
     };
     responses: never;
@@ -19376,6 +21082,10 @@ export interface operations {
                 customer_ref?: string | null;
                 /** @description Only orders containing this product (any product ref). */
                 product_ref?: string | null;
+                /** @description Only subscription orders whose plan is this type (`standard`, `full_library`, `choose_x`). */
+                plan_type?: ("standard" | "full_library" | "choose_x") | null;
+                /** @description Only subscription orders for an `individual` or `company` plan. */
+                audience_type?: ("individual" | "company") | null;
                 /** @description Search in the customer's email. */
                 query?: string | null;
                 /** @description Range start (ISO date or date-time, UTC), e.g. `2026-10-01`. */
@@ -22016,7 +23726,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CategoryResponse"][];
+                    "application/json": components["schemas"]["app__modules__catalog__presentation__schemas__CategoryResponse"][];
                 };
             };
         };
@@ -22038,7 +23748,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CategoryResponse"];
+                    "application/json": components["schemas"]["app__modules__catalog__presentation__schemas__CategoryResponse"];
                 };
             };
             /** @description Validation Error */
@@ -22337,6 +24047,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["LandingResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    menu_api_v1_catalog_menu_get: {
+        parameters: {
+            query?: {
+                per_category?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MenuResponse"];
                 };
             };
             /** @description Validation Error */
@@ -24600,10 +26341,152 @@ export interface operations {
             };
         };
     };
+    search_countries_api_v1_requests_countries_get: {
+        parameters: {
+            query?: {
+                q?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string;
+                    }[];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    country_cities_api_v1_requests_countries__code__cities_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string[];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    presign_trainer_attachment_api_v1_requests_trainer_attachments_presign_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UploadIntent"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    confirm_trainer_attachment_api_v1_requests_trainer_attachments__attachment_id__confirm_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attachment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UploadConfirmation"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: boolean;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     admin_company_requests_api_v1_admin_requests_company_training_get: {
         parameters: {
             query?: {
                 query?: string | null;
+                status?: string | null;
+                assigned_admin_id?: string | null;
+                from_date?: string | null;
+                to_date?: string | null;
+                category_id?: string | null;
+                skill_id?: string | null;
                 limit?: number;
                 offset?: number;
             };
@@ -24640,6 +26523,12 @@ export interface operations {
         parameters: {
             query?: {
                 query?: string | null;
+                status?: string | null;
+                assigned_admin_id?: string | null;
+                from_date?: string | null;
+                to_date?: string | null;
+                category_id?: string | null;
+                skill_id?: string | null;
                 limit?: number;
                 offset?: number;
             };
@@ -24659,6 +26548,82 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RequestPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    request_stats_api_v1_admin_requests_stats__kind__get: {
+        parameters: {
+            query?: {
+                query?: string | null;
+                status?: string | null;
+                assigned_admin_id?: string | null;
+                from_date?: string | null;
+                to_date?: string | null;
+                category_id?: string | null;
+                skill_id?: string | null;
+            };
+            header?: never;
+            path: {
+                kind: "company-training" | "trainer-applications";
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StatsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    request_assignees_api_v1_admin_requests_assignees_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string;
+                    }[];
                 };
             };
             /** @description Validation Error */
@@ -24693,6 +26658,193 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RequestRecord"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_request_api_v1_admin_requests__request_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequestUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequestRecord"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    request_notes_api_v1_admin_requests__request_id__notes_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    }[];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_request_note_api_v1_admin_requests__request_id__notes_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NoteCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: boolean;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    request_attachments_api_v1_admin_requests__request_id__attachments_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    }[];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    request_attachment_download_api_v1_admin_requests__request_id__attachments__attachment_id__download_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+                attachment_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string;
+                    };
                 };
             };
             /** @description Validation Error */
@@ -25576,6 +27728,41 @@ export interface operations {
             };
         };
     };
+    save_team_lead_api_v1_subscriptions_team_leads_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                b2c_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TeamLeadRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamLeadOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     create_subscription_checkout_session_api_v1_subscriptions_checkout_post: {
         parameters: {
             query?: never;
@@ -26248,6 +28435,42 @@ export interface operations {
             };
         };
     };
+    admin_preview_subscription_plan_api_v1_admin_subscriptions_plans__plan_id__preview_get: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path: {
+                plan_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionPlanPublicResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     admin_set_subscription_plan_products_api_v1_admin_subscriptions_plans__plan_id__products_put: {
         parameters: {
             query?: never;
@@ -26734,6 +28957,116 @@ export interface operations {
             };
         };
     };
+    admin_subscription_company_insights_api_v1_admin_subscriptions_stats_company_insights_get: {
+        parameters: {
+            query: {
+                /** @description Range start (ISO date or date-time, UTC), e.g. `2026-10-01`. */
+                start: string;
+                /** @description Range end, exclusive (ISO date or date-time, UTC). */
+                end: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompanyInsightsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_list_team_leads_api_v1_admin_subscriptions_team_leads_get: {
+        parameters: {
+            query?: {
+                status?: ("details" | "checkout_started" | "converted") | null;
+                plan_id?: string | null;
+                /** @description Search company, contact, email or phone. */
+                query?: string | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamLeadListResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_get_team_lead_api_v1_admin_subscriptions_team_leads__lead_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                lead_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamLeadOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     admin_list_customer_subscriptions_api_v1_admin_subscriptions_customer_subscriptions_get: {
         parameters: {
             query?: {
@@ -26834,6 +29167,1025 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CustomerSubscriptionResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_categories_api_v1_support_categories_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["app__modules__support__presentation__schemas__CategoryResponse"][];
+                };
+            };
+        };
+    };
+    get_related_options_api_v1_support_related_options_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                b2c_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RelatedOptionResponse"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    presign_attachment_api_v1_support_attachments_presign_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                b2c_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AttachmentPresignRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttachmentPresignResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    confirm_attachment_api_v1_support_attachments__attachment_id__confirm_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attachment_id: string;
+            };
+            cookie?: {
+                b2c_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttachmentResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_attachment_download_api_v1_support_attachments__attachment_id__download_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attachment_id: string;
+            };
+            cookie?: {
+                b2c_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_tickets_api_v1_support_tickets_get: {
+        parameters: {
+            query?: {
+                status?: string | null;
+                category_id?: string | null;
+                priority?: string | null;
+                search?: string | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                b2c_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TicketPageResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_ticket_api_v1_support_tickets_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                b2c_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateTicketRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TicketSummaryResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_ticket_api_v1_support_tickets__ticket_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ticket_id: string;
+            };
+            cookie?: {
+                b2c_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TicketDetailResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_ticket_messages_api_v1_support_tickets__ticket_id__messages_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ticket_id: string;
+            };
+            cookie?: {
+                b2c_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MessageResponse"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reply_ticket_api_v1_support_tickets__ticket_id__messages_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ticket_id: string;
+            };
+            cookie?: {
+                b2c_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CustomerReplyRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MessageResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reopen_ticket_api_v1_support_tickets__ticket_id__reopen_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ticket_id: string;
+            };
+            cookie?: {
+                b2c_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReopenTicketRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TicketSummaryResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    submit_feedback_api_v1_support_tickets__ticket_id__feedback_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ticket_id: string;
+            };
+            cookie?: {
+                b2c_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TicketFeedbackRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_admin_categories_api_v1_admin_support_categories_get: {
+        parameters: {
+            query?: {
+                active_only?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["app__modules__support__presentation__schemas__CategoryResponse"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_admin_category_api_v1_admin_support_categories_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCategoryRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["app__modules__support__presentation__schemas__CategoryResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_admin_category_api_v1_admin_support_categories__category_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                category_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCategoryRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["app__modules__support__presentation__schemas__CategoryResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_analytics_api_v1_admin_support_analytics_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SupportAnalyticsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_agents_api_v1_admin_support_agents_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentInfoResponse"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_b2c_tickets_api_v1_admin_support_b2c_tickets_get: {
+        parameters: {
+            query?: {
+                /** @description all, unassigned, mine, waiting, urgent, resolved */
+                queue?: string;
+                status?: string | null;
+                priority?: string | null;
+                category_id?: string | null;
+                assigned_admin_id?: string | null;
+                customer_id?: string | null;
+                search?: string | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TicketPageResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_b2c_ticket_api_v1_admin_support_b2c_tickets__ticket_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ticket_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TicketDetailResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_b2c_ticket_api_v1_admin_support_b2c_tickets__ticket_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ticket_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminUpdateTicketRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TicketDetailResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    assign_b2c_ticket_api_v1_admin_support_b2c_tickets__ticket_id__assign_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ticket_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminAssignTicketRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TicketDetailResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reply_b2c_ticket_api_v1_admin_support_b2c_tickets__ticket_id__messages_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ticket_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminReplyRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MessageResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_internal_note_api_v1_admin_support_b2c_tickets__ticket_id__notes_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ticket_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminInternalNoteRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MessageResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    resolve_b2c_ticket_api_v1_admin_support_b2c_tickets__ticket_id__resolve_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ticket_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminResolveTicketRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResolutionResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_ticket_activities_api_v1_admin_support_b2c_tickets__ticket_id__activity_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ticket_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivityResponse"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_ticket_customer_api_v1_admin_support_b2c_tickets__ticket_id__customer_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ticket_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerContextResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    presign_admin_attachment_api_v1_admin_support_attachments_presign_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AttachmentPresignRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttachmentPresignResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    confirm_admin_attachment_api_v1_admin_support_attachments__attachment_id__confirm_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attachment_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttachmentResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_admin_attachment_download_api_v1_admin_support_attachments__attachment_id__download_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attachment_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string;
+                    };
                 };
             };
             /** @description Validation Error */

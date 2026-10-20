@@ -13,6 +13,7 @@ import {
   getStudio,
   productKeys,
   publishStudio,
+  putProductReadme,
   studioKeys,
   studioQueries,
   type PreviewKind,
@@ -99,7 +100,8 @@ function StudioWorkspace({ productRef, initial }: { productRef: string; initial:
   const [status, setStatus] = useState({
     version: initial.published_version_no ?? null, changed: initial.has_unpublished_changes, seeded: initial.seeded,
   });
-  const [subPage, setSubPage] = useState<StudioSubPage>("editor");
+  // A live diploma's page is its README (with card elements), so its studio opens there.
+  const [subPage, setSubPage] = useState<StudioSubPage>(initial.product_type === "live_diploma" ? "readme" : "editor");
   const [showOutline, setShowOutline] = useState(false);
   const [device, setDevice] = useState<PreviewDevice>("desktop");
   const [showPreview, setShowPreview] = useState(true);
@@ -168,6 +170,8 @@ function StudioWorkspace({ productRef, initial }: { productRef: string; initial:
     // A draft with content wins, and so does anything typed while the README was loading. An empty draft
     // means nothing was authored yet, so the README is the right starting point.
     if (initialBlocks.length > 0 || userEdited.current) return;
+    // A live diploma's README holds `:::` card elements the block editor can't represent; it stays markdown.
+    if (initial.product_type === "live_diploma") return;
     const markdown = readmeQuery.data?.markdown ?? "";
     if (!markdown.trim()) return;
     const imported = markdownToStudioBlocks(markdown);
@@ -280,6 +284,10 @@ function StudioWorkspace({ productRef, initial }: { productRef: string; initial:
       // A draft seeded from the README (or a brand-new page) is not saved yet; persist it first.
       if (saver.revision.current === 0 || pendingImport.current) saver.schedule(document);
       await saver.flush();
+      // README edits not saved with "Save README" yet go out with the publish (a live diploma's page is its README).
+      if (readmeText != null && readmeQuery.data && readmeText !== readmeQuery.data.markdown) {
+        queryClient.setQueryData(studioKeys.readme(productRef), await putProductReadme(productRef, readmeText));
+      }
       return publishStudio(productRef, { note: note.trim() || null, base_revision: saver.revision.current });
     },
     onSuccess: (result) => {
@@ -506,7 +514,7 @@ function StudioWorkspace({ productRef, initial }: { productRef: string; initial:
         <div className={cn("ma-studio", "ma-studio--workspace", !showPreview && "is-no-preview")}>
           <section className="ma-studio__canvas" style={{ overflowY: "auto", maxHeight: "calc(100vh - 170px)", padding: "var(--space-2) var(--space-3)" }}>
             <Card title={t("README المنتج (Markdown)", "Product README (Markdown)")}>
-              <ReadmePanel productRef={productRef} editable={editable} onChange={setReadmeText} />
+              <ReadmePanel productRef={productRef} editable={editable} onChange={setReadmeText} kind={initial.product_type} />
             </Card>
           </section>
           {showPreview ? (

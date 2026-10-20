@@ -8,7 +8,9 @@ import { toast } from "@/components/ui/toast";
 import { Alert, Button, Card, ErrorAlert, Field, FormActions } from "@/components/ui/kit";
 import { isValidSlug, optional, PriceField, SegmentedChoice, ToggleField } from "@/features/learning/product-form";
 
-import { LOCALES, toNumber, translationFor } from "../lib";
+import { LOCALES, PLAN_TYPE_SUMMARY, discountedPrice, toNumber, translationFor } from "../lib";
+import { HelpLabel } from "./help-label";
+import { usePlanPreviewPatch } from "./plan-preview-draft";
 
 type PlanType = "standard" | "full_library" | "choose_x";
 type Interval = "month" | "year";
@@ -28,6 +30,7 @@ export function PlanDetailsTab({ plan }: { plan: SubscriptionPlan }) {
   const [allowance, setAllowance] = useState(plan.selection_allowance != null ? String(plan.selection_allowance) : "5");
   const [maxReplacements, setMaxReplacements] = useState(plan.max_replacements_per_period != null ? String(plan.max_replacements_per_period) : "");
   const [maxSeats, setMaxSeats] = useState(String(plan.max_seats ?? 1));
+  const [minSeats, setMinSeats] = useState(String(plan.min_seats ?? 1));
   const [thumbnail, setThumbnail] = useState(plan.thumbnail_url ?? "");
   const [featured, setFeatured] = useState(Boolean(plan.is_featured));
   const [content, setContent] = useState({
@@ -55,7 +58,28 @@ export function PlanDetailsTab({ plan }: { plan: SubscriptionPlan }) {
     effectiveInterval !== plan.billing_interval ||
     (chooseX && Number(allowance) !== (plan.selection_allowance ?? 0)) ||
     (chooseX && (maxReplacements.trim() === "" ? null : Number(maxReplacements)) !== (plan.max_replacements_per_period ?? null)) ||
-    (company && Number(maxSeats) !== plan.max_seats);
+    (company && Number(maxSeats) !== plan.max_seats) ||
+    (company && Number(minSeats) !== (plan.min_seats ?? 1));
+
+  // The live preview shows the Arabic storefront.
+  const listPrice = priceNumber > 0 ? priceNumber : 0;
+  usePlanPreviewPatch({
+    slug,
+    plan_type: planType,
+    billing_interval: effectiveInterval,
+    price: String(listPrice),
+    effective_price: String(discountedPrice(listPrice, plan.discount)),
+    compare_at_price: plan.discount?.is_active ? String(listPrice) : null,
+    selection_allowance: chooseX ? Number(allowance) || null : null,
+    max_seats: company ? Math.max(1, Number(maxSeats) || 1) : 1,
+    min_seats: company ? Math.max(1, Number(minSeats) || 1) : 1,
+    thumbnail_url: thumbnail.trim() || null,
+    is_featured: featured,
+    title: content.titleAr.trim() || null,
+    subtitle: content.subtitleAr.trim() || null,
+    short_description: content.shortAr.trim() || null,
+    description: content.descAr.trim() || null,
+  });
 
   const save = useMutation({
     mutationFn: () =>
@@ -67,6 +91,7 @@ export function PlanDetailsTab({ plan }: { plan: SubscriptionPlan }) {
         selection_allowance: chooseX ? Number(allowance) : null,
         max_replacements_per_period: chooseX && maxReplacements.trim() !== "" ? Number(maxReplacements) : null,
         max_seats: company ? Math.max(1, Number(maxSeats) || 1) : 1,
+        min_seats: company ? Math.max(1, Number(minSeats) || 1) : 1,
         thumbnail_url: thumbnail.trim(),
         is_featured: featured,
         translations: [
@@ -105,7 +130,8 @@ export function PlanDetailsTab({ plan }: { plan: SubscriptionPlan }) {
     !content.titleEn.trim() ||
     !isValidSlug(slug) ||
     !(priceNumber > 0) ||
-    (chooseX && !(Number(allowance) >= 1));
+    (chooseX && !(Number(allowance) >= 1)) ||
+    (company && Number(minSeats) > Number(maxSeats));
 
   return (
     <form
@@ -118,26 +144,37 @@ export function PlanDetailsTab({ plan }: { plan: SubscriptionPlan }) {
       <fieldset disabled={!writable} style={{ border: 0, padding: 0, margin: 0, display: "grid", gap: "var(--space-4)" }}>
         <Card title={t("الشروط والتسعير", "Terms & pricing")}>
           <div className="ma-form">
-            <SegmentedChoice<PlanType> label={t("نوع الباقة", "Plan type")} value={planType} onChange={setPlanType}
-              options={[
-                { value: "standard", label: t("قياسية", "Standard") },
-                { value: "full_library", label: t("المكتبة الكاملة", "Full library") },
-                { value: "choose_x", label: t("اختر عددًا من الدورات", "Choose X courses") },
-              ]} />
-            <SegmentedChoice<Interval> label={t("دورة الفوترة", "Billing interval")} value={effectiveInterval}
+            <div className="ma-field">
+              <SegmentedChoice<PlanType> label={<HelpLabel text={t("نوع الباقة", "Plan type")} help="planType" />} value={planType} onChange={setPlanType}
+                options={[
+                  { value: "standard", label: t("قياسية", "Standard") },
+                  { value: "full_library", label: t("المكتبة الكاملة", "Full library") },
+                  { value: "choose_x", label: t("اختر عددًا من الدورات", "Choose X courses") },
+                ]} />
+              <span className="ma-help">{t(PLAN_TYPE_SUMMARY[planType].ar, PLAN_TYPE_SUMMARY[planType].en)}</span>
+            </div>
+            <SegmentedChoice<Interval> label={<HelpLabel text={t("دورة الفوترة", "Billing interval")} help="interval" />} value={effectiveInterval}
               onChange={(v) => !chooseX && setInterval(v)}
               options={[{ value: "month", label: t("شهري", "Monthly") }, { value: "year", label: t("سنوي", "Yearly") }]} />
             <div className="ma-form-grid">
               <PriceField id="d-price" value={price} onChange={setPrice} invalid={!(priceNumber > 0)}
-                label={t("السعر الأساسي (USD)", "List price (USD)")} />
+                label={company
+                  ? <HelpLabel text={t("السعر لكل موظف (USD)", "Price per employee (USD)")} help="seatPrice" />
+                  : <HelpLabel text={t("السعر الأساسي (USD)", "List price (USD)")} help="price" />} />
               {chooseX ? (
                 <>
-                  <Field id="d-allowance" type="number" min={1} label={t("عدد الدورات المسموح", "Courses allowed")} value={allowance} onChange={setAllowance} />
-                  <Field id="d-repl" type="number" min={0} label={t("حد الاستبدال لكل فترة", "Replacements per period")} value={maxReplacements}
+                  <Field id="d-allowance" type="number" min={1} label={<HelpLabel text={t("عدد الدورات المسموح", "Courses allowed")} help="allowance" />} value={allowance} onChange={setAllowance} />
+                  <Field id="d-repl" type="number" min={0} label={<HelpLabel text={t("حد الاستبدال لكل فترة", "Replacements per period")} help="replacements" />} value={maxReplacements}
                     onChange={setMaxReplacements} hint={t("فارغ = بلا حد", "Empty = no limit")} />
                 </>
               ) : null}
-              {company ? <Field id="d-seats" type="number" min={1} label={t("أقصى عدد مقاعد", "Max seats")} value={maxSeats} onChange={setMaxSeats} /> : null}
+              {company ? (
+                <>
+                  <Field id="d-min-seats" type="number" min={1} label={<HelpLabel text={t("أقل حجم فريق", "Min team size")} help="seats" />} value={minSeats} onChange={setMinSeats} />
+                  <Field id="d-seats" type="number" min={1} label={t("أكبر حجم فريق", "Max team size")} value={maxSeats} onChange={setMaxSeats}
+                    hint={Number(minSeats) > Number(maxSeats) ? t("يجب ألا يقل عن أقل حجم.", "Must be at least the min team size.") : undefined} />
+                </>
+              ) : null}
             </div>
             {termsChanged ? (
               <Alert kind="warning" title={t(`سيُنشأ الإصدار ${plan.version + 1} من الباقة`, `This creates version ${plan.version + 1} of the plan`)}>
@@ -153,7 +190,7 @@ export function PlanDetailsTab({ plan }: { plan: SubscriptionPlan }) {
         <Card title={t("المحتوى", "Content")}>
           <div className="ma-form">
             <div className="ma-cols ma-cols--2">
-              <Field id="d-title-ar" label={t("الاسم (عربي)", "Title (Arabic)")} required value={content.titleAr} onChange={setC("titleAr")} dir="rtl" />
+              <Field id="d-title-ar" label={<HelpLabel text={t("الاسم (عربي)", "Title (Arabic)")} help="title" />} required value={content.titleAr} onChange={setC("titleAr")} dir="rtl" />
               <Field id="d-title-en" label={t("الاسم (إنجليزي)", "Title (English)")} required value={content.titleEn} onChange={setC("titleEn")} dir="ltr" />
               <Field id="d-sub-ar" label={t("عنوان فرعي (عربي)", "Subtitle (Arabic)")} value={content.subtitleAr} onChange={setC("subtitleAr")} dir="rtl" />
               <Field id="d-sub-en" label={t("عنوان فرعي (إنجليزي)", "Subtitle (English)")} value={content.subtitleEn} onChange={setC("subtitleEn")} dir="ltr" />
@@ -164,10 +201,10 @@ export function PlanDetailsTab({ plan }: { plan: SubscriptionPlan }) {
               <Field id="d-for-ar" type="textarea" rows={3} label={t("لمن هذه الباقة (عربي)", "Who it's for (Arabic)")} value={content.forAr} onChange={setC("forAr")} dir="rtl" />
               <Field id="d-for-en" type="textarea" rows={3} label={t("لمن هذه الباقة (إنجليزي)", "Who it's for (English)")} value={content.forEn} onChange={setC("forEn")} dir="ltr" />
             </div>
-            <Field id="d-slug" label={t("رابط الباقة (slug)", "Plan slug")} value={slug} onChange={setSlug} dir="ltr"
+            <Field id="d-slug" label={<HelpLabel text={t("رابط الباقة (slug)", "Plan slug")} help="slug" />} value={slug} onChange={setSlug} dir="ltr"
               hint={!isValidSlug(slug) ? t("حروف لاتينية صغيرة وأرقام وشرطات فقط.", "Lowercase letters, digits and hyphens only.") : undefined} />
             <Field id="d-thumb" label={t("رابط الصورة المصغّرة", "Thumbnail URL")} value={thumbnail} onChange={setThumbnail} dir="ltr" />
-            <ToggleField id="d-featured" label={t("باقة مميّزة", "Featured plan")} checked={featured} onChange={setFeatured} />
+            <ToggleField id="d-featured" label={<HelpLabel text={t("باقة مميّزة", "Featured plan")} help="featured" />} checked={featured} onChange={setFeatured} />
           </div>
         </Card>
       </fieldset>

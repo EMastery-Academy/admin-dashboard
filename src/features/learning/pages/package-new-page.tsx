@@ -68,7 +68,7 @@ export default function PackageNewPage() {
         course_refs: form.courseRefs,
       }),
     onSuccess: (view) => {
-      toast.success(t("تم إنشاء الحزمة بنجاح", "Package created"));
+      toast.success(t("تم إنشاء الباقة بنجاح", "Bundle created"));
       navigate(productTabHref(view.ref, "package"));
     },
   });
@@ -82,12 +82,12 @@ export default function PackageNewPage() {
   return (
     <>
       <PageHead
-        title={t("إنشاء حزمة", "Create a package")}
+        title={t("إنشاء باقة", "Create a bundle")}
         sub={t(
-          "اجمع دورات ودبلومات في حزمة واحدة بسعر موحّد.",
-          "Bundle courses and diplomas into one package at a single price.",
+          "اجمع دورات ودبلومات في باقة واحدة بسعر موحّد.",
+          "Bundle courses and diplomas into one bundle at a single price.",
         )}
-        back={{ href: "/learning/catalog?type=package", label: t("المنتجات", "Products") }}
+        back={{ href: "/learning/bundles", label: t("المنتجات", "Products") }}
       />
 
       <form
@@ -98,7 +98,7 @@ export default function PackageNewPage() {
         }}
       >
         <div className="ma-form-main">
-          <Card title={t("دورات الحزمة", "Package courses")}>
+          <Card title={t("دورات الباقة", "Bundle courses")}>
             <div className="ma-form">
               <SelectedChips
                 items={selectedMembers}
@@ -126,7 +126,7 @@ export default function PackageNewPage() {
         </div>
 
         <ProductFormAside
-          typeLabel={t("حزمة", "Package")}
+          typeLabel={t("باقة", "Bundle")}
           price={form.price}
           counts={[
             { label: t("الدورات المضمّنة", "Bundled courses"), value: form.courseRefs.length },
@@ -136,12 +136,12 @@ export default function PackageNewPage() {
           ]}
           published={form.published}
           onPublishedChange={(checked) => catalog.setField("published", checked)}
-          submitLabel={t("حفظ الحزمة", "Save package")}
+          submitLabel={t("حفظ الباقة", "Save bundle")}
           pending={create.isPending}
           disabled={invalid}
-          cancelHref="/learning/catalog?type=package"
+          cancelHref="/learning/bundles"
           error={create.error}
-          errorTitle={t("تعذّر حفظ الحزمة", "Couldn't save the package")}
+          errorTitle={t("تعذّر حفظ الباقة", "Couldn't save the bundle")}
         />
       </form>
     </>

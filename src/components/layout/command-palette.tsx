@@ -59,8 +59,8 @@ export type Result = {
 const ACTIONS: { ar: string; en: string; href: string; permission: string; icon: string; hint?: { ar: string; en: string } }[] = [
   { ar: "إنشاء دورة", en: "Create course", href: "/learning/courses/new", permission: "courses.create", icon: "plus" },
   { ar: "إنشاء دبلوم مباشر", en: "Create live diploma", href: "/learning/live-diplomas/new", permission: "courses.create", icon: "video" },
-  { ar: "إنشاء حزمة تعليمية", en: "Create package", href: "/learning/packages/new", permission: "packages.create", icon: "layers" },
-  { ar: "إنشاء باقة مجمّعة (Bundle)", en: "Create bundle", href: "/learning/bundles/new", permission: "courses.create", icon: "folder" },
+  { ar: "إنشاء باقة تعليمية", en: "Create bundle", href: "/learning/bundles/new", permission: "packages.create", icon: "layers" },
+  { ar: "إنشاء حزمة مجمّعة", en: "Create package", href: "/learning/packages/new", permission: "courses.create", icon: "folder" },
   { ar: "إنشاء استشارة", en: "Create consultation", href: "/learning/consultations/new", permission: "consultations.read", icon: "calendar" },
   { ar: "إنشاء باقة اشتراك", en: "Create subscription plan", href: "/subscriptions/plans/new", permission: "subscriptionsWrite.write", icon: "refresh" },
   { ar: "إنشاء كوبون", en: "Create coupon", href: "/sales/coupons/new", permission: "coupons.create", icon: "tag" },

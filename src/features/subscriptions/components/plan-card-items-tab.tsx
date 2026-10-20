@@ -8,7 +8,9 @@ import { toast } from "@/components/ui/toast";
 import { Button, Card, ErrorAlert, FormActions, IconButton } from "@/components/ui/kit";
 
 import { LOCALES, cardFeaturesFor } from "../lib";
+import { HelpLabel } from "./help-label";
 import { PlanCard } from "./plan-card";
+import { usePlanPreviewPatch } from "./plan-preview-draft";
 
 const MAX_ITEMS = 20;
 
@@ -83,11 +85,13 @@ export function PlanCardItemsTab({ plan }: { plan: SubscriptionPlan }) {
     },
   });
 
+  usePlanPreviewPatch({ card_features: clean(ar) });
+
   const preview: SubscriptionPlan = { ...plan, card_features_by_locale: { [LOCALES.ar]: clean(ar), [LOCALES.en]: clean(en) } };
 
   return (
     <div className="ma-cols ma-cols--main-side">
-      <Card title={t("عناصر البطاقة", "Card items")}>
+      <Card title={<HelpLabel text={t("عناصر البطاقة", "Card items")} help="cardItems" />}>
         <div className="ma-form">
           <OrderedItems label={t("بالعربية", "Arabic")} items={ar} onChange={setAr} dir="rtl" placeholder="وصول غير محدود لكل الدورات" disabled={!writable} />
           <OrderedItems label={t("بالإنجليزية", "English")} items={en} onChange={setEn} dir="ltr" placeholder="Unlimited access to every course" disabled={!writable} />

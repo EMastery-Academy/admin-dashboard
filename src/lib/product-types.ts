@@ -4,8 +4,8 @@ import type { ProductType } from "@/lib/api";
 export const PRODUCT_TYPE_LABELS: Record<ProductType, { ar: string; en: string }> = {
   course: { ar: "دورة", en: "Course" },
   diploma: { ar: "دبلوم", en: "Diploma" },
-  package: { ar: "حزمة", en: "Package" },
-  bundle: { ar: "باقة", en: "Bundle" },
+  package: { ar: "باقة", en: "Bundle" },
+  bundle: { ar: "حزمة", en: "Package" },
   consultation: { ar: "استشارة", en: "Consultation" },
   live_diploma: { ar: "دبلوم مباشر", en: "Live diploma" },
 };

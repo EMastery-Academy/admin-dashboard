@@ -10432,6 +10432,51 @@
             "description": "Only orders containing this product (any product ref)."
           },
           {
+            "name": "plan_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "standard",
+                    "full_library",
+                    "choose_x"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only subscription orders whose plan is this type (`standard`, `full_library`, `choose_x`).",
+              "title": "Plan Type"
+            },
+            "description": "Only subscription orders whose plan is this type (`standard`, `full_library`, `choose_x`)."
+          },
+          {
+            "name": "audience_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "individual",
+                    "company"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only subscription orders for an `individual` or `company` plan.",
+              "title": "Audience Type"
+            },
+            "description": "Only subscription orders for an `individual` or `company` plan."
+          },
+          {
             "name": "query",
             "in": "query",
             "required": false,
@@ -16459,7 +16504,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/CategoryResponse"
+                    "$ref": "#/components/schemas/app__modules__catalog__presentation__schemas__CategoryResponse"
                   },
                   "type": "array",
                   "title": "Response Categories Api V1 Catalog Categories Get"
@@ -16495,7 +16540,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CategoryResponse"
+                  "$ref": "#/components/schemas/app__modules__catalog__presentation__schemas__CategoryResponse"
                 }
               }
             }
@@ -17093,6 +17138,51 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/LandingResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/catalog/menu": {
+      "get": {
+        "tags": [
+          "Catalog"
+        ],
+        "summary": "Header explore menu: groups, categories and top items",
+        "operationId": "menu_api_v1_catalog_menu_get",
+        "parameters": [
+          {
+            "name": "per_category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 12,
+              "minimum": 1,
+              "default": 6,
+              "title": "Per Category"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MenuResponse"
                 }
               }
             }
@@ -21525,6 +21615,213 @@
         }
       }
     },
+    "/api/v1/requests/countries": {
+      "get": {
+        "tags": [
+          "Public requests"
+        ],
+        "summary": "Search Countries",
+        "description": "Every country (Arabic name first) when `q` is omitted, otherwise a name search.",
+        "operationId": "search_countries_api_v1_requests_countries_get",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 2,
+                  "maxLength": 80
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  },
+                  "title": "Response Search Countries Api V1 Requests Countries Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/requests/countries/{code}/cities": {
+      "get": {
+        "tags": [
+          "Public requests"
+        ],
+        "summary": "Country Cities",
+        "description": "Cities of one country (English names, from CountriesNow).",
+        "operationId": "country_cities_api_v1_requests_countries__code__cities_get",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Z]{2}$",
+              "title": "Code"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "Response Country Cities Api V1 Requests Countries  Code  Cities Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/requests/trainer-attachments/presign": {
+      "post": {
+        "tags": [
+          "Public requests"
+        ],
+        "summary": "Presign Trainer Attachment",
+        "operationId": "presign_trainer_attachment_api_v1_requests_trainer_attachments_presign_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadIntent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Presign Trainer Attachment Api V1 Requests Trainer Attachments Presign Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/requests/trainer-attachments/{attachment_id}/confirm": {
+      "post": {
+        "tags": [
+          "Public requests"
+        ],
+        "summary": "Confirm Trainer Attachment",
+        "operationId": "confirm_trainer_attachment_api_v1_requests_trainer_attachments__attachment_id__confirm_post",
+        "parameters": [
+          {
+            "name": "attachment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Attachment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadConfirmation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  },
+                  "title": "Response Confirm Trainer Attachment Api V1 Requests Trainer Attachments  Attachment Id  Confirm Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/admin/requests/company-training": {
       "get": {
         "tags": [
@@ -21553,6 +21850,107 @@
                 }
               ],
               "title": "Query"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "assigned_admin_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Assigned Admin Id"
+            }
+          },
+          {
+            "name": "from_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "From Date"
+            }
+          },
+          {
+            "name": "to_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "To Date"
+            }
+          },
+          {
+            "name": "category_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category Id"
+            }
+          },
+          {
+            "name": "skill_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Skill Id"
             }
           },
           {
@@ -21652,6 +22050,107 @@
             }
           },
           {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "assigned_admin_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Assigned Admin Id"
+            }
+          },
+          {
+            "name": "from_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "From Date"
+            }
+          },
+          {
+            "name": "to_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "To Date"
+            }
+          },
+          {
+            "name": "category_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category Id"
+            }
+          },
+          {
+            "name": "skill_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Skill Id"
+            }
+          },
+          {
             "name": "limit",
             "in": "query",
             "required": false,
@@ -21700,6 +22199,256 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RequestPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/requests/stats/{kind}": {
+      "get": {
+        "tags": [
+          "Admin requests"
+        ],
+        "summary": "Request Stats",
+        "operationId": "request_stats_api_v1_admin_requests_stats__kind__get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "enum": [
+                "company-training",
+                "trainer-applications"
+              ],
+              "type": "string",
+              "title": "Kind"
+            }
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Query"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "assigned_admin_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Assigned Admin Id"
+            }
+          },
+          {
+            "name": "from_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "From Date"
+            }
+          },
+          {
+            "name": "to_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "To Date"
+            }
+          },
+          {
+            "name": "category_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category Id"
+            }
+          },
+          {
+            "name": "skill_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Skill Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/requests/assignees": {
+      "get": {
+        "tags": [
+          "Admin requests"
+        ],
+        "summary": "Request Assignees",
+        "operationId": "request_assignees_api_v1_admin_requests_assignees_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  },
+                  "title": "Response Request Assignees Api V1 Admin Requests Assignees Get"
                 }
               }
             }
@@ -21766,6 +22515,380 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RequestRecord"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Admin requests"
+        ],
+        "summary": "Update Request",
+        "operationId": "update_request_api_v1_admin_requests__request_id__patch",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Request Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestRecord"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/requests/{request_id}/notes": {
+      "get": {
+        "tags": [
+          "Admin requests"
+        ],
+        "summary": "Request Notes",
+        "operationId": "request_notes_api_v1_admin_requests__request_id__notes_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Request Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "title": "Response Request Notes Api V1 Admin Requests  Request Id  Notes Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin requests"
+        ],
+        "summary": "Add Request Note",
+        "operationId": "add_request_note_api_v1_admin_requests__request_id__notes_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Request Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NoteCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  },
+                  "title": "Response Add Request Note Api V1 Admin Requests  Request Id  Notes Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/requests/{request_id}/attachments": {
+      "get": {
+        "tags": [
+          "Admin requests"
+        ],
+        "summary": "Request Attachments",
+        "operationId": "request_attachments_api_v1_admin_requests__request_id__attachments_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Request Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "title": "Response Request Attachments Api V1 Admin Requests  Request Id  Attachments Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/requests/{request_id}/attachments/{attachment_id}/download": {
+      "get": {
+        "tags": [
+          "Admin requests"
+        ],
+        "summary": "Request Attachment Download",
+        "operationId": "request_attachment_download_api_v1_admin_requests__request_id__attachments__attachment_id__download_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Request Id"
+            }
+          },
+          {
+            "name": "attachment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Attachment Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Request Attachment Download Api V1 Admin Requests  Request Id  Attachments  Attachment Id  Download Get"
                 }
               }
             }
@@ -23972,6 +25095,71 @@
         }
       }
     },
+    "/api/v1/subscriptions/team-leads": {
+      "post": {
+        "tags": [
+          "Subscriptions"
+        ],
+        "summary": "Save a company's details from the team checkout",
+        "description": "Step 1 of a company plan checkout: company and contact details (and the team size, if known), saved before any price or payment so the business team can follow up even if the purchase is not completed. Calling it again for the same plan updates the customer's open lead.",
+        "operationId": "save_team_lead_api_v1_subscriptions_team_leads_post",
+        "security": [
+          {
+            "B2C JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "b2c_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "B2C Access Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TeamLeadRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamLeadOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/subscriptions/checkout": {
       "post": {
         "tags": [
@@ -25382,6 +26570,83 @@
         }
       }
     },
+    "/api/v1/admin/subscriptions/plans/{plan_id}/preview": {
+      "get": {
+        "tags": [
+          "Admin Subscriptions"
+        ],
+        "summary": "Storefront view of a plan in any status",
+        "description": "The plan exactly as the public `GET /subscriptions/plans/{slug}` returns it, but for drafts too and without recording a view. Feeds the admin live preview. Requires `admin:catalog:read`.",
+        "operationId": "admin_preview_subscription_plan_api_v1_admin_subscriptions_plans__plan_id__preview_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "plan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "ar",
+              "title": "Lang"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionPlanPublicResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/admin/subscriptions/plans/{plan_id}/products": {
       "put": {
         "tags": [
@@ -26420,6 +27685,296 @@
         }
       }
     },
+    "/api/v1/admin/subscriptions/stats/company-insights": {
+      "get": {
+        "tags": [
+          "Admin Subscriptions"
+        ],
+        "summary": "Admin Subscription Company Insights",
+        "description": "Company checkout funnel for the period: companies that submitted their details, started\ncheckout or paid, with average team sizes and the companies that stopped before paying.\nRequires `admin:catalog:read` or `admin:analytics:read`.",
+        "operationId": "admin_subscription_company_insights_api_v1_admin_subscriptions_stats_company_insights_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "start",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Range start (ISO date or date-time, UTC), e.g. `2026-10-01`.",
+              "examples": [
+                "2026-10-01"
+              ],
+              "title": "Start"
+            },
+            "description": "Range start (ISO date or date-time, UTC), e.g. `2026-10-01`."
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Range end, exclusive (ISO date or date-time, UTC).",
+              "examples": [
+                "2026-10-31"
+              ],
+              "title": "End"
+            },
+            "description": "Range end, exclusive (ISO date or date-time, UTC)."
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyInsightsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/subscriptions/team-leads": {
+      "get": {
+        "tags": [
+          "Admin Subscriptions"
+        ],
+        "summary": "Companies that started a team checkout",
+        "description": "Company and contact details saved on the first step of a company plan checkout, newest first, whether or not they paid: `details` (never reached Stripe), `checkout_started` (unpaid order) or `converted`. Requires `admin:entitlements:read`.",
+        "operationId": "admin_list_team_leads_api_v1_admin_subscriptions_team_leads_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "details",
+                    "checkout_started",
+                    "converted"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "plan_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Search company, contact, email or phone.",
+              "title": "Query"
+            },
+            "description": "Search company, contact, email or phone."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamLeadListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/subscriptions/team-leads/{lead_id}": {
+      "get": {
+        "tags": [
+          "Admin Subscriptions"
+        ],
+        "summary": "Company request detail",
+        "description": "Everything a company submitted before paying (company, contact, team size), plus how far it got: no order (`details`), an unfinished checkout (`checkout_started`) or a subscription (`converted`). Requires `admin:entitlements:read`.",
+        "operationId": "admin_get_team_lead_api_v1_admin_subscriptions_team_leads__lead_id__get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "lead_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Lead Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamLeadOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/admin/subscriptions/customer-subscriptions": {
       "get": {
         "tags": [
@@ -26735,6 +28290,2143 @@
           }
         }
       }
+    },
+    "/api/v1/support/categories": {
+      "get": {
+        "tags": [
+          "Customer Support"
+        ],
+        "summary": "List ticket categories",
+        "operationId": "list_categories_api_v1_support_categories_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/app__modules__support__presentation__schemas__CategoryResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Categories Api V1 Support Categories Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/support/related-options": {
+      "get": {
+        "tags": [
+          "Customer Support"
+        ],
+        "summary": "Customer orders/courses to link to ticket",
+        "operationId": "get_related_options_api_v1_support_related_options_get",
+        "security": [
+          {
+            "B2C JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "b2c_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "B2C Access Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RelatedOptionResponse"
+                  },
+                  "title": "Response Get Related Options Api V1 Support Related Options Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/support/attachments/presign": {
+      "post": {
+        "tags": [
+          "Customer Support"
+        ],
+        "summary": "Authorize attachment upload",
+        "operationId": "presign_attachment_api_v1_support_attachments_presign_post",
+        "security": [
+          {
+            "B2C JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "b2c_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "B2C Access Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttachmentPresignRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttachmentPresignResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/support/attachments/{attachment_id}/confirm": {
+      "post": {
+        "tags": [
+          "Customer Support"
+        ],
+        "summary": "Confirm attachment upload",
+        "operationId": "confirm_attachment_api_v1_support_attachments__attachment_id__confirm_post",
+        "security": [
+          {
+            "B2C JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "attachment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Attachment Id"
+            }
+          },
+          {
+            "name": "b2c_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "B2C Access Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttachmentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/support/attachments/{attachment_id}/download": {
+      "get": {
+        "tags": [
+          "Customer Support"
+        ],
+        "summary": "Get short-lived download URL",
+        "operationId": "get_attachment_download_api_v1_support_attachments__attachment_id__download_get",
+        "security": [
+          {
+            "B2C JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "attachment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Attachment Id"
+            }
+          },
+          {
+            "name": "b2c_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "B2C Access Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Get Attachment Download Api V1 Support Attachments  Attachment Id  Download Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/support/tickets": {
+      "post": {
+        "tags": [
+          "Customer Support"
+        ],
+        "summary": "Create support ticket",
+        "operationId": "create_ticket_api_v1_support_tickets_post",
+        "security": [
+          {
+            "B2C JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "b2c_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "B2C Access Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTicketRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketSummaryResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Customer Support"
+        ],
+        "summary": "List my tickets",
+        "operationId": "list_tickets_api_v1_support_tickets_get",
+        "security": [
+          {
+            "B2C JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "category_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category Id"
+            }
+          },
+          {
+            "name": "priority",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Priority"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "b2c_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "B2C Access Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketPageResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/support/tickets/{ticket_id}": {
+      "get": {
+        "tags": [
+          "Customer Support"
+        ],
+        "summary": "Get ticket detail and conversation",
+        "operationId": "get_ticket_api_v1_support_tickets__ticket_id__get",
+        "security": [
+          {
+            "B2C JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ticket_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Ticket Id"
+            }
+          },
+          {
+            "name": "b2c_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "B2C Access Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketDetailResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/support/tickets/{ticket_id}/messages": {
+      "get": {
+        "tags": [
+          "Customer Support"
+        ],
+        "summary": "Get ticket public messages",
+        "operationId": "list_ticket_messages_api_v1_support_tickets__ticket_id__messages_get",
+        "security": [
+          {
+            "B2C JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ticket_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Ticket Id"
+            }
+          },
+          {
+            "name": "b2c_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "B2C Access Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MessageResponse"
+                  },
+                  "title": "Response List Ticket Messages Api V1 Support Tickets  Ticket Id  Messages Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Customer Support"
+        ],
+        "summary": "Reply to ticket as customer",
+        "operationId": "reply_ticket_api_v1_support_tickets__ticket_id__messages_post",
+        "security": [
+          {
+            "B2C JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ticket_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Ticket Id"
+            }
+          },
+          {
+            "name": "b2c_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "B2C Access Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerReplyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/support/tickets/{ticket_id}/reopen": {
+      "post": {
+        "tags": [
+          "Customer Support"
+        ],
+        "summary": "Reopen resolved ticket",
+        "operationId": "reopen_ticket_api_v1_support_tickets__ticket_id__reopen_post",
+        "security": [
+          {
+            "B2C JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ticket_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Ticket Id"
+            }
+          },
+          {
+            "name": "b2c_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "B2C Access Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReopenTicketRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketSummaryResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/support/tickets/{ticket_id}/feedback": {
+      "post": {
+        "tags": [
+          "Customer Support"
+        ],
+        "summary": "Submit customer satisfaction rating",
+        "operationId": "submit_feedback_api_v1_support_tickets__ticket_id__feedback_post",
+        "security": [
+          {
+            "B2C JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ticket_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Ticket Id"
+            }
+          },
+          {
+            "name": "b2c_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "B2C Access Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TicketFeedbackRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Submit Feedback Api V1 Support Tickets  Ticket Id  Feedback Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/support/categories": {
+      "get": {
+        "tags": [
+          "Admin Support"
+        ],
+        "summary": "List all support categories",
+        "operationId": "list_admin_categories_api_v1_admin_support_categories_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "active_only",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Active Only"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/app__modules__support__presentation__schemas__CategoryResponse"
+                  },
+                  "title": "Response List Admin Categories Api V1 Admin Support Categories Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin Support"
+        ],
+        "summary": "Create support category",
+        "operationId": "create_admin_category_api_v1_admin_support_categories_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCategoryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__modules__support__presentation__schemas__CategoryResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/support/categories/{category_id}": {
+      "patch": {
+        "tags": [
+          "Admin Support"
+        ],
+        "summary": "Update support category",
+        "operationId": "update_admin_category_api_v1_admin_support_categories__category_id__patch",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "category_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Category Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCategoryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__modules__support__presentation__schemas__CategoryResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/support/analytics": {
+      "get": {
+        "tags": [
+          "Admin Support"
+        ],
+        "summary": "Support KPIs and resolution metrics",
+        "operationId": "get_analytics_api_v1_admin_support_analytics_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportAnalyticsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/support/agents": {
+      "get": {
+        "tags": [
+          "Admin Support"
+        ],
+        "summary": "List eligible support agents",
+        "operationId": "list_agents_api_v1_admin_support_agents_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AgentInfoResponse"
+                  },
+                  "title": "Response List Agents Api V1 Admin Support Agents Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/support/b2c/tickets": {
+      "get": {
+        "tags": [
+          "Admin Support"
+        ],
+        "summary": "Filter and list B2C support tickets",
+        "operationId": "list_b2c_tickets_api_v1_admin_support_b2c_tickets_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "queue",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "all, unassigned, mine, waiting, urgent, resolved",
+              "default": "all",
+              "title": "Queue"
+            },
+            "description": "all, unassigned, mine, waiting, urgent, resolved"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "priority",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Priority"
+            }
+          },
+          {
+            "name": "category_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category Id"
+            }
+          },
+          {
+            "name": "assigned_admin_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Assigned Admin Id"
+            }
+          },
+          {
+            "name": "customer_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Customer Id"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 25,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketPageResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/support/b2c/tickets/{ticket_id}": {
+      "get": {
+        "tags": [
+          "Admin Support"
+        ],
+        "summary": "Get full B2C ticket details",
+        "operationId": "get_b2c_ticket_api_v1_admin_support_b2c_tickets__ticket_id__get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ticket_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Ticket Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketDetailResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Admin Support"
+        ],
+        "summary": "Update ticket status/priority",
+        "operationId": "update_b2c_ticket_api_v1_admin_support_b2c_tickets__ticket_id__patch",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ticket_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Ticket Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminUpdateTicketRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketDetailResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/support/b2c/tickets/{ticket_id}/assign": {
+      "post": {
+        "tags": [
+          "Admin Support"
+        ],
+        "summary": "Assign or transfer ticket",
+        "operationId": "assign_b2c_ticket_api_v1_admin_support_b2c_tickets__ticket_id__assign_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ticket_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Ticket Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminAssignTicketRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketDetailResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/support/b2c/tickets/{ticket_id}/messages": {
+      "post": {
+        "tags": [
+          "Admin Support"
+        ],
+        "summary": "Reply to ticket (emails customer)",
+        "operationId": "reply_b2c_ticket_api_v1_admin_support_b2c_tickets__ticket_id__messages_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ticket_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Ticket Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminReplyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/support/b2c/tickets/{ticket_id}/notes": {
+      "post": {
+        "tags": [
+          "Admin Support"
+        ],
+        "summary": "Add internal staff note",
+        "operationId": "add_internal_note_api_v1_admin_support_b2c_tickets__ticket_id__notes_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ticket_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Ticket Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminInternalNoteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/support/b2c/tickets/{ticket_id}/resolve": {
+      "post": {
+        "tags": [
+          "Admin Support"
+        ],
+        "summary": "Resolve ticket with summary",
+        "operationId": "resolve_b2c_ticket_api_v1_admin_support_b2c_tickets__ticket_id__resolve_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ticket_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Ticket Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminResolveTicketRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResolutionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/support/b2c/tickets/{ticket_id}/activity": {
+      "get": {
+        "tags": [
+          "Admin Support"
+        ],
+        "summary": "Get ticket activity audit trail",
+        "operationId": "list_ticket_activities_api_v1_admin_support_b2c_tickets__ticket_id__activity_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ticket_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Ticket Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ActivityResponse"
+                  },
+                  "title": "Response List Ticket Activities Api V1 Admin Support B2C Tickets  Ticket Id  Activity Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/support/b2c/tickets/{ticket_id}/customer": {
+      "get": {
+        "tags": [
+          "Admin Support"
+        ],
+        "summary": "Get customer 360 context",
+        "operationId": "get_ticket_customer_api_v1_admin_support_b2c_tickets__ticket_id__customer_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ticket_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Ticket Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerContextResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/support/attachments/presign": {
+      "post": {
+        "tags": [
+          "Admin Support"
+        ],
+        "summary": "Authorize admin attachment upload",
+        "operationId": "presign_admin_attachment_api_v1_admin_support_attachments_presign_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttachmentPresignRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttachmentPresignResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/support/attachments/{attachment_id}/confirm": {
+      "post": {
+        "tags": [
+          "Admin Support"
+        ],
+        "summary": "Confirm admin attachment upload",
+        "operationId": "confirm_admin_attachment_api_v1_admin_support_attachments__attachment_id__confirm_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "attachment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Attachment Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttachmentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/support/attachments/{attachment_id}/download": {
+      "get": {
+        "tags": [
+          "Admin Support"
+        ],
+        "summary": "Get admin authorized download URL",
+        "operationId": "get_admin_attachment_download_api_v1_admin_support_attachments__attachment_id__download_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "attachment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Attachment Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Get Admin Attachment Download Api V1 Admin Support Attachments  Attachment Id  Download Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -26980,6 +30672,100 @@
         ],
         "title": "ActiveRequest"
       },
+      "ActivityResponse": {
+        "properties": {
+          "activity_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Activity Id"
+          },
+          "ticket_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Ticket Id"
+          },
+          "actor_type": {
+            "type": "string",
+            "title": "Actor Type"
+          },
+          "actor_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actor Id"
+          },
+          "actor_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actor Name"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action"
+          },
+          "previous_value": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previous Value"
+          },
+          "new_value": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "New Value"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "activity_id",
+          "ticket_id",
+          "actor_type",
+          "action",
+          "created_at"
+        ],
+        "title": "ActivityResponse"
+      },
       "AddPackageCourseRequest": {
         "properties": {
           "product_id": {
@@ -27087,6 +30873,33 @@
           "items"
         ],
         "title": "AdminAssetsResponse"
+      },
+      "AdminAssignTicketRequest": {
+        "properties": {
+          "assigned_admin_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Assigned Admin Id"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "assigned_admin_id"
+        ],
+        "title": "AdminAssignTicketRequest"
       },
       "AdminAuditLogPageResponse": {
         "properties": {
@@ -28865,6 +32678,31 @@
           "bookings_count"
         ],
         "title": "AdminExpertService"
+      },
+      "AdminInternalNoteRequest": {
+        "properties": {
+          "body": {
+            "type": "string",
+            "maxLength": 10000,
+            "minLength": 1,
+            "title": "Body"
+          },
+          "attachment_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 5,
+            "title": "Attachment Ids"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "body"
+        ],
+        "title": "AdminInternalNoteRequest"
       },
       "AdminLegacyImportResponse": {
         "properties": {
@@ -30752,6 +34590,42 @@
         ],
         "title": "AdminRefundPreview"
       },
+      "AdminReplyRequest": {
+        "properties": {
+          "body": {
+            "type": "string",
+            "maxLength": 10000,
+            "minLength": 1,
+            "title": "Body"
+          },
+          "attachment_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 5,
+            "title": "Attachment Ids"
+          },
+          "status_after": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status After"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "body"
+        ],
+        "title": "AdminReplyRequest"
+      },
       "AdminRescheduleOptions": {
         "properties": {
           "booking_id": {
@@ -30829,6 +34703,36 @@
           "slot_ids"
         ],
         "title": "AdminRescheduleRequest"
+      },
+      "AdminResolveTicketRequest": {
+        "properties": {
+          "resolution_type": {
+            "type": "string",
+            "enum": [
+              "SOLVED",
+              "WORKAROUND",
+              "COURSE_ACCESS_RESTORED",
+              "REFUND_PROCESSED",
+              "DUPLICATE",
+              "NOT_REPRODUCIBLE",
+              "OTHER"
+            ],
+            "title": "Resolution Type",
+            "default": "SOLVED"
+          },
+          "resolution_summary": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 3,
+            "title": "Resolution Summary"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "resolution_summary"
+        ],
+        "title": "AdminResolveTicketRequest"
       },
       "AdminRoleCreateRequest": {
         "properties": {
@@ -31480,6 +35384,59 @@
         ],
         "title": "AdminUpdateSlotRequest"
       },
+      "AdminUpdateTicketRequest": {
+        "properties": {
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "priority": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Priority"
+          },
+          "category_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category Id"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "AdminUpdateTicketRequest"
+      },
       "AdminUserPageResponse": {
         "properties": {
           "items": {
@@ -31553,6 +35510,48 @@
           "scopes"
         ],
         "title": "AdminUserResponse"
+      },
+      "AgentInfoResponse": {
+        "properties": {
+          "admin_user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Admin User Id"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "full_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name"
+          },
+          "roles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Roles"
+          },
+          "active_ticket_count": {
+            "type": "integer",
+            "title": "Active Ticket Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "admin_user_id",
+          "email",
+          "active_ticket_count"
+        ],
+        "title": "AgentInfoResponse"
       },
       "Announcement": {
         "properties": {
@@ -31806,6 +35805,190 @@
           "email"
         ],
         "title": "AssignSeatRequest"
+      },
+      "AttachmentPresignRequest": {
+        "properties": {
+          "filename": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Filename"
+          },
+          "content_type": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 3,
+            "title": "Content Type"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "maximum": 15728640.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Size Bytes"
+          },
+          "ticket_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ticket Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "filename",
+          "content_type",
+          "size_bytes"
+        ],
+        "title": "AttachmentPresignRequest"
+      },
+      "AttachmentPresignResponse": {
+        "properties": {
+          "attachment_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Attachment Id"
+          },
+          "upload_url": {
+            "type": "string",
+            "title": "Upload Url"
+          },
+          "bucket": {
+            "type": "string",
+            "title": "Bucket"
+          },
+          "storage_key": {
+            "type": "string",
+            "title": "Storage Key"
+          },
+          "content_type": {
+            "type": "string",
+            "title": "Content Type"
+          },
+          "expires_in_seconds": {
+            "type": "integer",
+            "title": "Expires In Seconds"
+          }
+        },
+        "type": "object",
+        "required": [
+          "attachment_id",
+          "upload_url",
+          "bucket",
+          "storage_key",
+          "content_type",
+          "expires_in_seconds"
+        ],
+        "title": "AttachmentPresignResponse"
+      },
+      "AttachmentResponse": {
+        "properties": {
+          "attachment_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Attachment Id"
+          },
+          "ticket_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ticket Id"
+          },
+          "message_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message Id"
+          },
+          "uploader_type": {
+            "type": "string",
+            "title": "Uploader Type"
+          },
+          "uploader_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Uploader Id"
+          },
+          "original_filename": {
+            "type": "string",
+            "title": "Original Filename"
+          },
+          "content_type": {
+            "type": "string",
+            "title": "Content Type"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "title": "Size Bytes"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "scan_status": {
+            "type": "string",
+            "title": "Scan Status"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "confirmed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confirmed At"
+          },
+          "download_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Download Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "attachment_id",
+          "uploader_type",
+          "uploader_id",
+          "original_filename",
+          "content_type",
+          "size_bytes",
+          "status",
+          "scan_status",
+          "created_at"
+        ],
+        "title": "AttachmentResponse"
       },
       "AuthResponse": {
         "properties": {
@@ -34992,60 +39175,6 @@
         "title": "CatalogProductView",
         "description": "One catalog product (`GET /admin/catalog/products/{ref}`).\n\n`b2c` is the B2C product detail (prices per currency, access, categories) when there is a B2C product;\n`legacy` the legacy course/package detail (price rows, category ids, package courses) when one is linked.\nA legacy ref of a course that a B2C product represents resolves to that product (`canonical_ref`)."
       },
-      "CategoryResponse": {
-        "properties": {
-          "category_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Category Id"
-          },
-          "slug": {
-            "type": "string",
-            "title": "Slug"
-          },
-          "name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Name"
-          },
-          "parent_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Parent Id"
-          },
-          "sort_order": {
-            "type": "integer",
-            "title": "Sort Order"
-          },
-          "product_count": {
-            "type": "integer",
-            "title": "Product Count",
-            "default": 0
-          }
-        },
-        "type": "object",
-        "required": [
-          "category_id",
-          "slug",
-          "name",
-          "parent_id",
-          "sort_order"
-        ],
-        "title": "CategoryResponse"
-      },
       "CategorySalesReport": {
         "properties": {
           "start": {
@@ -36000,6 +40129,233 @@
         ],
         "title": "CollectionResponse"
       },
+      "CompanyContactIn": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 3,
+            "title": "Email"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "job_title": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 160
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Job Title"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "email"
+        ],
+        "title": "CompanyContactIn",
+        "description": "Who to contact about a company subscription (from the team checkout form)."
+      },
+      "CompanyInsightsResponse": {
+        "properties": {
+          "start": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Start"
+          },
+          "end": {
+            "type": "string",
+            "format": "date-time",
+            "title": "End"
+          },
+          "submitted": {
+            "type": "integer",
+            "title": "Submitted"
+          },
+          "details_only": {
+            "type": "integer",
+            "title": "Details Only"
+          },
+          "checkout_started": {
+            "type": "integer",
+            "title": "Checkout Started"
+          },
+          "converted": {
+            "type": "integer",
+            "title": "Converted"
+          },
+          "abandoned": {
+            "type": "integer",
+            "title": "Abandoned"
+          },
+          "conversion_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conversion Rate"
+          },
+          "avg_seats": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Seats"
+          },
+          "avg_seats_converted": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Seats Converted"
+          },
+          "paid_subscriptions": {
+            "type": "integer",
+            "title": "Paid Subscriptions"
+          },
+          "avg_seats_paid": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Seats Paid"
+          },
+          "stages": {
+            "items": {
+              "$ref": "#/components/schemas/CompanyStageInsightOut"
+            },
+            "type": "array",
+            "title": "Stages"
+          },
+          "trend": {
+            "items": {
+              "$ref": "#/components/schemas/CompanyInsightsTrendPointOut"
+            },
+            "type": "array",
+            "title": "Trend"
+          }
+        },
+        "type": "object",
+        "required": [
+          "start",
+          "end",
+          "submitted",
+          "details_only",
+          "checkout_started",
+          "converted",
+          "abandoned",
+          "paid_subscriptions",
+          "stages",
+          "trend"
+        ],
+        "title": "CompanyInsightsResponse",
+        "description": "Company checkout funnel: details submitted vs checkouts started vs paid, and team sizes."
+      },
+      "CompanyInsightsTrendPointOut": {
+        "properties": {
+          "month": {
+            "type": "string",
+            "format": "date",
+            "title": "Month"
+          },
+          "submitted": {
+            "type": "integer",
+            "title": "Submitted"
+          },
+          "converted": {
+            "type": "integer",
+            "title": "Converted"
+          },
+          "avg_seats": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Seats"
+          }
+        },
+        "type": "object",
+        "required": [
+          "month",
+          "submitted",
+          "converted"
+        ],
+        "title": "CompanyInsightsTrendPointOut"
+      },
+      "CompanyStageInsightOut": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "details",
+              "checkout_started",
+              "converted"
+            ],
+            "title": "Status"
+          },
+          "companies": {
+            "type": "integer",
+            "title": "Companies"
+          },
+          "avg_seats": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Seats"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "companies"
+        ],
+        "title": "CompanyStageInsightOut"
+      },
       "CompanyTrainingRequest": {
         "properties": {
           "companyName": {
@@ -36049,6 +40405,158 @@
             "maxLength": 100,
             "minLength": 2,
             "title": "City"
+          },
+          "industry": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 2,
+            "title": "Industry"
+          },
+          "websiteUrl": {
+            "type": "string",
+            "maxLength": 2083,
+            "minLength": 1,
+            "format": "uri",
+            "title": "Websiteurl"
+          },
+          "teamSize": {
+            "type": "integer",
+            "maximum": 1000000.0,
+            "minimum": 1.0,
+            "title": "Teamsize"
+          },
+          "trainingTypes": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "recorded",
+                "live",
+                "in_person"
+              ]
+            },
+            "type": "array",
+            "maxItems": 3,
+            "minItems": 1,
+            "title": "Trainingtypes"
+          },
+          "trainingGoals": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "solve_problem",
+                "employee_performance",
+                "increase_sales",
+                "knowledge_skills",
+                "disclosure_compliance"
+              ]
+            },
+            "type": "array",
+            "maxItems": 5,
+            "minItems": 1,
+            "title": "Traininggoals"
+          },
+          "departments": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "sales",
+                "finance",
+                "it",
+                "quality_control",
+                "top_management",
+                "warehouses",
+                "ohs",
+                "all",
+                "other"
+              ]
+            },
+            "type": "array",
+            "maxItems": 9,
+            "minItems": 1,
+            "title": "Departments"
+          },
+          "otherDepartment": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Otherdepartment"
+          },
+          "hasTrainingBudget": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hastrainingbudget"
+          },
+          "usedPlatformBefore": {
+            "type": "boolean",
+            "title": "Usedplatformbefore"
+          },
+          "previousPlatforms": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "coursera",
+                "udemy",
+                "linkedin_learning",
+                "edraak",
+                "rwaq",
+                "doroob",
+                "internal_lms",
+                "other"
+              ]
+            },
+            "type": "array",
+            "maxItems": 8,
+            "title": "Previousplatforms"
+          },
+          "otherPlatform": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Otherplatform"
+          },
+          "categoryIds": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "Categoryids"
+          },
+          "skillIds": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 30,
+            "minItems": 1,
+            "title": "Skillids"
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 3000,
+            "minLength": 20,
+            "title": "Summary"
           }
         },
         "additionalProperties": false,
@@ -36061,7 +40569,17 @@
           "jobTitle",
           "companyRange",
           "country",
-          "city"
+          "city",
+          "industry",
+          "websiteUrl",
+          "teamSize",
+          "trainingTypes",
+          "trainingGoals",
+          "departments",
+          "usedPlatformBefore",
+          "categoryIds",
+          "skillIds",
+          "summary"
         ],
         "title": "CompanyTrainingRequest"
       },
@@ -37737,6 +42255,82 @@
         ],
         "title": "CourseSelectionOut"
       },
+      "CreateCategoryRequest": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 2,
+            "title": "Code"
+          },
+          "name_ar": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 2,
+            "title": "Name Ar"
+          },
+          "name_en": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 2,
+            "title": "Name En"
+          },
+          "description_ar": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description Ar"
+          },
+          "description_en": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description En"
+          },
+          "default_priority": {
+            "type": "string",
+            "enum": [
+              "LOW",
+              "MEDIUM",
+              "HIGH",
+              "URGENT"
+            ],
+            "title": "Default Priority",
+            "default": "MEDIUM"
+          },
+          "display_order": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Display Order",
+            "default": 0
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": true
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "name_ar",
+          "name_en"
+        ],
+        "title": "CreateCategoryRequest"
+      },
       "CreateExpertServiceRequest": {
         "properties": {
           "title": {
@@ -38450,6 +43044,13 @@
             "title": "Max Seats",
             "default": 1
           },
+          "min_seats": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Min Seats",
+            "description": "Company plans: smallest team that can buy.",
+            "default": 1
+          },
           "thumbnail_url": {
             "anyOf": [
               {
@@ -38562,6 +43163,96 @@
           "price"
         ],
         "title": "CreateSubscriptionPlanRequest"
+      },
+      "CreateTicketRequest": {
+        "properties": {
+          "subject": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 3,
+            "title": "Subject"
+          },
+          "category_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Category Id"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 10000,
+            "minLength": 10,
+            "title": "Description"
+          },
+          "requested_priority": {
+            "type": "string",
+            "enum": [
+              "LOW",
+              "MEDIUM",
+              "HIGH",
+              "URGENT"
+            ],
+            "title": "Requested Priority",
+            "default": "MEDIUM"
+          },
+          "related_entity_type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "ORDER",
+                  "PRODUCT",
+                  "SUBSCRIPTION",
+                  "CONSULTATION"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Related Entity Type"
+          },
+          "related_entity_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Related Entity Id"
+          },
+          "related_entity_label": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Related Entity Label"
+          },
+          "attachment_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 5,
+            "title": "Attachment Ids"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "subject",
+          "category_id",
+          "description"
+        ],
+        "title": "CreateTicketRequest"
       },
       "CreateUnitRequest": {
         "properties": {
@@ -38890,6 +43581,109 @@
         ],
         "title": "CustomerAuthResponse"
       },
+      "CustomerContextResponse": {
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Customer Id"
+          },
+          "full_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "country_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country Code"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "total_tickets": {
+            "type": "integer",
+            "title": "Total Tickets"
+          },
+          "open_tickets": {
+            "type": "integer",
+            "title": "Open Tickets"
+          },
+          "orders": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Orders"
+          },
+          "entitlements": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Entitlements"
+          },
+          "subscriptions": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Subscriptions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer_id",
+          "email",
+          "status",
+          "total_tickets",
+          "open_tickets"
+        ],
+        "title": "CustomerContextResponse"
+      },
       "CustomerImportRequest": {
         "properties": {
           "batch_size": {
@@ -39158,6 +43952,31 @@
         },
         "type": "object",
         "title": "CustomerProfileUpdateRequest"
+      },
+      "CustomerReplyRequest": {
+        "properties": {
+          "body": {
+            "type": "string",
+            "maxLength": 10000,
+            "minLength": 1,
+            "title": "Body"
+          },
+          "attachment_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 5,
+            "title": "Attachment Ids"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "body"
+        ],
+        "title": "CustomerReplyRequest"
       },
       "CustomerSalesReport": {
         "properties": {
@@ -42593,6 +47412,18 @@
             "type": "array",
             "title": "Cohorts"
           },
+          "readme": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Readme",
+            "description": "Saved page README (markdown with `:::` card elements); when set it replaces `marketing.details`."
+          },
           "ref": {
             "type": "string",
             "title": "Ref",
@@ -42956,6 +47787,170 @@
         ],
         "title": "MediaResponse"
       },
+      "MenuCategoryResponse": {
+        "properties": {
+          "category_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Category Id"
+          },
+          "legacy_category_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Legacy Category Id",
+            "description": "Id used in storefront category URLs."
+          },
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "product_count": {
+            "type": "integer",
+            "title": "Product Count",
+            "default": 0
+          },
+          "products": {
+            "items": {
+              "$ref": "#/components/schemas/ProductCardResponse"
+            },
+            "type": "array",
+            "title": "Products",
+            "description": "Newest published items of the group in the category."
+          }
+        },
+        "type": "object",
+        "required": [
+          "category_id",
+          "slug",
+          "name"
+        ],
+        "title": "MenuCategoryResponse"
+      },
+      "MenuGroupResponse": {
+        "properties": {
+          "product_type": {
+            "type": "string",
+            "title": "Product Type"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count",
+            "default": 0
+          },
+          "categories": {
+            "items": {
+              "$ref": "#/components/schemas/MenuCategoryResponse"
+            },
+            "type": "array",
+            "title": "Categories"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_type"
+        ],
+        "title": "MenuGroupResponse"
+      },
+      "MenuResponse": {
+        "properties": {
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/MenuGroupResponse"
+            },
+            "type": "array",
+            "title": "Groups"
+          }
+        },
+        "type": "object",
+        "title": "MenuResponse"
+      },
+      "MessageResponse": {
+        "properties": {
+          "message_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Message Id"
+          },
+          "ticket_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Ticket Id"
+          },
+          "sender_type": {
+            "type": "string",
+            "title": "Sender Type"
+          },
+          "sender_customer_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sender Customer Id"
+          },
+          "sender_admin_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sender Admin Id"
+          },
+          "sender_name": {
+            "type": "string",
+            "title": "Sender Name"
+          },
+          "visibility": {
+            "type": "string",
+            "title": "Visibility"
+          },
+          "body": {
+            "type": "string",
+            "title": "Body"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "attachments": {
+            "items": {
+              "$ref": "#/components/schemas/AttachmentResponse"
+            },
+            "type": "array",
+            "title": "Attachments"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message_id",
+          "ticket_id",
+          "sender_type",
+          "sender_name",
+          "visibility",
+          "body",
+          "created_at"
+        ],
+        "title": "MessageResponse"
+      },
       "MoneyAmount": {
         "properties": {
           "currency": {
@@ -42974,6 +47969,21 @@
         ],
         "title": "MoneyAmount",
         "description": "An amount in one currency (major units, e.g. 143.23 AED)."
+      },
+      "NoteCreate": {
+        "properties": {
+          "body": {
+            "type": "string",
+            "maxLength": 3000,
+            "minLength": 1,
+            "title": "Body"
+          }
+        },
+        "type": "object",
+        "required": [
+          "body"
+        ],
+        "title": "NoteCreate"
       },
       "NotificationEmail": {
         "properties": {
@@ -43399,6 +48409,22 @@
           "invoice_count": {
             "type": "integer",
             "title": "Invoice Count",
+            "default": 0
+          },
+          "subtotal_minor": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subtotal Minor"
+          },
+          "tax_minor": {
+            "type": "integer",
+            "title": "Tax Minor",
             "default": 0
           },
           "lines": {
@@ -43901,6 +48927,22 @@
           "invoice_count": {
             "type": "integer",
             "title": "Invoice Count",
+            "default": 0
+          },
+          "subtotal_minor": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subtotal Minor"
+          },
+          "tax_minor": {
+            "type": "integer",
+            "title": "Tax Minor",
             "default": 0
           }
         },
@@ -46295,7 +51337,7 @@
           },
           "categories": {
             "items": {
-              "$ref": "#/components/schemas/CategoryResponse"
+              "$ref": "#/components/schemas/app__modules__catalog__presentation__schemas__CategoryResponse"
             },
             "type": "array",
             "title": "Categories"
@@ -46674,7 +51716,7 @@
           },
           "categories": {
             "items": {
-              "$ref": "#/components/schemas/CategoryResponse"
+              "$ref": "#/components/schemas/app__modules__catalog__presentation__schemas__CategoryResponse"
             },
             "type": "array",
             "title": "Categories"
@@ -47957,7 +52999,7 @@
           "source": {
             "type": "string",
             "title": "Source",
-            "description": "`readme` when saved; otherwise one generated from the product: `consultation` (its details), `sections` (legacy HTML sections), `description` (its description and learning outcomes), or `empty`."
+            "description": "`readme` when saved; otherwise one generated from the product: `consultation` (its details), `sections` (legacy HTML sections), `live_marketing` (a live diploma's page content), `description` (its description and learning outcomes), or `empty`."
           },
           "revalidated": {
             "type": "boolean",
@@ -48730,6 +53772,66 @@
         ],
         "title": "RelatedInstructorCardResponse"
       },
+      "RelatedOptionResponse": {
+        "properties": {
+          "entity_type": {
+            "type": "string",
+            "title": "Entity Type"
+          },
+          "entity_id": {
+            "type": "string",
+            "title": "Entity Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "subtitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subtitle"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "group": {
+            "type": "string",
+            "title": "Group",
+            "default": "OTHER"
+          },
+          "group_name_ar": {
+            "type": "string",
+            "title": "Group Name Ar",
+            "default": "أخرى"
+          },
+          "group_name_en": {
+            "type": "string",
+            "title": "Group Name En",
+            "default": "Other"
+          }
+        },
+        "type": "object",
+        "required": [
+          "entity_type",
+          "entity_id",
+          "label"
+        ],
+        "title": "RelatedOptionResponse"
+      },
       "RelatedResourceCardResponse": {
         "properties": {
           "resource_type": {
@@ -48944,6 +54046,22 @@
         "type": "object",
         "title": "RelatedResourcesResponse"
       },
+      "ReopenTicketRequest": {
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "reason"
+        ],
+        "title": "ReopenTicketRequest"
+      },
       "ReorderRequest": {
         "properties": {
           "ids": {
@@ -49112,6 +54230,30 @@
             "additionalProperties": true,
             "type": "object",
             "title": "Payload"
+          },
+          "assigned_admin_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assigned Admin Id"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
           }
         },
         "type": "object",
@@ -49129,6 +54271,83 @@
           "payload"
         ],
         "title": "RequestRecord"
+      },
+      "RequestUpdate": {
+        "properties": {
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "assigned_admin_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assigned Admin Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "RequestUpdate"
+      },
+      "ResolutionResponse": {
+        "properties": {
+          "resolution_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Resolution Id"
+          },
+          "ticket_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Ticket Id"
+          },
+          "resolved_by_admin_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Resolved By Admin Id"
+          },
+          "resolved_by_name": {
+            "type": "string",
+            "title": "Resolved By Name"
+          },
+          "resolution_type": {
+            "type": "string",
+            "title": "Resolution Type"
+          },
+          "resolution_summary": {
+            "type": "string",
+            "title": "Resolution Summary"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "resolution_id",
+          "ticket_id",
+          "resolved_by_admin_id",
+          "resolved_by_name",
+          "resolution_type",
+          "resolution_summary",
+          "created_at"
+        ],
+        "title": "ResolutionResponse"
       },
       "ResourceInstructorResponse": {
         "properties": {
@@ -50653,6 +55872,30 @@
         ],
         "title": "SetPlanStatusRequest"
       },
+      "SkillPoint": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "value": {
+            "type": "integer",
+            "title": "Value"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "value",
+          "id"
+        ],
+        "title": "SkillPoint"
+      },
       "SkillResponse": {
         "properties": {
           "skill_id": {
@@ -50761,6 +56004,66 @@
           "name"
         ],
         "title": "SkillSummaryResponse"
+      },
+      "SlaStateResponse": {
+        "properties": {
+          "ticket_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Ticket Id"
+          },
+          "response_due_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Response Due At"
+          },
+          "resolution_due_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Resolution Due At"
+          },
+          "first_response_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Response At"
+          },
+          "resolved_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolved At"
+          },
+          "response_breached": {
+            "type": "boolean",
+            "title": "Response Breached"
+          },
+          "resolution_breached": {
+            "type": "boolean",
+            "title": "Resolution Breached"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ticket_id",
+          "response_due_at",
+          "resolution_due_at",
+          "response_breached",
+          "resolution_breached"
+        ],
+        "title": "SlaStateResponse"
       },
       "Slider": {
         "properties": {
@@ -51020,6 +56323,74 @@
         ],
         "title": "SourceSales",
         "description": "Sales of one system of record (`b2c` or `legacy`) inside a report."
+      },
+      "StatPoint": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "value": {
+            "type": "integer",
+            "title": "Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "value"
+        ],
+        "title": "StatPoint"
+      },
+      "StatsResponse": {
+        "properties": {
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "by_status": {
+            "items": {
+              "$ref": "#/components/schemas/StatPoint"
+            },
+            "type": "array",
+            "title": "By Status"
+          },
+          "by_month": {
+            "items": {
+              "$ref": "#/components/schemas/StatPoint"
+            },
+            "type": "array",
+            "title": "By Month"
+          },
+          "categories": {
+            "items": {
+              "$ref": "#/components/schemas/StatPoint"
+            },
+            "type": "array",
+            "title": "Categories"
+          },
+          "skills": {
+            "items": {
+              "$ref": "#/components/schemas/SkillPoint"
+            },
+            "type": "array",
+            "title": "Skills"
+          },
+          "skills_request_count": {
+            "type": "integer",
+            "title": "Skills Request Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total",
+          "by_status",
+          "by_month",
+          "categories",
+          "skills",
+          "skills_request_count"
+        ],
+        "title": "StatsResponse"
       },
       "StudioAsset": {
         "properties": {
@@ -51519,7 +56890,8 @@
                 "type": "null"
               }
             ],
-            "title": "Seat Count"
+            "title": "Seat Count",
+            "description": "Company plans: team size, within the plan's min/max seats."
           },
           "company_name": {
             "anyOf": [
@@ -51532,6 +56904,29 @@
               }
             ],
             "title": "Company Name"
+          },
+          "contact": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CompanyContactIn"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "lead_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lead Id",
+            "description": "The team lead saved on step 1; checkout links its order."
           },
           "initial_selected_product_ids": {
             "items": {
@@ -51901,6 +57296,30 @@
             "title": "Max Seats",
             "default": 1
           },
+          "min_seats": {
+            "type": "integer",
+            "title": "Min Seats",
+            "description": "Company plans: smallest team that can buy.",
+            "default": 1
+          },
+          "per_seat": {
+            "type": "boolean",
+            "title": "Per Seat",
+            "description": "True for company plans: `effective_price` is per seat (employee).",
+            "default": false
+          },
+          "tax_percent": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Tax Percent",
+            "description": "VAT added at checkout on the subtotal (seats x price).",
+            "default": "0"
+          },
+          "tax_label": {
+            "type": "string",
+            "title": "Tax Label",
+            "default": "VAT"
+          },
           "title": {
             "anyOf": [
               {
@@ -52036,6 +57455,18 @@
             "type": "array",
             "title": "Features",
             "description": "Catalog features this plan offers, localized."
+          },
+          "library_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Library Count",
+            "description": "Full-library plans only: how many published courses and diplomas it grants today."
           },
           "stripe_product_id": {
             "anyOf": [
@@ -52414,6 +57845,30 @@
             "title": "Max Seats",
             "default": 1
           },
+          "min_seats": {
+            "type": "integer",
+            "title": "Min Seats",
+            "description": "Company plans: smallest team that can buy.",
+            "default": 1
+          },
+          "per_seat": {
+            "type": "boolean",
+            "title": "Per Seat",
+            "description": "True for company plans: `effective_price` is per seat (employee).",
+            "default": false
+          },
+          "tax_percent": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Tax Percent",
+            "description": "VAT added at checkout on the subtotal (seats x price).",
+            "default": "0"
+          },
+          "tax_label": {
+            "type": "string",
+            "title": "Tax Label",
+            "default": "VAT"
+          },
           "title": {
             "anyOf": [
               {
@@ -52549,6 +58004,18 @@
             "type": "array",
             "title": "Features",
             "description": "Catalog features this plan offers, localized."
+          },
+          "library_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Library Count",
+            "description": "Full-library plans only: how many published courses and diplomas it grants today."
           }
         },
         "type": "object",
@@ -52902,6 +58369,121 @@
           "churned"
         ],
         "title": "SubscriptionTrendPointOut"
+      },
+      "SupportAnalyticsResponse": {
+        "properties": {
+          "total_tickets": {
+            "type": "integer",
+            "title": "Total Tickets"
+          },
+          "open_tickets": {
+            "type": "integer",
+            "title": "Open Tickets"
+          },
+          "unassigned_tickets": {
+            "type": "integer",
+            "title": "Unassigned Tickets"
+          },
+          "urgent_tickets": {
+            "type": "integer",
+            "title": "Urgent Tickets"
+          },
+          "waiting_for_customer_tickets": {
+            "type": "integer",
+            "title": "Waiting For Customer Tickets"
+          },
+          "resolved_tickets": {
+            "type": "integer",
+            "title": "Resolved Tickets"
+          },
+          "closed_tickets": {
+            "type": "integer",
+            "title": "Closed Tickets"
+          },
+          "sla_breached_tickets": {
+            "type": "integer",
+            "title": "Sla Breached Tickets"
+          },
+          "sla_compliance_rate": {
+            "type": "number",
+            "title": "Sla Compliance Rate"
+          },
+          "avg_first_response_minutes": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg First Response Minutes"
+          },
+          "avg_resolution_minutes": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Resolution Minutes"
+          },
+          "csat_average": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Csat Average"
+          },
+          "csat_count": {
+            "type": "integer",
+            "title": "Csat Count"
+          },
+          "by_category": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "By Category"
+          },
+          "by_status": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "By Status"
+          },
+          "agent_workload": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Agent Workload"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_tickets",
+          "open_tickets",
+          "unassigned_tickets",
+          "urgent_tickets",
+          "waiting_for_customer_tickets",
+          "resolved_tickets",
+          "closed_tickets",
+          "sla_breached_tickets",
+          "sla_compliance_rate",
+          "csat_count"
+        ],
+        "title": "SupportAnalyticsResponse"
       },
       "SupportMessage": {
         "properties": {
@@ -53303,6 +58885,432 @@
         ],
         "title": "TargetSkillsUpdateRequest"
       },
+      "TeamLeadListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TeamLeadOut"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "TeamLeadListResponse"
+      },
+      "TeamLeadOut": {
+        "properties": {
+          "lead_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Lead Id"
+          },
+          "customer_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Customer Id"
+          },
+          "plan_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Plan Id"
+          },
+          "plan_slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Slug"
+          },
+          "plan_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Title"
+          },
+          "company_name": {
+            "type": "string",
+            "title": "Company Name"
+          },
+          "contact_name": {
+            "type": "string",
+            "title": "Contact Name"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "job_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Job Title"
+          },
+          "customer_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Email"
+          },
+          "seat_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seat Count"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "details",
+              "checkout_started",
+              "converted"
+            ],
+            "title": "Status"
+          },
+          "order_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Order Id"
+          },
+          "subscription_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subscription Id"
+          },
+          "order_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Order Status"
+          },
+          "order_total": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Order Total"
+          },
+          "order_currency_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Order Currency Code"
+          },
+          "order_created_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Order Created At"
+          },
+          "subscription_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subscription Status"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "lead_id",
+          "customer_id",
+          "plan_id",
+          "company_name",
+          "contact_name",
+          "email",
+          "status"
+        ],
+        "title": "TeamLeadOut"
+      },
+      "TeamLeadRequest": {
+        "properties": {
+          "plan_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Plan Id"
+          },
+          "company_name": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Company Name"
+          },
+          "contact": {
+            "$ref": "#/components/schemas/CompanyContactIn"
+          },
+          "seat_count": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seat Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "plan_id",
+          "company_name",
+          "contact"
+        ],
+        "title": "TeamLeadRequest",
+        "description": "Step 1 of the team checkout: who the company is, saved before any price or payment."
+      },
+      "TicketDetailResponse": {
+        "properties": {
+          "ticket": {
+            "$ref": "#/components/schemas/TicketSummaryResponse"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "csat_comment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Csat Comment"
+          },
+          "csat_submitted_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Csat Submitted At"
+          },
+          "can_reopen": {
+            "type": "boolean",
+            "title": "Can Reopen"
+          },
+          "initial_attachments": {
+            "items": {
+              "$ref": "#/components/schemas/AttachmentResponse"
+            },
+            "type": "array",
+            "title": "Initial Attachments"
+          },
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/MessageResponse"
+            },
+            "type": "array",
+            "title": "Messages"
+          },
+          "sla": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SlaStateResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "resolutions": {
+            "items": {
+              "$ref": "#/components/schemas/ResolutionResponse"
+            },
+            "type": "array",
+            "title": "Resolutions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ticket",
+          "description",
+          "can_reopen"
+        ],
+        "title": "TicketDetailResponse"
+      },
+      "TicketFeedbackRequest": {
+        "properties": {
+          "rating": {
+            "type": "integer",
+            "maximum": 5.0,
+            "minimum": 1.0,
+            "title": "Rating"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "rating"
+        ],
+        "title": "TicketFeedbackRequest"
+      },
+      "TicketPageResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TicketSummaryResponse"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "TicketPageResponse"
+      },
       "TicketReplyRequest": {
         "properties": {
           "message": {
@@ -53344,6 +59352,259 @@
           "status"
         ],
         "title": "TicketStatusRequest"
+      },
+      "TicketSummaryResponse": {
+        "properties": {
+          "ticket_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Ticket Id"
+          },
+          "ticket_number": {
+            "type": "string",
+            "title": "Ticket Number"
+          },
+          "customer_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Customer Id"
+          },
+          "customer_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Name"
+          },
+          "customer_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Email"
+          },
+          "category_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Category Id"
+          },
+          "category_code": {
+            "type": "string",
+            "title": "Category Code"
+          },
+          "category_name_ar": {
+            "type": "string",
+            "title": "Category Name Ar"
+          },
+          "category_name_en": {
+            "type": "string",
+            "title": "Category Name En"
+          },
+          "assigned_admin_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assigned Admin Id"
+          },
+          "assigned_admin_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assigned Admin Name"
+          },
+          "subject": {
+            "type": "string",
+            "title": "Subject"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "priority": {
+            "type": "string",
+            "title": "Priority"
+          },
+          "requested_priority": {
+            "type": "string",
+            "title": "Requested Priority"
+          },
+          "related_entity_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Related Entity Type"
+          },
+          "related_entity_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Related Entity Id"
+          },
+          "related_entity_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Related Entity Label"
+          },
+          "customer_unread_count": {
+            "type": "integer",
+            "title": "Customer Unread Count"
+          },
+          "admin_unread_count": {
+            "type": "integer",
+            "title": "Admin Unread Count"
+          },
+          "message_count": {
+            "type": "integer",
+            "title": "Message Count"
+          },
+          "first_response_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Response At"
+          },
+          "last_activity_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Last Activity At"
+          },
+          "resolved_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolved At"
+          },
+          "closed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closed At"
+          },
+          "csat_rating": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Csat Rating"
+          },
+          "sla_response_due_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sla Response Due At"
+          },
+          "sla_resolution_due_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sla Resolution Due At"
+          },
+          "sla_breached": {
+            "type": "boolean",
+            "title": "Sla Breached"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ticket_id",
+          "ticket_number",
+          "customer_id",
+          "category_id",
+          "category_code",
+          "category_name_ar",
+          "category_name_en",
+          "subject",
+          "status",
+          "priority",
+          "requested_priority",
+          "customer_unread_count",
+          "admin_unread_count",
+          "message_count",
+          "last_activity_at",
+          "sla_breached",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "TicketSummaryResponse"
       },
       "TokenResponse": {
         "properties": {
@@ -53620,6 +59881,47 @@
             "type": "boolean",
             "title": "Recorded",
             "default": false
+          },
+          "categoryIds": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "Categoryids"
+          },
+          "skillIds": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 30,
+            "minItems": 1,
+            "title": "Skillids"
+          },
+          "cvAttachmentId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cvattachmentid"
+          },
+          "portfolioAttachmentIds": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 5,
+            "title": "Portfolioattachmentids"
           }
         },
         "additionalProperties": false,
@@ -53640,7 +59942,9 @@
           "specialized",
           "programs",
           "personalProgram",
-          "languages"
+          "languages",
+          "categoryIds",
+          "skillIds"
         ],
         "title": "TrainerApplicationRequest"
       },
@@ -53670,6 +59974,103 @@
           "code"
         ],
         "title": "TwoFactorCheckRequest"
+      },
+      "UpdateCategoryRequest": {
+        "properties": {
+          "name_ar": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150,
+                "minLength": 2
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name Ar"
+          },
+          "name_en": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150,
+                "minLength": 2
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name En"
+          },
+          "description_ar": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description Ar"
+          },
+          "description_en": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description En"
+          },
+          "default_priority": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "LOW",
+                  "MEDIUM",
+                  "HIGH",
+                  "URGENT"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default Priority"
+          },
+          "display_order": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Order"
+          },
+          "is_active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Active"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "UpdateCategoryRequest"
       },
       "UpdateExpertProfileRequest": {
         "properties": {
@@ -54314,6 +60715,18 @@
             ],
             "title": "Max Seats"
           },
+          "min_seats": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min Seats"
+          },
           "thumbnail_url": {
             "anyOf": [
               {
@@ -54485,6 +60898,59 @@
         },
         "type": "object",
         "title": "UpdateUnitRequest"
+      },
+      "UploadConfirmation": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 32,
+            "title": "Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "token"
+        ],
+        "title": "UploadConfirmation"
+      },
+      "UploadIntent": {
+        "properties": {
+          "filename": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Filename"
+          },
+          "content_type": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 3,
+            "title": "Content Type"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "maximum": 15728640.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Size Bytes"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "cv",
+              "portfolio"
+            ],
+            "title": "Kind"
+          }
+        },
+        "type": "object",
+        "required": [
+          "filename",
+          "content_type",
+          "size_bytes",
+          "kind"
+        ],
+        "title": "UploadIntent"
       },
       "UploadIntentRequest": {
         "properties": {
@@ -54898,6 +61364,60 @@
         ],
         "title": "ExpertSummaryResponse"
       },
+      "app__modules__catalog__presentation__schemas__CategoryResponse": {
+        "properties": {
+          "category_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Category Id"
+          },
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "parent_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Id"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order"
+          },
+          "product_count": {
+            "type": "integer",
+            "title": "Product Count",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "category_id",
+          "slug",
+          "name",
+          "parent_id",
+          "sort_order"
+        ],
+        "title": "CategoryResponse"
+      },
       "app__modules__catalog__presentation__schemas__ProductPriceResponse": {
         "properties": {
           "amount": {
@@ -55007,6 +61527,72 @@
           "product_id"
         ],
         "title": "ProductPriceResponse"
+      },
+      "app__modules__support__presentation__schemas__CategoryResponse": {
+        "properties": {
+          "category_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Category Id"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "name_ar": {
+            "type": "string",
+            "title": "Name Ar"
+          },
+          "name_en": {
+            "type": "string",
+            "title": "Name En"
+          },
+          "description_ar": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description Ar"
+          },
+          "description_en": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description En"
+          },
+          "default_priority": {
+            "type": "string",
+            "title": "Default Priority"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "display_order": {
+            "type": "integer",
+            "title": "Display Order"
+          }
+        },
+        "type": "object",
+        "required": [
+          "category_id",
+          "code",
+          "name_ar",
+          "name_en",
+          "default_priority",
+          "is_active",
+          "display_order"
+        ],
+        "title": "CategoryResponse"
       }
     },
     "securitySchemes": {
