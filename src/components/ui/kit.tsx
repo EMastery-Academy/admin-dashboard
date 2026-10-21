@@ -69,6 +69,9 @@ export type ButtonProps = {
   /** Put the icon after the label (e.g. "Next ›"). */
   iconEnd?: boolean;
   href?: string;
+  /** Link-only: e.g. `_blank` for a page on the storefront. */
+  target?: string;
+  rel?: string;
   size?: ButtonSize;
   sm?: boolean;
   block?: boolean;
@@ -81,7 +84,7 @@ export type ButtonProps = {
   "aria-busy"?: boolean;
 };
 
-export function Button({ label, kind = "soft", icon, iconNode, iconDir, iconEnd, href, size, sm, block, children, type = "button", disabled, onClick, className, ...rest }: ButtonProps) {
+export function Button({ label, kind = "soft", icon, iconNode, iconDir, iconEnd, href, target, rel, size, sm, block, children, type = "button", disabled, onClick, className, ...rest }: ButtonProps) {
   const cls = cn(buttonClass({ variant: BUTTON_VARIANT[kind], size: size ?? (sm ? "sm" : "md"), block }), className);
   const glyph = iconNode ?? (icon ? <Icon name={icon} className={iconDir ? "ma-icon-dir" : undefined} /> : null);
   const inner = children ?? (
@@ -93,7 +96,7 @@ export function Button({ label, kind = "soft", icon, iconNode, iconDir, iconEnd,
   );
   if (href) {
     return (
-      <AppLink className={cls} to={href} {...rest}>
+      <AppLink className={cls} to={href} target={target} rel={rel} {...rest}>
         {inner}
       </AppLink>
     );

@@ -3585,6 +3585,158 @@
         }
       }
     },
+    "/api/v1/admin/catalog/products/{product_ref}/resources": {
+      "get": {
+        "tags": [
+          "Admin catalog"
+        ],
+        "summary": "List a product's resources and durations",
+        "description": "Lists the B2C resources linked to a product with their B2C-owned `duration_minutes` (the value search uses for the duration filter and sort) and the legacy-synced `cached_duration_minutes`. Requires `admin:catalog:read` or `admin:catalog:write`.",
+        "operationId": "list_product_resources_api_v1_admin_catalog_products__product_ref__resources_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "product_ref",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Product ref: `b2c:<product_id>` (a bare UUID also works), `legacy:course:<id>` or `legacy:package:<id>`.",
+              "examples": [
+                "legacy:course:402"
+              ],
+              "title": "Product Ref"
+            },
+            "description": "Product ref: `b2c:<product_id>` (a bare UUID also works), `legacy:course:<id>` or `legacy:package:<id>`."
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ResourceDurationView"
+                  },
+                  "title": "Response List Product Resources Api V1 Admin Catalog Products  Product Ref  Resources Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/catalog/resources/{resource_id}": {
+      "patch": {
+        "tags": [
+          "Admin catalog"
+        ],
+        "summary": "Update resource duration",
+        "description": "Sets the B2C-owned duration (minutes) of a catalog resource. Search reads this as the source of truth for the duration filter and sort, so it no longer depends on the legacy sync. Requires `admin:catalog:write`.",
+        "operationId": "update_resource_duration_api_v1_admin_catalog_resources__resource_id__patch",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "resource_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Resource Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateResourceDurationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceDurationView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/admin/catalog/products/{product_ref}/curriculum": {
       "get": {
         "tags": [
@@ -17038,6 +17190,24 @@
               "default": 0,
               "title": "Offset"
             }
+          },
+          {
+            "name": "featured",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only the landing line-up, in its order.",
+              "title": "Featured"
+            },
+            "description": "Only the landing line-up, in its order."
           }
         ],
         "responses": {
@@ -21066,6 +21236,70 @@
         }
       }
     },
+    "/api/v1/me/lms/launch": {
+      "post": {
+        "tags": [
+          "LMS"
+        ],
+        "summary": "Launch Lms",
+        "operationId": "launch_lms_api_v1_me_lms_launch_post",
+        "security": [
+          {
+            "B2C JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "b2c_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "B2C Access Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LmsLaunchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LmsLaunchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/me/products": {
       "get": {
         "tags": [
@@ -23628,6 +23862,1010 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/WebhookAckResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/refund-cases/events/learning-started": {
+      "post": {
+        "tags": [
+          "Refunds"
+        ],
+        "summary": "Learning Started Event",
+        "operationId": "learning_started_event_api_v1_refund_cases_events_learning_started_post",
+        "parameters": [
+          {
+            "name": "X-Legacy-Command-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Legacy-Command-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LearningStarted"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Learning Started Event Api V1 Refund Cases Events Learning Started Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/refund-cases/orders/{order_id}/items/{order_item_id}/preview": {
+      "get": {
+        "tags": [
+          "Refunds"
+        ],
+        "summary": "Customer Preview",
+        "operationId": "customer_preview_api_v1_refund_cases_orders__order_id__items__order_item_id__preview_get",
+        "security": [
+          {
+            "B2C JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          },
+          {
+            "name": "order_item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Item Id"
+            }
+          },
+          {
+            "name": "b2c_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "B2C Access Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Customer Preview Api V1 Refund Cases Orders  Order Id  Items  Order Item Id  Preview Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/refund-cases/orders/{order_id}/requests": {
+      "post": {
+        "tags": [
+          "Refunds"
+        ],
+        "summary": "Request Refund",
+        "operationId": "request_refund_api_v1_refund_cases_orders__order_id__requests_post",
+        "security": [
+          {
+            "B2C JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          },
+          {
+            "name": "b2c_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "B2C Access Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Request Refund Api V1 Refund Cases Orders  Order Id  Requests Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/refund-cases/me": {
+      "get": {
+        "tags": [
+          "Refunds"
+        ],
+        "summary": "My Cases",
+        "operationId": "my_cases_api_v1_refund_cases_me_get",
+        "security": [
+          {
+            "B2C JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "b2c_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "B2C Access Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "title": "Response My Cases Api V1 Refund Cases Me Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/refund-cases": {
+      "get": {
+        "tags": [
+          "Admin refunds"
+        ],
+        "summary": "Admin Cases",
+        "operationId": "admin_cases_api_v1_admin_refund_cases_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Admin Cases Api V1 Admin Refund Cases Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin refunds"
+        ],
+        "summary": "Create Admin Case",
+        "operationId": "create_admin_case_api_v1_admin_refund_cases_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Create Admin Case Api V1 Admin Refund Cases Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/refund-cases/statistics": {
+      "get": {
+        "tags": [
+          "Admin refunds"
+        ],
+        "summary": "Refund Statistics",
+        "operationId": "refund_statistics_api_v1_admin_refund_cases_statistics_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 365,
+              "minimum": 1,
+              "default": 30,
+              "title": "Days"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Refund Statistics Api V1 Admin Refund Cases Statistics Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/refund-cases/items/{order_item_id}/preview": {
+      "get": {
+        "tags": [
+          "Admin refunds"
+        ],
+        "summary": "Admin Item Preview",
+        "operationId": "admin_item_preview_api_v1_admin_refund_cases_items__order_item_id__preview_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Item Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Admin Item Preview Api V1 Admin Refund Cases Items  Order Item Id  Preview Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/refund-cases/resources/{resource_id}/comparison": {
+      "get": {
+        "tags": [
+          "Admin refunds"
+        ],
+        "summary": "Resource Refund Comparison",
+        "operationId": "resource_refund_comparison_api_v1_admin_refund_cases_resources__resource_id__comparison_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "resource_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Resource Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Resource Refund Comparison Api V1 Admin Refund Cases Resources  Resource Id  Comparison Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/refund-cases/products/{product_id}/resources": {
+      "get": {
+        "tags": [
+          "Admin refunds"
+        ],
+        "summary": "Product Resource Refund Comparisons",
+        "operationId": "product_resource_refund_comparisons_api_v1_admin_refund_cases_products__product_id__resources_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Product Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "title": "Response Product Resource Refund Comparisons Api V1 Admin Refund Cases Products  Product Id  Resources Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/refund-cases/{case_id}": {
+      "get": {
+        "tags": [
+          "Admin refunds"
+        ],
+        "summary": "Admin Case",
+        "operationId": "admin_case_api_v1_admin_refund_cases__case_id__get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "case_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Case Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Admin Case Api V1 Admin Refund Cases  Case Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/refund-cases/{case_id}/reject": {
+      "post": {
+        "tags": [
+          "Admin refunds"
+        ],
+        "summary": "Reject Case",
+        "operationId": "reject_case_api_v1_admin_refund_cases__case_id__reject_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "case_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Case Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundDecision"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Reject Case Api V1 Admin Refund Cases  Case Id  Reject Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/refund-cases/{case_id}/approve": {
+      "post": {
+        "tags": [
+          "Admin refunds"
+        ],
+        "summary": "Approve Case",
+        "operationId": "approve_case_api_v1_admin_refund_cases__case_id__approve_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "case_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Case Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundDecision"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Approve Case Api V1 Admin Refund Cases  Case Id  Approve Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/refund-cases/{case_id}/reconcile": {
+      "post": {
+        "tags": [
+          "Admin refunds"
+        ],
+        "summary": "Reconcile Case",
+        "operationId": "reconcile_case_api_v1_admin_refund_cases__case_id__reconcile_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "case_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Case Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Reconcile Case Api V1 Admin Refund Cases  Case Id  Reconcile Post"
                 }
               }
             }
@@ -30411,6 +31649,2341 @@
                     "type": "string"
                   },
                   "title": "Response Get Admin Attachment Download Api V1 Admin Support Attachments  Attachment Id  Download Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/catalog/instructors": {
+      "get": {
+        "tags": [
+          "Admin catalog"
+        ],
+        "summary": "Experts (B2C profiles)",
+        "operationId": "list_instructors_api_v1_admin_catalog_instructors_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Name, title, specialty or key.",
+              "title": "Query"
+            },
+            "description": "Name, title, specialty or key."
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^(active|inactive)$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "consultant",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only experts who give (or don't give) consultations.",
+              "title": "Consultant"
+            },
+            "description": "Only experts who give (or don't give) consultations."
+          },
+          {
+            "name": "featured",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Featured"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 25,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminInstructorPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/catalog/instructors/{key}": {
+      "get": {
+        "tags": [
+          "Admin catalog"
+        ],
+        "summary": "One expert's profile",
+        "operationId": "get_instructor_api_v1_admin_catalog_instructors__key__get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 64,
+              "description": "Legacy trainer id, `c{id}`, or the instructor uuid.",
+              "title": "Key"
+            },
+            "description": "Legacy trainer id, `c{id}`, or the instructor uuid."
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminInstructorDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Admin catalog"
+        ],
+        "summary": "Update an expert's profile",
+        "operationId": "update_instructor_api_v1_admin_catalog_instructors__key__patch",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 64,
+              "description": "Legacy trainer id, `c{id}`, or the instructor uuid.",
+              "title": "Key"
+            },
+            "description": "Legacy trainer id, `c{id}`, or the instructor uuid."
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateInstructorRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminInstructorDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/catalog/instructors/{key}/images": {
+      "post": {
+        "tags": [
+          "Admin catalog"
+        ],
+        "summary": "Upload the expert's avatar or cover",
+        "description": "The raw image is the request body (JPEG, PNG or WebP, up to 5 MB). It is stored on S3 and set on the profile.",
+        "operationId": "upload_instructor_image_api_v1_admin_catalog_instructors__key__images_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 64,
+              "description": "Legacy trainer id, `c{id}`, or the instructor uuid.",
+              "title": "Key"
+            },
+            "description": "Legacy trainer id, `c{id}`, or the instructor uuid."
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^(avatar|cover)$",
+              "default": "avatar",
+              "title": "Kind"
+            }
+          },
+          {
+            "name": "filename",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 300,
+              "default": "image",
+              "title": "Filename"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstructorImageResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/catalog/instructors/{key}/readme": {
+      "get": {
+        "tags": [
+          "Admin catalog"
+        ],
+        "summary": "The expert's page README",
+        "operationId": "get_instructor_readme_api_v1_admin_catalog_instructors__key__readme_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 64,
+              "description": "Legacy trainer id, `c{id}`, or the instructor uuid.",
+              "title": "Key"
+            },
+            "description": "Legacy trainer id, `c{id}`, or the instructor uuid."
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstructorReadmeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Admin catalog"
+        ],
+        "summary": "Save the expert's page README",
+        "operationId": "put_instructor_readme_api_v1_admin_catalog_instructors__key__readme_put",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 64,
+              "description": "Legacy trainer id, `c{id}`, or the instructor uuid.",
+              "title": "Key"
+            },
+            "description": "Legacy trainer id, `c{id}`, or the instructor uuid."
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateInstructorReadmeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstructorReadmeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/catalog/instructors/{key}/products": {
+      "get": {
+        "tags": [
+          "Admin catalog"
+        ],
+        "summary": "Products the expert teaches or gives",
+        "operationId": "list_instructor_products_api_v1_admin_catalog_instructors__key__products_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 64,
+              "description": "Legacy trainer id, `c{id}`, or the instructor uuid.",
+              "title": "Key"
+            },
+            "description": "Legacy trainer id, `c{id}`, or the instructor uuid."
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InstructorProduct"
+                  },
+                  "title": "Response List Instructor Products Api V1 Admin Catalog Instructors  Key  Products Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin catalog"
+        ],
+        "summary": "Assign the expert to a product",
+        "operationId": "assign_instructor_product_api_v1_admin_catalog_instructors__key__products_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 64,
+              "description": "Legacy trainer id, `c{id}`, or the instructor uuid.",
+              "title": "Key"
+            },
+            "description": "Legacy trainer id, `c{id}`, or the instructor uuid."
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignProductRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InstructorProduct"
+                  },
+                  "title": "Response Assign Instructor Product Api V1 Admin Catalog Instructors  Key  Products Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/catalog/instructors/{key}/product-options": {
+      "get": {
+        "tags": [
+          "Admin catalog"
+        ],
+        "summary": "Products that can be assigned to the expert",
+        "operationId": "instructor_product_options_api_v1_admin_catalog_instructors__key__product_options_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 64,
+              "description": "Legacy trainer id, `c{id}`, or the instructor uuid.",
+              "title": "Key"
+            },
+            "description": "Legacy trainer id, `c{id}`, or the instructor uuid."
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Query"
+            }
+          },
+          {
+            "name": "product_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^(course|diploma|live_diploma|package|bundle)$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Product Type"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InstructorProduct"
+                  },
+                  "title": "Response Instructor Product Options Api V1 Admin Catalog Instructors  Key  Product Options Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/catalog/instructors/{key}/products/{product_id}": {
+      "delete": {
+        "tags": [
+          "Admin catalog"
+        ],
+        "summary": "Remove the expert from a product",
+        "operationId": "unassign_instructor_product_api_v1_admin_catalog_instructors__key__products__product_id__delete",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 64,
+              "description": "Legacy trainer id, `c{id}`, or the instructor uuid.",
+              "title": "Key"
+            },
+            "description": "Legacy trainer id, `c{id}`, or the instructor uuid."
+          },
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Product Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InstructorProduct"
+                  },
+                  "title": "Response Unassign Instructor Product Api V1 Admin Catalog Instructors  Key  Products  Product Id  Delete"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/catalog/instructors/duplicates": {
+      "get": {
+        "tags": [
+          "Admin catalog"
+        ],
+        "summary": "Possible duplicate experts",
+        "description": "Profiles that share a name (honorifics, diacritics and spacing ignored), with the suggested survivor.",
+        "operationId": "list_duplicate_instructors_api_v1_admin_catalog_instructors_duplicates_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DuplicateGroup"
+                  },
+                  "title": "Response List Duplicate Instructors Api V1 Admin Catalog Instructors Duplicates Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/catalog/instructors/{key}/merge": {
+      "post": {
+        "tags": [
+          "Admin catalog"
+        ],
+        "summary": "Merge a duplicate into this expert",
+        "description": "Moves the duplicate's products, lead-instructor links, consultant profile and page to this expert, fills this expert's empty profile fields from it, and marks it merged (hidden; its key resolves here). Audited.",
+        "operationId": "merge_instructor_into_api_v1_admin_catalog_instructors__key__merge_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 64,
+              "description": "Legacy trainer id, `c{id}`, or the instructor uuid.",
+              "title": "Key"
+            },
+            "description": "Legacy trainer id, `c{id}`, or the instructor uuid."
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MergeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminInstructorDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/catalog/instructors/{key}/consultant": {
+      "post": {
+        "tags": [
+          "Admin catalog"
+        ],
+        "summary": "Turn the expert's consultations on or off",
+        "description": "On: activates their consultant profile, creating it (linked to this expert) when there is none; services, availability and bookings are then managed under `/admin/consultations-b2c/experts/{consultant_id}`. Off: deactivates it (its services stop being bookable). Audited.",
+        "operationId": "set_instructor_consultant_api_v1_admin_catalog_instructors__key__consultant_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 64,
+              "description": "Legacy trainer id, `c{id}`, or the instructor uuid.",
+              "title": "Key"
+            },
+            "description": "Legacy trainer id, `c{id}`, or the instructor uuid."
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsultantRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminInstructorDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/catalog/instructors/{key}/page-document": {
+      "get": {
+        "tags": [
+          "Admin catalog"
+        ],
+        "summary": "The expert's Studio page",
+        "operationId": "get_instructor_page_document_api_v1_admin_catalog_instructors__key__page_document_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 64,
+              "description": "Legacy trainer id, `c{id}`, or the instructor uuid.",
+              "title": "Key"
+            },
+            "description": "Legacy trainer id, `c{id}`, or the instructor uuid."
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDocumentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Admin catalog"
+        ],
+        "summary": "Save the Studio page draft",
+        "operationId": "put_instructor_page_document_api_v1_admin_catalog_instructors__key__page_document_put",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 64,
+              "description": "Legacy trainer id, `c{id}`, or the instructor uuid.",
+              "title": "Key"
+            },
+            "description": "Legacy trainer id, `c{id}`, or the instructor uuid."
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PageDocumentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDocumentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Admin catalog"
+        ],
+        "summary": "Unpublish the Studio page",
+        "description": "The storefront goes back to the README; the draft is kept.",
+        "operationId": "unpublish_instructor_page_document_api_v1_admin_catalog_instructors__key__page_document_delete",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 64,
+              "description": "Legacy trainer id, `c{id}`, or the instructor uuid.",
+              "title": "Key"
+            },
+            "description": "Legacy trainer id, `c{id}`, or the instructor uuid."
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDocumentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/catalog/instructors/{key}/page-document/publish": {
+      "post": {
+        "tags": [
+          "Admin catalog"
+        ],
+        "summary": "Publish the Studio page",
+        "operationId": "publish_instructor_page_document_api_v1_admin_catalog_instructors__key__page_document_publish_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 64,
+              "description": "Legacy trainer id, `c{id}`, or the instructor uuid.",
+              "title": "Key"
+            },
+            "description": "Legacy trainer id, `c{id}`, or the instructor uuid."
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDocumentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/catalog/instructors/{key}/assets": {
+      "post": {
+        "tags": [
+          "Admin catalog"
+        ],
+        "summary": "Upload an image for the expert's Studio page",
+        "description": "The raw image is the request body (JPEG, PNG or WebP, up to 5 MB); returns its public URL.",
+        "operationId": "upload_instructor_page_asset_api_v1_admin_catalog_instructors__key__assets_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 64,
+              "description": "Legacy trainer id, `c{id}`, or the instructor uuid.",
+              "title": "Key"
+            },
+            "description": "Legacy trainer id, `c{id}`, or the instructor uuid."
+          },
+          {
+            "name": "filename",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 300,
+              "default": "image",
+              "title": "Filename"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageAssetResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/customers/{customer_ref}/grants": {
+      "get": {
+        "tags": [
+          "Admin customers"
+        ],
+        "summary": "Access given by admins",
+        "operationId": "list_grants_api_v1_admin_customers__customer_ref__grants_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "customer_ref",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "`b2c:<uuid>` (legacy accounts must be imported first).",
+              "title": "Customer Ref"
+            },
+            "description": "`b2c:<uuid>` (legacy accounts must be imported first)."
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AccessGrant"
+                  },
+                  "title": "Response List Grants Api V1 Admin Customers  Customer Ref  Grants Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin customers"
+        ],
+        "summary": "Give a customer access to a product",
+        "description": "A zero-total `admin_grant` order: access starts now (bundles include their members) and the LMS enrollment is queued. Refused when the customer already has active access. Audited.",
+        "operationId": "create_grant_api_v1_admin_customers__customer_ref__grants_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "customer_ref",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "`b2c:<uuid>` (legacy accounts must be imported first).",
+              "title": "Customer Ref"
+            },
+            "description": "`b2c:<uuid>` (legacy accounts must be imported first)."
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GrantRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AccessGrant"
+                  },
+                  "title": "Response Create Grant Api V1 Admin Customers  Customer Ref  Grants Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/customers/{customer_ref}/grant-options": {
+      "get": {
+        "tags": [
+          "Admin customers"
+        ],
+        "summary": "Products that can be granted",
+        "operationId": "grant_options_api_v1_admin_customers__customer_ref__grant_options_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "customer_ref",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "`b2c:<uuid>` (legacy accounts must be imported first).",
+              "title": "Customer Ref"
+            },
+            "description": "`b2c:<uuid>` (legacy accounts must be imported first)."
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Query"
+            }
+          },
+          {
+            "name": "product_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^(course|diploma|package|bundle)$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Product Type"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GrantOption"
+                  },
+                  "title": "Response Grant Options Api V1 Admin Customers  Customer Ref  Grant Options Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/customers/{customer_ref}/grants/{order_id}": {
+      "delete": {
+        "tags": [
+          "Admin customers"
+        ],
+        "summary": "Revoke access given by an admin",
+        "description": "Revokes the grant's access (bundle members included) and queues the LMS revoke. Only admin grants; paid orders are refunded instead. Audited.",
+        "operationId": "revoke_grant_api_v1_admin_customers__customer_ref__grants__order_id__delete",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "customer_ref",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "`b2c:<uuid>` (legacy accounts must be imported first).",
+              "title": "Customer Ref"
+            },
+            "description": "`b2c:<uuid>` (legacy accounts must be imported first)."
+          },
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AccessGrant"
+                  },
+                  "title": "Response Revoke Grant Api V1 Admin Customers  Customer Ref  Grants  Order Id  Delete"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/customers/{customer_ref}/avatar": {
+      "get": {
+        "tags": [
+          "Admin customers"
+        ],
+        "summary": "The customer's profile photo",
+        "operationId": "get_avatar_api_v1_admin_customers__customer_ref__avatar_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "customer_ref",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "`b2c:<uuid>` (legacy accounts must be imported first).",
+              "title": "Customer Ref"
+            },
+            "description": "`b2c:<uuid>` (legacy accounts must be imported first)."
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvatarResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin customers"
+        ],
+        "summary": "Upload the customer's profile photo",
+        "description": "The raw image is the request body (JPEG, PNG or WebP, up to 5 MB). Audited.",
+        "operationId": "upload_avatar_api_v1_admin_customers__customer_ref__avatar_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "customer_ref",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "`b2c:<uuid>` (legacy accounts must be imported first).",
+              "title": "Customer Ref"
+            },
+            "description": "`b2c:<uuid>` (legacy accounts must be imported first)."
+          },
+          {
+            "name": "filename",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 300,
+              "default": "avatar",
+              "title": "Filename"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvatarResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/customers/{customer_ref}/notes": {
+      "get": {
+        "tags": [
+          "Admin customers"
+        ],
+        "summary": "Internal notes on the customer",
+        "operationId": "list_notes_api_v1_admin_customers__customer_ref__notes_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "customer_ref",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "`b2c:<uuid>` (legacy accounts must be imported first).",
+              "title": "Customer Ref"
+            },
+            "description": "`b2c:<uuid>` (legacy accounts must be imported first)."
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CustomerNote"
+                  },
+                  "title": "Response List Notes Api V1 Admin Customers  Customer Ref  Notes Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin customers"
+        ],
+        "summary": "Add an internal note",
+        "operationId": "add_note_api_v1_admin_customers__customer_ref__notes_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "customer_ref",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "`b2c:<uuid>` (legacy accounts must be imported first).",
+              "title": "Customer Ref"
+            },
+            "description": "`b2c:<uuid>` (legacy accounts must be imported first)."
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NoteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CustomerNote"
+                  },
+                  "title": "Response Add Note Api V1 Admin Customers  Customer Ref  Notes Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/customers/{customer_ref}/notes/{note_id}": {
+      "delete": {
+        "tags": [
+          "Admin customers"
+        ],
+        "summary": "Delete an internal note",
+        "operationId": "delete_note_api_v1_admin_customers__customer_ref__notes__note_id__delete",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "customer_ref",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "`b2c:<uuid>` (legacy accounts must be imported first).",
+              "title": "Customer Ref"
+            },
+            "description": "`b2c:<uuid>` (legacy accounts must be imported first)."
+          },
+          {
+            "name": "note_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Note Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CustomerNote"
+                  },
+                  "title": "Response Delete Note Api V1 Admin Customers  Customer Ref  Notes  Note Id  Delete"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/customers/{customer_ref}/history": {
+      "get": {
+        "tags": [
+          "Admin customers"
+        ],
+        "summary": "Admin actions on the customer",
+        "operationId": "customer_history_api_v1_admin_customers__customer_ref__history_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "customer_ref",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "`b2c:<uuid>` (legacy accounts must be imported first).",
+              "title": "Customer Ref"
+            },
+            "description": "`b2c:<uuid>` (legacy accounts must be imported first)."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HistoryEntry"
+                  },
+                  "title": "Response Customer History Api V1 Admin Customers  Customer Ref  History Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/catalog/instructors/{key}/current-page": {
+      "get": {
+        "tags": [
+          "Admin catalog"
+        ],
+        "summary": "What the expert's page shows now",
+        "description": "The expert as the storefront shows them (hidden experts included): README, fields, skills, highlights and their published items by type. The Studio opens a new page pre-filled from it, section by section.",
+        "operationId": "get_instructor_current_page_api_v1_admin_catalog_instructors__key__current_page_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 64,
+              "description": "Legacy trainer id, `c{id}`, or the instructor uuid.",
+              "title": "Key"
+            },
+            "description": "Legacy trainer id, `c{id}`, or the instructor uuid."
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExpertDetailResponse"
                 }
               }
             }
@@ -37814,6 +41387,7 @@
           "completed",
           "rejected",
           "refund_pending",
+          "refunded",
           "no_show_customer",
           "no_show_expert",
           "cancelled"
@@ -45638,6 +49212,42 @@
             "type": "array",
             "title": "Consultations"
           },
+          "bundles": {
+            "items": {
+              "$ref": "#/components/schemas/ProductCardResponse"
+            },
+            "type": "array",
+            "title": "Bundles"
+          },
+          "live_diplomas": {
+            "items": {
+              "$ref": "#/components/schemas/ProductCardResponse"
+            },
+            "type": "array",
+            "title": "Live Diplomas"
+          },
+          "category_items": {
+            "items": {
+              "$ref": "#/components/schemas/ExpertCategoryResponse"
+            },
+            "type": "array",
+            "title": "Category Items",
+            "description": "`categories` with ids and slugs."
+          },
+          "skills": {
+            "items": {
+              "$ref": "#/components/schemas/ExpertTopicResponse"
+            },
+            "type": "array",
+            "title": "Skills"
+          },
+          "tags": {
+            "items": {
+              "$ref": "#/components/schemas/ExpertTopicResponse"
+            },
+            "type": "array",
+            "title": "Tags"
+          },
           "highlights": {
             "$ref": "#/components/schemas/ExpertHighlightsResponse"
           },
@@ -45648,6 +49258,14 @@
             "type": "array",
             "title": "Related",
             "description": "Other experts' items in the same categories."
+          },
+          "related_experts": {
+            "items": {
+              "$ref": "#/components/schemas/app__modules__catalog__presentation__browse_router__ExpertSummaryResponse"
+            },
+            "type": "array",
+            "title": "Related Experts",
+            "description": "Other experts ranked by shared categories, skills and tags."
           }
         },
         "type": "object",
@@ -45732,6 +49350,59 @@
             "type": "integer",
             "title": "Consultation Count",
             "default": 0
+          },
+          "bundle_count": {
+            "type": "integer",
+            "title": "Bundle Count",
+            "default": 0
+          },
+          "live_diploma_count": {
+            "type": "integer",
+            "title": "Live Diploma Count",
+            "default": 0
+          },
+          "headline": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Headline",
+            "description": "Title line under the name, e.g. «خبير التسويق الرقمي»."
+          },
+          "is_consultant": {
+            "type": "boolean",
+            "title": "Is Consultant",
+            "description": "Gives consultations: has an active consultant profile.",
+            "default": false
+          },
+          "is_featured": {
+            "type": "boolean",
+            "title": "Is Featured",
+            "description": "In the landing page's experts line-up.",
+            "default": false
+          },
+          "featured_order": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Featured Order"
+          },
+          "categories": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Categories",
+            "description": "The fields they teach in, most items first."
           },
           "cover_image": {
             "anyOf": [
@@ -45854,6 +49525,52 @@
               }
             ],
             "title": "Youtube Url"
+          },
+          "readme": {
+            "type": "string",
+            "title": "Readme",
+            "description": "Page content (markdown). Replaces `info` / `more_info` when set.",
+            "default": ""
+          },
+          "readme_source": {
+            "type": "string",
+            "title": "Readme Source",
+            "description": "`readme` when saved in the admin; `bio` when converted from the legacy HTML bio.",
+            "default": "empty"
+          },
+          "document": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document",
+            "description": "The page built in the expert Studio (BlockNote blocks, published copy; the draft in preview). Takes precedence over `readme` when set."
+          },
+          "document_published_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Published At"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "`inactive` only in preview: hidden experts 404 otherwise.",
+            "default": "active"
           }
         },
         "type": "object",
@@ -47183,6 +50900,38 @@
         ],
         "title": "LearningResourceDetailResponse"
       },
+      "LearningStarted": {
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Customer Id"
+          },
+          "product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Product Id"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer_id",
+          "product_id"
+        ],
+        "title": "LearningStarted"
+      },
       "LiveDiplomaView": {
         "properties": {
           "slug": {
@@ -47690,6 +51439,66 @@
           "result"
         ],
         "title": "LiveKitWebhookAckResponse"
+      },
+      "LmsLaunchRequest": {
+        "properties": {
+          "entitlement_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Entitlement Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "entitlement_id"
+        ],
+        "title": "LmsLaunchRequest"
+      },
+      "LmsLaunchResponse": {
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "cookie",
+              "login"
+            ],
+            "title": "Mode"
+          },
+          "redirect_url": {
+            "type": "string",
+            "title": "Redirect Url"
+          },
+          "refresh_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Refresh Token"
+          },
+          "refresh_expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Refresh Expires At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mode",
+          "redirect_url"
+        ],
+        "title": "LmsLaunchResponse",
+        "description": "`cookie`: set the legacy `refreshToken` cookie on the shared parent domain, then redirect.\n`login`: redirect to the LMS sign-in page."
       },
       "LoginChallengeResponse": {
         "properties": {
@@ -53609,6 +57418,60 @@
         "type": "object",
         "title": "RefreshRequest"
       },
+      "RefundDecision": {
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 5,
+            "title": "Reason"
+          },
+          "amount_minor": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount Minor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reason"
+        ],
+        "title": "RefundDecision"
+      },
+      "RefundRequest": {
+        "properties": {
+          "order_item_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Order Item Id"
+          },
+          "amount_minor": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Amount Minor"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 10,
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "order_item_id",
+          "amount_minor",
+          "reason"
+        ],
+        "title": "RefundRequest"
+      },
       "RegisterRequest": {
         "properties": {
           "email": {
@@ -54349,6 +58212,67 @@
         ],
         "title": "ResolutionResponse"
       },
+      "ResourceDurationView": {
+        "properties": {
+          "resource_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Resource Id"
+          },
+          "resource_type": {
+            "type": "string",
+            "title": "Resource Type"
+          },
+          "lms_reference_id": {
+            "type": "string",
+            "title": "Lms Reference Id"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "duration_minutes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Minutes"
+          },
+          "cached_duration_minutes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cached Duration Minutes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "resource_id",
+          "resource_type",
+          "lms_reference_id",
+          "title",
+          "duration_minutes",
+          "cached_duration_minutes"
+        ],
+        "title": "ResourceDurationView",
+        "description": "A catalog resource with its B2C-owned duration (`duration_minutes`)."
+      },
       "ResourceInstructorResponse": {
         "properties": {
           "id": {
@@ -54488,6 +58412,17 @@
             ],
             "title": "Cached Duration Minutes"
           },
+          "duration_minutes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Minutes"
+          },
           "cached_modules_count": {
             "anyOf": [
               {
@@ -54541,6 +58476,7 @@
           "cached_title",
           "cached_instructor_name",
           "cached_duration_minutes",
+          "duration_minutes",
           "cached_modules_count",
           "publishing_status",
           "last_synced_at"
@@ -60552,6 +64488,26 @@
         ],
         "title": "UpdateReadmeRequest"
       },
+      "UpdateResourceDurationRequest": {
+        "properties": {
+          "duration_minutes": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 1000000.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Minutes",
+            "description": "Resource duration in minutes; null clears it."
+          }
+        },
+        "type": "object",
+        "title": "UpdateResourceDurationRequest"
+      },
       "UpdateSlotRequest": {
         "properties": {
           "starts_at": {
@@ -61353,6 +65309,59 @@
             "type": "integer",
             "title": "Consultation Count",
             "default": 0
+          },
+          "bundle_count": {
+            "type": "integer",
+            "title": "Bundle Count",
+            "default": 0
+          },
+          "live_diploma_count": {
+            "type": "integer",
+            "title": "Live Diploma Count",
+            "default": 0
+          },
+          "headline": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Headline",
+            "description": "Title line under the name, e.g. «خبير التسويق الرقمي»."
+          },
+          "is_consultant": {
+            "type": "boolean",
+            "title": "Is Consultant",
+            "description": "Gives consultations: has an active consultant profile.",
+            "default": false
+          },
+          "is_featured": {
+            "type": "boolean",
+            "title": "Is Featured",
+            "description": "In the landing page's experts line-up.",
+            "default": false
+          },
+          "featured_order": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Featured Order"
+          },
+          "categories": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Categories",
+            "description": "The fields they teach in, most items first."
           }
         },
         "type": "object",
@@ -61593,6 +65602,1430 @@
           "display_order"
         ],
         "title": "CategoryResponse"
+      },
+      "AdminInstructorDetail": {
+        "properties": {
+          "instructor_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Instructor Id"
+          },
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "legacy_trainer_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Legacy Trainer Id",
+            "description": "Set when the expert came from a legacy trainer."
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "headline": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Headline"
+          },
+          "specialized": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Specialized"
+          },
+          "avatar_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avatar Url"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "is_featured": {
+            "type": "boolean",
+            "title": "Is Featured",
+            "default": false
+          },
+          "featured_order": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Featured Order"
+          },
+          "consultant_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Consultant Id",
+            "description": "Their consultant profile, when they give consultations."
+          },
+          "is_consultant": {
+            "type": "boolean",
+            "title": "Is Consultant",
+            "default": false
+          },
+          "product_count": {
+            "type": "integer",
+            "title": "Product Count",
+            "default": 0
+          },
+          "consultation_count": {
+            "type": "integer",
+            "title": "Consultation Count",
+            "default": 0
+          },
+          "has_readme": {
+            "type": "boolean",
+            "title": "Has Readme",
+            "default": false
+          },
+          "has_page": {
+            "type": "boolean",
+            "title": "Has Page",
+            "description": "A Studio page is published (it replaces the README).",
+            "default": false
+          },
+          "merged_into_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Merged Into Key",
+            "description": "Set on a duplicate merged into another expert."
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "cover_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cover Url"
+          },
+          "bio": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bio",
+            "description": "Legacy HTML bio; the page shows the README instead once saved."
+          },
+          "more_info": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "More Info"
+          },
+          "scoped_experience": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scoped Experience"
+          },
+          "languages": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Languages"
+          },
+          "city": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City"
+          },
+          "educational_level": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Educational Level"
+          },
+          "years_of_experience": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Years Of Experience"
+          },
+          "facebook_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Facebook Url"
+          },
+          "instagram_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instagram Url"
+          },
+          "youtube_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Youtube Url"
+          },
+          "consultant_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Consultant Email"
+          },
+          "session_minutes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Minutes"
+          },
+          "merged_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Merged At"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "instructor_id",
+          "key",
+          "name",
+          "status"
+        ],
+        "title": "AdminInstructorDetail"
+      },
+      "AdminInstructorPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AdminInstructorSummary"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "AdminInstructorPage"
+      },
+      "AdminInstructorSummary": {
+        "properties": {
+          "instructor_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Instructor Id"
+          },
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "legacy_trainer_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Legacy Trainer Id",
+            "description": "Set when the expert came from a legacy trainer."
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "headline": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Headline"
+          },
+          "specialized": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Specialized"
+          },
+          "avatar_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avatar Url"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "is_featured": {
+            "type": "boolean",
+            "title": "Is Featured",
+            "default": false
+          },
+          "featured_order": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Featured Order"
+          },
+          "consultant_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Consultant Id",
+            "description": "Their consultant profile, when they give consultations."
+          },
+          "is_consultant": {
+            "type": "boolean",
+            "title": "Is Consultant",
+            "default": false
+          },
+          "product_count": {
+            "type": "integer",
+            "title": "Product Count",
+            "default": 0
+          },
+          "consultation_count": {
+            "type": "integer",
+            "title": "Consultation Count",
+            "default": 0
+          },
+          "has_readme": {
+            "type": "boolean",
+            "title": "Has Readme",
+            "default": false
+          },
+          "has_page": {
+            "type": "boolean",
+            "title": "Has Page",
+            "description": "A Studio page is published (it replaces the README).",
+            "default": false
+          },
+          "merged_into_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Merged Into Key",
+            "description": "Set on a duplicate merged into another expert."
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "instructor_id",
+          "key",
+          "name",
+          "status"
+        ],
+        "title": "AdminInstructorSummary"
+      },
+      "AssignProductRequest": {
+        "properties": {
+          "product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Product Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id"
+        ],
+        "title": "AssignProductRequest"
+      },
+      "ExpertCategoryResponse": {
+        "properties": {
+          "category_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Category Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slug"
+          },
+          "legacy_category_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Legacy Category Id",
+            "description": "Id used in storefront category URLs."
+          }
+        },
+        "type": "object",
+        "required": [
+          "category_id",
+          "name"
+        ],
+        "title": "ExpertCategoryResponse"
+      },
+      "ExpertTopicResponse": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slug"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count",
+            "description": "How many of the expert's items carry it.",
+            "default": 1
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "ExpertTopicResponse",
+        "description": "A skill or tag across the expert's items; `slug` is null for tags."
+      },
+      "InstructorImageResponse": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "instructor": {
+            "$ref": "#/components/schemas/AdminInstructorDetail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "url",
+          "instructor"
+        ],
+        "title": "InstructorImageResponse"
+      },
+      "InstructorProduct": {
+        "properties": {
+          "product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Product Id"
+          },
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "product_type": {
+            "type": "string",
+            "title": "Product Type"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "image": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image"
+          },
+          "sort_order": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sort Order",
+            "description": "Their position among the product's instructors."
+          },
+          "is_primary": {
+            "type": "boolean",
+            "title": "Is Primary",
+            "description": "The product's lead instructor (`products.instructor_id`).",
+            "default": false
+          },
+          "via_consultant": {
+            "type": "boolean",
+            "title": "Via Consultant",
+            "description": "A consultation they give (managed under consultations).",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "slug",
+          "product_type",
+          "status"
+        ],
+        "title": "InstructorProduct"
+      },
+      "InstructorReadmeResponse": {
+        "properties": {
+          "markdown": {
+            "type": "string",
+            "title": "Markdown"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "`readme` when saved; `bio` when converted from the legacy HTML bio; `empty`."
+          },
+          "revalidated": {
+            "type": "boolean",
+            "title": "Revalidated",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "markdown",
+          "source"
+        ],
+        "title": "InstructorReadmeResponse"
+      },
+      "UpdateInstructorReadmeRequest": {
+        "properties": {
+          "markdown": {
+            "type": "string",
+            "maxLength": 250000,
+            "title": "Markdown",
+            "description": "README markdown. Raw HTML is stripped."
+          }
+        },
+        "type": "object",
+        "required": [
+          "markdown"
+        ],
+        "title": "UpdateInstructorReadmeRequest"
+      },
+      "UpdateInstructorRequest": {
+        "properties": {
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Name"
+          },
+          "headline": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Headline"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(active|inactive)$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "is_featured": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Featured"
+          },
+          "featured_order": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10000.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Featured Order"
+          },
+          "avatar_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avatar Url"
+          },
+          "cover_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cover Url"
+          },
+          "specialized": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Specialized"
+          },
+          "scoped_experience": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scoped Experience"
+          },
+          "languages": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Languages"
+          },
+          "city": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City"
+          },
+          "educational_level": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Educational Level"
+          },
+          "years_of_experience": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Years Of Experience"
+          },
+          "facebook_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Facebook Url"
+          },
+          "instagram_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instagram Url"
+          },
+          "youtube_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Youtube Url"
+          }
+        },
+        "type": "object",
+        "title": "UpdateInstructorRequest",
+        "description": "Only the fields sent are changed; send `null` to clear one."
+      },
+      "DuplicateGroup": {
+        "properties": {
+          "survivor": {
+            "$ref": "#/components/schemas/DuplicateExpert",
+            "description": "The profile the others would be merged into."
+          },
+          "duplicates": {
+            "items": {
+              "$ref": "#/components/schemas/DuplicateExpert"
+            },
+            "type": "array",
+            "title": "Duplicates"
+          }
+        },
+        "type": "object",
+        "required": [
+          "survivor",
+          "duplicates"
+        ],
+        "title": "DuplicateGroup"
+      },
+      "GrantOption": {
+        "properties": {
+          "product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Product Id"
+          },
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "product_type": {
+            "type": "string",
+            "title": "Product Type"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "owned": {
+            "type": "boolean",
+            "title": "Owned",
+            "description": "The customer already has active access.",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "slug",
+          "product_type"
+        ],
+        "title": "GrantOption"
+      },
+      "CustomerNote": {
+        "properties": {
+          "note_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Note Id"
+          },
+          "body": {
+            "type": "string",
+            "title": "Body"
+          },
+          "author": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Author"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "note_id",
+          "body",
+          "created_at"
+        ],
+        "title": "CustomerNote"
+      },
+      "PageDocumentResponse": {
+        "properties": {
+          "draft": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Draft",
+            "description": "The autosaved draft blocks."
+          },
+          "published": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published",
+            "description": "The blocks the storefront shows."
+          },
+          "draft_updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Draft Updated At"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published At"
+          },
+          "changed": {
+            "type": "boolean",
+            "title": "Changed",
+            "description": "The draft differs from the published page.",
+            "default": false
+          },
+          "revalidated": {
+            "type": "boolean",
+            "title": "Revalidated",
+            "default": false
+          }
+        },
+        "type": "object",
+        "title": "PageDocumentResponse"
+      },
+      "HistoryEntry": {
+        "properties": {
+          "action": {
+            "type": "string",
+            "title": "Action"
+          },
+          "actor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actor"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "before": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Before"
+          },
+          "after": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "After"
+          }
+        },
+        "type": "object",
+        "required": [
+          "action",
+          "created_at"
+        ],
+        "title": "HistoryEntry"
+      },
+      "ConsultantRequest": {
+        "properties": {
+          "active": {
+            "type": "boolean",
+            "title": "Active",
+            "description": "Turn consultations on (creating the consultant profile) or off.",
+            "default": true
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 320
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email",
+            "description": "Contact email for bookings (new profile)."
+          },
+          "session_minutes": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 240.0,
+                "minimum": 5.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Minutes",
+            "description": "Session length (new profile; default 60)."
+          }
+        },
+        "type": "object",
+        "title": "ConsultantRequest"
+      },
+      "AvatarResponse": {
+        "properties": {
+          "avatar_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avatar Url",
+            "description": "Short-lived URL of the profile photo; null when none."
+          }
+        },
+        "type": "object",
+        "title": "AvatarResponse"
+      },
+      "NoteRequest": {
+        "properties": {
+          "body": {
+            "type": "string",
+            "maxLength": 3000,
+            "minLength": 1,
+            "title": "Body"
+          }
+        },
+        "type": "object",
+        "required": [
+          "body"
+        ],
+        "title": "NoteRequest"
+      },
+      "PageDocumentRequest": {
+        "properties": {
+          "blocks": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Blocks",
+            "description": "BlockNote blocks; whitelisted types only (as the course Studio)."
+          }
+        },
+        "type": "object",
+        "required": [
+          "blocks"
+        ],
+        "title": "PageDocumentRequest"
+      },
+      "AccessGrant": {
+        "properties": {
+          "order_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Order Id"
+          },
+          "product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Product Id"
+          },
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "product_type": {
+            "type": "string",
+            "title": "Product Type"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "granted_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Granted By"
+          },
+          "granted_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Granted At"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "The access: `active`, `revoked` or `expired`."
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "order_id",
+          "product_id",
+          "slug",
+          "product_type",
+          "status"
+        ],
+        "title": "AccessGrant"
+      },
+      "GrantRequest": {
+        "properties": {
+          "product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Product Id"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason",
+            "description": "Why the access is given (kept on the order)."
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "reason"
+        ],
+        "title": "GrantRequest"
+      },
+      "PageAssetResponse": {
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "title": "PageAssetResponse"
+      },
+      "MergeRequest": {
+        "properties": {
+          "source_key": {
+            "type": "string",
+            "maxLength": 64,
+            "title": "Source Key",
+            "description": "The duplicate to merge into this expert."
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_key"
+        ],
+        "title": "MergeRequest"
+      },
+      "DuplicateExpert": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "product_count": {
+            "type": "integer",
+            "title": "Product Count"
+          },
+          "consultant_count": {
+            "type": "integer",
+            "title": "Consultant Count"
+          },
+          "has_avatar": {
+            "type": "boolean",
+            "title": "Has Avatar"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "name",
+          "status",
+          "product_count",
+          "consultant_count",
+          "has_avatar"
+        ],
+        "title": "DuplicateExpert"
       }
     },
     "securitySchemes": {

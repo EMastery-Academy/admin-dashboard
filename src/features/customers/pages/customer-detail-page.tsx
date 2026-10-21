@@ -22,6 +22,12 @@ import { SearchBox } from "@/components/ui/paged-list";
 import { SelectField } from "@/components/ui/select";
 import { SourceBadge } from "@/components/ui/source-badge";
 import { isLegacy } from "@/lib/refs";
+import {
+  CustomerAvatarCard,
+  CustomerGrantsCard,
+  CustomerHistoryCard,
+  CustomerNotesCard,
+} from "@/features/customers/components/customer-management";
 
 const STATUS_OPTIONS: { value: string; ar: string; en: string }[] = [
   { value: "active", ar: "تفعيل", en: "Activate" },
@@ -154,8 +160,21 @@ export default function CustomerDetailPage() {
               </Card>
             </div>
 
+            {!readOnly ? (
+              <div className="ma-cols ma-cols--2 ma-section-gap">
+                <CustomerAvatarCard customerRef={profile.ref} name={name} />
+                <CustomerNotesCard customerRef={profile.ref} />
+              </div>
+            ) : null}
+
+            {!readOnly ? <CustomerGrantsCard customerRef={profile.ref} /> : null}
             <RecentOrders orders={customer360.data?.recent_orders} loading={customer360.isLoading} />
             <Entitlements entitlements={customer360.data?.entitlements} loading={customer360.isLoading} />
+            {!readOnly ? (
+              <div className="ma-section-gap">
+                <CustomerHistoryCard customerRef={profile.ref} />
+              </div>
+            ) : null}
           </>
         ) : detail.isLoading ? (
           <Loading />
@@ -327,6 +346,16 @@ function EditCustomerForm({
           <Field id="customer-phone" dir="ltr" label={t("الهاتف", "Phone")} value={phone} onChange={setPhone} />
           <Field id="customer-country" dir="ltr" label={t("رمز الدولة", "Country code")} value={countryCode} onChange={setCountryCode} />
           <Field id="customer-currency" dir="ltr" label={t("العملة المفضلة", "Preferred currency")} value={currency} onChange={setCurrency} />
+          <Field
+            id="customer-locale"
+            label={t("اللغة المفضلة", "Preferred locale")}
+            options={[
+              ["ar", "العربية"],
+              ["en", "English"],
+            ]}
+            value={locale}
+            onChange={setLocale}
+          />
         </div>
         <FormActions>
           <Button type="submit" kind="primary" label={pending ? t("جارٍ الحفظ…", "Saving…") : t("حفظ التغييرات", "Save changes")} disabled={pending} />

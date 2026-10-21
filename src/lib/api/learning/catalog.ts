@@ -33,6 +33,8 @@ type UpdatePackageSectionsOp = "update_package_sections_api_v1_admin_catalog_pro
 type AddPackageCourseOp = "add_package_course_api_v1_admin_catalog_products__product_ref__package_courses_post";
 type UpdatePackageCourseOp = "update_package_course_api_v1_admin_catalog_products__product_ref__package_courses__member_product_id__patch";
 type UpdateProductOp = "update_product_api_v1_admin_catalog_products__product_ref__patch";
+type ListProductResourcesOp = "list_product_resources_api_v1_admin_catalog_products__product_ref__resources_get";
+type UpdateResourceDurationOp = "update_resource_duration_api_v1_admin_catalog_resources__resource_id__patch";
 type CategorySuggestionsOp = "category_suggestions_api_v1_admin_catalog_categories__category_id__suggestions_get";
 type CategoriesOp = "list_categories_api_v1_admin_catalog_categories_get";
 type PriceListsOp = "list_price_lists_api_v1_admin_catalog_price_lists_get";
@@ -121,12 +123,31 @@ export type UpdateProductRequest = RequestBody<UpdateProductOp>;
 /** Skills and tags curated for one category. */
 export type CategorySuggestions = SuccessResponse<CategorySuggestionsOp>;
 
+/** A product resource with its B2C-owned duration (`duration_minutes`). */
+export type ProductResourceDuration = SuccessResponse<ListProductResourcesOp>[number];
+export type UpdateResourceDurationRequest = RequestBody<UpdateResourceDurationOp>;
+
 /** `PATCH /admin/catalog/products/{ref}` — partial update of details, general info, categories, skills. */
 export function updateProduct(
   product_ref: PathParams<GetProductOp>["product_ref"],
   body: UpdateProductRequest,
 ): Promise<ProductView> {
   return apiPatch(productPaths.detail, { path: { product_ref }, body });
+}
+
+/** `GET /admin/catalog/products/{ref}/resources` — the product's resources with their durations. */
+export function listProductResources(
+  product_ref: PathParams<GetProductOp>["product_ref"],
+): Promise<ProductResourceDuration[]> {
+  return apiGet(productPaths.resources, { path: { product_ref } });
+}
+
+/** `PATCH /admin/catalog/resources/{id}` — set a resource's B2C-owned duration (minutes). */
+export function updateResourceDuration(
+  resource_id: string,
+  body: UpdateResourceDurationRequest,
+): Promise<ProductResourceDuration> {
+  return apiPatch(resourcePaths.detail, { path: { resource_id }, body });
 }
 
 /** `GET /admin/catalog/categories/{id}/suggestions` — the skills/tags that go with a category. */
@@ -219,6 +240,7 @@ export const productPaths = {
   instructors: "admin/catalog/products/{product_ref}/instructors",
   learners: "admin/catalog/products/{product_ref}/learners",
   summary: "admin/catalog/products/{product_ref}/summary",
+  resources: "admin/catalog/products/{product_ref}/resources",
   courses: "admin/catalog/products/{product_ref}/courses",
   package: "admin/catalog/products/{product_ref}/package",
   packageSections: "admin/catalog/products/{product_ref}/package/sections",
@@ -229,6 +251,11 @@ export const productPaths = {
   extensionPackages: "admin/catalog/extension-packages",
   certificateTemplates: "admin/catalog/certificates",
   allRatings: "admin/catalog/ratings",
+} as const;
+
+/** B2C resources of a product (`/admin/catalog/resources`). */
+export const resourcePaths = {
+  detail: "admin/catalog/resources/{resource_id}",
 } as const;
 
 /** Public catalog read endpoints (`/catalog/*`) used by the product form for its options. */

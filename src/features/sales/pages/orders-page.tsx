@@ -168,9 +168,6 @@ export default function OrdersPage() {
         }}
       />
 
-      <p className="ma-note">
-        {t("استرداد الطلب متاح من صفحة الطلب بعد اكتمال تكامل بوابة الدفع.", "Issuing a refund is available from the order page once the gateway integration is complete.")}
-      </p>
     </>
   );
 }

@@ -1,5 +1,5 @@
 import { createReactBlockSpec } from "@blocknote/react";
-import { ImageIcon, Images, Info, MessageCircleQuestion, Plus, Trash2, UserRound } from "lucide-react";
+import { ImageIcon, Images, Info, LayoutGrid, MessageCircleQuestion, Plus, Trash2, UserRound } from "lucide-react";
 
 import { useT } from "@/lib/i18n";
 import { isSafeUrl, parseGallery } from "@/features/learning/studio/model/document";
@@ -170,6 +170,68 @@ export const assetGalleryBlock = createReactBlockSpec(
               <span>{t("أضف صورة", "Add image")}</span>
             </button>
           </div>
+        </div>
+      );
+    },
+  },
+);
+
+function parseProgramSlugs(raw: string): string[] {
+  try {
+    const items = JSON.parse(raw || "[]") as unknown;
+    return Array.isArray(items) ? items.flatMap((item) => (typeof item?.slug === "string" ? [item.slug as string] : [])) : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Featured programs: a row of cards for products of the page (the expert's own items), picked by slug. */
+export const programCardsBlock = createReactBlockSpec(
+  {
+    type: "programCards",
+    propSchema: { items: { default: "[]" } },
+    content: "none",
+  },
+  {
+    render: function ProgramCards({ block, editor }) {
+      const t = useT();
+      const { programs = [] } = useStudioContext();
+      const slugs = parseProgramSlugs(block.props.items);
+      const save = (next: string[]) => editor.updateBlock(block, { props: { items: JSON.stringify(next.map((slug) => ({ slug }))) } });
+      const remaining = programs.filter((program) => !slugs.includes(program.slug));
+      return (
+        <div className="ma-sblock ma-sblock--gallery" contentEditable={false}>
+          <strong style={{ display: "flex", alignItems: "center", gap: "6px", marginBlockEnd: "var(--space-2)" }}>
+            <LayoutGrid size={16} aria-hidden /> {t("بطاقات البرامج", "Program cards")}
+          </strong>
+          <div className="ma-sblock__grid">
+            {slugs.map((slug) => {
+              const program = programs.find((item) => item.slug === slug);
+              return (
+                <figure key={slug} className="ma-sblock__tile" title={program?.title ?? slug}>
+                  {program?.image && isSafeUrl(program.image) ? <img src={program.image} alt="" /> : null}
+                  <figcaption style={{ position: "absolute", insetInline: 0, bottom: 0, padding: "4px 6px", fontSize: "11px", background: "var(--surface)" }}>
+                    {program?.title ?? t(`غير متاح: ${slug}`, `Unavailable: ${slug}`)}
+                  </figcaption>
+                  <button type="button" className="ma-sblock__remove" aria-label={t("إزالة", "Remove")}
+                    onClick={() => save(slugs.filter((item) => item !== slug))}>
+                    <Trash2 size={14} aria-hidden />
+                  </button>
+                </figure>
+              );
+            })}
+          </div>
+          {remaining.length ? (
+            <select className="ma-sblock__input" value="" aria-label={t("أضف برنامجاً", "Add a program")}
+              onChange={(event) => event.target.value && save([...slugs, event.target.value])}>
+              <option value="">{t("+ أضف برنامجاً من برامج المدرّب…", "+ Add one of the expert's programs…")}</option>
+              {remaining.map((program) => (
+                <option key={program.slug} value={program.slug}>{program.title}</option>
+              ))}
+            </select>
+          ) : slugs.length === 0 ? (
+            <span className="ma-studio__hint" style={{ margin: 0 }}>{t("لا توجد برامج منشورة لهذا المدرّب.", "This expert has no published programs.")}</span>
+          ) : null}
         </div>
       );
     },

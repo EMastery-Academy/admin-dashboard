@@ -1,6 +1,6 @@
 import { BlockNoteSchema, createHeadingBlockSpec, defaultBlockSpecs, insertOrUpdateBlockForSlashMenu } from "@blocknote/core";
 import type { DefaultReactSuggestionItem } from "@blocknote/react";
-import { FileCode, Images, Info, LayoutPanelTop, MessageCircleQuestion, UserRound } from "lucide-react";
+import { FileCode, Images, Info, LayoutGrid, LayoutPanelTop, MessageCircleQuestion, UserRound } from "lucide-react";
 
 import {
   assetGalleryBlock,
@@ -8,6 +8,7 @@ import {
   calloutBlock,
   faqBlock,
   instructorCardBlock,
+  programCardsBlock,
 } from "@/features/learning/studio/editor/custom-blocks";
 
 /*
@@ -27,6 +28,7 @@ export const studioSchema = BlockNoteSchema.create({
     faq: faqBlock(),
     instructorCard: instructorCardBlock(),
     assetGallery: assetGalleryBlock(),
+    programCards: programCardsBlock(),
   },
 });
 
@@ -36,13 +38,17 @@ export type StudioPartialBlock = typeof studioSchema.PartialBlock;
 
 type T = (ar: string, en?: string) => string;
 
-/** Slash-menu entries of the studio blocks, in a "Course page" group. */
+/**
+ * Slash-menu entries of the studio blocks. `page: "expert"` (the expert Studio) names the group for an expert
+ * page, offers program cards and leaves out the course-only README builder and instructor card.
+ */
 export function studioSlashItems(
   editor: StudioEditor,
   t: T,
   onOpenReadme?: () => void,
+  page: "course" | "expert" = "course",
 ): DefaultReactSuggestionItem[] {
-  const group = t("صفحة الدورة", "Course page");
+  const group = page === "expert" ? t("صفحة المدرّب", "Expert page") : t("صفحة الدورة", "Course page");
   const items: DefaultReactSuggestionItem[] = [
     {
       title: t("كود README / بناء سريع", "README Code / Quick Build"),
@@ -83,5 +89,15 @@ export function studioSlashItems(
     },
   ];
 
+  if (page === "expert") {
+    return [
+      ...items.filter((item) => item.aliases?.[0] !== "readme" && item.aliases?.[0] !== "instructor"),
+      {
+        title: t("بطاقات البرامج", "Program cards"), subtext: t("دورات المدرّب وباقاته وحزمه واستشاراته", "The expert's courses, packages, bundles, consultations"), group,
+        aliases: ["programs", "cards", "courses", "برامج", "دورات"], icon: <LayoutGrid size={18} />,
+        onItemClick: () => insertOrUpdateBlockForSlashMenu(editor, { type: "programCards" }),
+      },
+    ];
+  }
   return items;
 }

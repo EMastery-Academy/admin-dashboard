@@ -29,6 +29,8 @@ export function StudioEditor({
   onChange,
   onReady,
   onOpenReadmeModal,
+  uploadFile,
+  page = "course",
 }: {
   productRef: string;
   /** Changes when the draft is replaced (restore, reload); the editor is then rebuilt. */
@@ -38,6 +40,10 @@ export function StudioEditor({
   onChange: (blocks: unknown[]) => void;
   onReady?: (editor: Editor | null) => void;
   onOpenReadmeModal?: () => void;
+  /** Stores a pasted/dropped file and returns its URL; defaults to the product's asset library. */
+  uploadFile?: (file: File) => Promise<string>;
+  /** Which page the editor builds; sets the studio blocks offered in the `/` menu. */
+  page?: "course" | "expert";
 }) {
   const t = useT();
   const lang = useLang();
@@ -53,7 +59,7 @@ export function StudioEditor({
       schema: studioSchema,
       initialContent: initialBlocks.length ? toEditorBlocks(initialBlocks) : undefined,
       dictionary: lang === "ar" ? locales.ar : locales.en,
-      uploadFile: async (file: File) => (await uploadStudioAsset(productRef, file)).url,
+      uploadFile: uploadFile ?? (async (file: File) => (await uploadStudioAsset(productRef, file)).url),
     },
     [editorKey, lang],
   );
@@ -114,7 +120,7 @@ export function StudioEditor({
           floatingUIOptions={slashFloatingOptions}
           getItems={async (query) =>
             filterSuggestionItems(
-              [...getDefaultReactSlashMenuItems(editor), ...studioSlashItems(editor, t, onOpenReadmeModal)],
+              [...getDefaultReactSlashMenuItems(editor), ...studioSlashItems(editor, t, onOpenReadmeModal, page)],
               query,
             )
           }

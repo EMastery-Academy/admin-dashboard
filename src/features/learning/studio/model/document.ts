@@ -13,7 +13,7 @@ export const SCHEMA_VERSION = 1;
 export const STUDIO_BLOCK_TYPES = [
   "heading", "paragraph", "bulletListItem", "numberedListItem", "checkListItem", "quote",
   "image", "video", "file", "divider", "table",
-  "banner", "instructorCard", "callout", "faq", "assetGallery",
+  "banner", "instructorCard", "callout", "faq", "assetGallery", "programCards",
 ] as const;
 
 export type StudioBlock = StudioDocument["blocks"] extends (infer B)[] | undefined ? B : never;
@@ -99,7 +99,7 @@ export type GalleryItem = { url: string; alt: string };
  * Blocks whose data lives in props. BlockNote throws while building a document that gives them `content`,
  * which would blank the whole studio page, so anything loaded from the API is normalised first.
  */
-const CONTENTLESS = new Set(["banner", "instructorCard", "assetGallery", "divider", "image", "video", "file"]);
+const CONTENTLESS = new Set(["banner", "instructorCard", "assetGallery", "programCards", "divider", "image", "video", "file"]);
 
 /** Makes API-stored blocks loadable: drops `content` from content-less blocks and empty `children`. */
 export function toEditorBlocks(blocks: unknown[]): StudioPartialBlock[] {

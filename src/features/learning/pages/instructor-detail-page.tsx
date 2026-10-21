@@ -1,118 +1,103 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Monitor, Smartphone } from "lucide-react";
 
-import {
-  expertsQueries,
-  type ExpertCategory,
-  type ExpertCourse,
-  type ExpertPackage,
-  type ExpertConsultation,
-} from "@/lib/api";
-import { formatNumber } from "@/lib/format";
+import { expertProfilesKeys, expertProfilesQueries, setExpertConsultations, type ExpertProfileDetail } from "@/lib/api";
+import { formatDateTime, formatNumber } from "@/lib/format";
 import { useT } from "@/lib/i18n";
 import { initialsOf } from "@/lib/status";
-import { AppLink } from "@/components/ui/app-link";
-import { Avatar, Badge, Button, Card, Dl, Empty, Kpi, Loading, PageHead } from "@/components/ui/kit";
-import { DataTable, type Column } from "@/components/ui/data-table";
+import { Alert, Avatar, Badge, Button, Card, Dl, ErrorAlert, Field, FormActions, Kpi, Loading, PageHead, PageTabs } from "@/components/ui/kit";
+import { toast } from "@/components/ui/toast";
 import { PageState } from "@/components/ui/primitives";
-import { SearchBox } from "@/components/ui/paged-list";
-import { SelectField } from "@/components/ui/select";
+import { ExpertPreview } from "@/features/learning/expert-profile/expert-preview";
+import { expertPublicUrl } from "@/features/learning/expert-profile/urls";
+import { ExpertProductsCard } from "@/features/learning/expert-profile/expert-products-card";
+import { ExpertProfileForm } from "@/features/learning/expert-profile/expert-profile-form";
+import type { PreviewDevice } from "@/features/learning/studio/preview/use-preview-channel";
+
+/*
+ * One expert (trainer and/or consultant) on B2C: profile and images, the products they teach, and a live
+ * preview of their storefront page; the page content itself is edited in the Studio. `:trainerId` is the
+ * expert key (legacy trainer id, `c{id}`, or uuid), so old `/learning/instructors/9` links still open.
+ */
+
+type Tab = "" | "products" | "preview";
 
 export default function InstructorDetailPage() {
   const t = useT();
-  const { trainerId = "" } = useParams<{ trainerId: string }>();
-  const query = useQuery(expertsQueries.detail(trainerId));
+  const { trainerId: key = "", tab = "" } = useParams<{ trainerId: string; tab?: string }>();
+  const query = useQuery(expertProfilesQueries.detail(key));
   const expert = query.data;
-
-  const profile = expert?.expert;
-  const name = profile?.name ?? `${t("المدرب", "Trainer")} #${trainerId}`;
+  const base = `/learning/instructors/${encodeURIComponent(key)}`;
+  const active: Tab = tab === "products" || tab === "preview" ? tab : "";
 
   return (
     <>
       <PageHead
-        back={{ href: "/learning/instructors", label: t("المدربون", "Instructors") }}
-        title={name}
-        sub={profile?.key ? `#${profile.key}` : `#${trainerId}`}
+        back={{ href: "/learning/instructors", label: t("المدربون والخبراء", "Instructors & experts") }}
+        title={expert?.name ?? `#${key}`}
+        status={expert ? <ExpertBadges expert={expert} /> : undefined}
+        sub={expert?.headline || expert?.specialized || `#${key}`}
         actions={
-          profile?.key ? (
-            <Button
-              kind="ghost"
-              icon="openInNew"
-              label={t("الملف العام", "Public profile")}
-              href={`/learning/experts/${profile.key}`}
-            />
-          ) : undefined
+          <>
+            <Button kind="primary" icon="edit" label={t("فتح الاستوديو", "Open Studio")} href={`${base}/studio`} />
+            <Button kind="ghost" icon="link" label={t("الصفحة العامة", "Public page")} href={expertPublicUrl(key)} target="_blank" rel="noopener noreferrer" />
+          </>
         }
       />
-
+      <PageTabs
+        base={base}
+        active={active}
+        list={[
+          ["", t("الملف الشخصي", "Profile")],
+          ["products", t("المنتجات والموارد", "Products & resources")],
+          ["preview", t("المعاينة", "Preview")],
+        ]}
+      />
       <PageState error={query.error}>
         {expert ? (
           <>
-            <div className="ma-cols ma-cols--3">
+            {expert.merged_into_key ? (
+              <Alert kind="warning" title={t("ملف مكرر تم دمجه", "Merged duplicate")}>
+                {t("نُقلت منتجات هذا الملف واستشاراته وصفحته إلى الملف الأساسي، ورابطه العام يفتح الملف الأساسي.", "Its products, consultations and page moved to the main profile, and its public link opens that profile.")}{" "}
+                <Button sm kind="ghost" label={t("فتح الملف الأساسي", "Open the main profile")} href={`/learning/instructors/${encodeURIComponent(expert.merged_into_key)}`} />
+              </Alert>
+            ) : null}
+            <div className="ma-kpis">
+              <Kpi label={t("المنتجات المسندة", "Assigned products")} value={formatNumber(expert.product_count)} icon="book" />
+              <Kpi label={t("خدمات الاستشارة", "Consultation services")} value={formatNumber(expert.consultation_count)} icon="calendar" />
               <Kpi
-                label={t("الدورات", "Courses")}
-                value={formatNumber(expert.courses?.length ?? 0)}
-                icon="book"
-              />
-              <Kpi
-                label={t("الدبلومات", "Diplomas")}
-                value={formatNumber(expert.diplomas?.length ?? 0)}
-                icon="award"
-              />
-              <Kpi
-                label={t("الاستشارات", "Consultations")}
-                value={formatNumber(expert.consultations?.length ?? 0)}
-                icon="calendar"
+                label={t("محتوى الصفحة", "Page content")}
+                value={expert.has_page ? t("صفحة الاستوديو", "Studio page") : expert.has_readme ? "README" : t("نبذة قديمة", "Legacy bio")}
+                icon="file"
               />
             </div>
-
-            <div className="ma-cols ma-cols--2 ma-section-gap">
-              <Card title={t("الملف الشخصي", "Profile")}>
-                <div className="ma-cell-flex" style={{ marginBlockEnd: "var(--space-4)" }}>
-                  <Avatar
-                    initials={initialsOf(profile?.name ?? "")}
-                    src={profile?.profile_image ?? (profile as unknown as { square_image?: string | null })?.square_image}
-                    color="var(--sky)"
-                    alt={profile?.name ?? ""}
-                    lg
-                  />
-                  <div>
-                    <h3 style={{ margin: 0, fontSize: "18px", fontWeight: 700 }}>{profile?.name}</h3>
-                    <p className="ma-muted">{profile?.key ? `#${profile.key}` : "—"}</p>
-                  </div>
+            {active === "" ? (
+              <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
+                <ExpertProfileForm key={expert.updated_at ?? expert.key} expert={expert} />
+                <div className="grid content-start gap-4">
+                  <ConsultationsCard expert={expert} />
+                  <Card title={t("السجل", "Record")}>
+                    <Dl
+                      rows={[
+                        [t("المفتاح", "Key"), <bdi key="k">{expert.key}</bdi>],
+                        [t("رقم المدرب القديم", "Legacy trainer id"), expert.legacy_trainer_id ?? "—"],
+                        [t("أُنشئ", "Created"), formatDateTime(expert.created_at)],
+                        [t("آخر تعديل", "Updated"), formatDateTime(expert.updated_at)],
+                      ]}
+                    />
+                  </Card>
                 </div>
-
-                <Dl
-                  rows={[
-                    [t("المعرف", "Key"), profile?.key ?? "—"],
-                    [t("رقم المدرب", "Trainer id"), profile?.trainer_id != null ? <span key="t" className="ma-num">{profile.trainer_id}</span> : "—"],
-                    [t("أرقام المستشار", "Consultant ids"), profile?.consultant_ids?.length ? profile.consultant_ids.join(", ") : "—"],
-                    [t("المصدر", "Source"), expert.highlights?.source ?? "—"],
-                  ]}
-                />
-              </Card>
-
-              <Card title={t("التصنيفات", "Categories")}>
-                <CategoryList rows={expert.categories ?? []} />
-              </Card>
-            </div>
-
-            {expert.courses?.length ? (
-              <CourseTable title={t("الدورات", "Courses")} rows={expert.courses} />
+              </div>
             ) : null}
-
-            {expert.diplomas?.length ? (
-              <CourseTable title={t("الدبلومات", "Diplomas")} rows={expert.diplomas} />
+            {active === "products" ? (
+              <ExpertProductsCard
+                expertKey={expert.key}
+                consultantHref={expert.consultant_id ? `/consultations/experts/${expert.consultant_id}` : null}
+              />
             ) : null}
-
-            {expert.packages?.length ? (
-              <PackageTable rows={expert.packages} />
-            ) : null}
-
-            {expert.consultations?.length ? (
-              <ConsultationTable rows={expert.consultations} />
-            ) : null}
+            {active === "preview" ? <PreviewTab expert={expert} /> : null}
           </>
         ) : (
           <Loading />
@@ -122,223 +107,105 @@ export default function InstructorDetailPage() {
   );
 }
 
-function CategoryList({ rows }: { rows: ExpertCategory[] }) {
-  const t = useT();
-  if (!rows.length) return <Empty text={t("لا تصنيفات.", "No categories.")} />;
+function ExpertBadges({ expert }: { expert: ExpertProfileDetail }) {
   return (
-    <ul className="ma-list">
-      {rows.map((cat) => (
-        <li key={cat.id} className="ma-list__item">
-          <span>{cat.name}</span>
-          {cat.description ? <span className="ma-muted">{cat.description}</span> : null}
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function CourseTable({ title, rows }: { title: string; rows: ExpertCourse[] }) {
-  const t = useT();
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("all");
-
-  const filtered = useMemo(() => {
-    return rows.filter((r) => {
-      const matchSearch = !search || (r.name?.toLowerCase().includes(search.toLowerCase()) ?? false);
-      const matchStatus = status === "all" || (status === "active" ? r.active : !r.active);
-      return matchSearch && matchStatus;
-    });
-  }, [rows, search, status]);
-
-  const columns: Column<ExpertCourse>[] = [
-    {
-      key: "name",
-      header: t("الدورة", "Course"),
-      cell: (row) => (
-        <AppLink className="ma-cell-flex ma-link ma-link--plain" to={`/learning/backoffice/course/${row.id}`}>
-          <Avatar
-            initials={initialsOf(row.name)}
-            src={row.image ?? (row as unknown as { square_image?: string | null }).square_image ?? (row as unknown as { squareImage?: string | null }).squareImage}
-            color="var(--teal)"
-            alt={row.name ?? undefined}
-            square
-          />
-          <span>
-            <span className="ma-cell-main">{row.name}</span>
-            <span className="ma-cell-sub">{row.category_name || "—"}</span>
-          </span>
-        </AppLink>
-      ),
-    },
-    {
-      key: "price",
-      header: t("السعر", "Price"),
-      align: "end",
-      cell: (row) => <span className="ma-num">{formatNumber(row.current_price?.price ?? row.price ?? 0)}</span>,
-    },
-    {
-      key: "duration",
-      header: t("المدة", "Duration"),
-      align: "end",
-      cell: (row) => <span className="ma-num">{row.duration ?? "—"}</span>,
-    },
-    {
-      key: "active",
-      header: t("الحالة", "Status"),
-      cell: (row) => (
-        <Badge
-          def={{
-            label: row.active ? { ar: "نشطة", en: "Active" } : { ar: "موقوفة", en: "Inactive" },
-            tone: row.active ? "success" : "warning",
-          }}
-        />
-      ),
-    },
-  ];
-
-  const toolbar = (
     <>
-      <SearchBox placeholder={t("ابحث في الدورات…", "Search courses…")} value={search} onChange={setSearch} />
-      <SelectField
-        label={t("الحالة", "Status")}
-        value={status}
-        onChange={setStatus}
-        options={[
-          { value: "all", label: t("كل الحالات", "All statuses") },
-          { value: "active", label: t("نشطة", "Active") },
-          { value: "inactive", label: t("موقوفة", "Inactive") },
-        ]}
-      />
+      <Badge
+        def={{
+          label: expert.status === "active" ? { ar: "نشط", en: "Active" } : { ar: "موقوف", en: "Inactive" },
+          tone: expert.status === "active" ? "success" : "warning",
+        }}
+      />{" "}
+      {expert.product_count > 0 ? <Badge def={{ label: { ar: "مدرّب", en: "Trainer" }, tone: "info" }} /> : null}{" "}
+      {expert.is_consultant ? <Badge def={{ label: { ar: "خبير استشارات", en: "Consultant" }, tone: "info" }} /> : null}{" "}
+      {expert.is_featured ? <Badge def={{ label: { ar: "في الصفحة الرئيسية", en: "Featured" }, tone: "neutral" }} /> : null}
     </>
   );
+}
+
+/** Whether they give consultations: turn them on or off, and where services, availability and bookings are managed. */
+function ConsultationsCard({ expert }: { expert: ExpertProfileDetail }) {
+  const t = useT();
+  const queryClient = useQueryClient();
+  const [enabling, setEnabling] = useState(false);
+  const [email, setEmail] = useState("");
+  const [minutes, setMinutes] = useState("60");
+  const toggle = useMutation({
+    mutationFn: (active: boolean) =>
+      setExpertConsultations(expert.key, active ? { active, email: email.trim() || null, session_minutes: Number(minutes) || 60 } : { active }),
+    onSuccess: (next, active) => {
+      queryClient.setQueryData(expertProfilesKeys.detail(expert.key), next);
+      queryClient.invalidateQueries({ queryKey: expertProfilesKeys.all });
+      setEnabling(false);
+      toast.success(active ? t("تم تفعيل الاستشارات", "Consultations turned on") : t("تم إيقاف الاستشارات", "Consultations turned off"));
+    },
+  });
+  const merged = Boolean(expert.merged_into_key);
 
   return (
-    <Card title={title} className="ma-section-gap">
-      <DataTable rows={filtered} columns={columns} toolbar={toolbar} empty={t("لا عناصر مطابقة.", "No matching items.")} />
+    <Card title={t("الاستشارات", "Consultations")}>
+      <div className="ma-cell-flex" style={{ gap: "var(--space-3)", marginBlockEnd: "var(--space-3)" }}>
+        <Avatar initials={initialsOf(expert.name)} src={expert.avatar_url} color="var(--purple)" alt={expert.name} />
+        <span>
+          {expert.is_consultant
+            ? t(`يقدّم ${formatNumber(expert.consultation_count)} خدمة استشارية · جلسة ${expert.session_minutes ?? 60} دقيقة.`,
+                `Gives ${formatNumber(expert.consultation_count)} consultation service(s) · ${expert.session_minutes ?? 60}-minute sessions.`)
+            : expert.consultant_id
+              ? t("الاستشارات متوقفة.", "Consultations are turned off.")
+              : t("لا يقدّم استشارات.", "Doesn't give consultations.")}
+        </span>
+      </div>
+      <div className="grid gap-2">
+        {expert.consultant_id ? (
+          <Button icon="calendar" label={t("الخدمات والمواعيد والحجوزات", "Services, availability & bookings")} href={`/consultations/experts/${expert.consultant_id}`} />
+        ) : null}
+        {merged ? null : expert.is_consultant ? (
+          <Button kind="ghost" label={t("إيقاف الاستشارات", "Turn consultations off")} disabled={toggle.isPending} onClick={() => toggle.mutate(false)} />
+        ) : expert.consultant_id ? (
+          <Button kind="primary" label={t("تفعيل الاستشارات", "Turn consultations on")} disabled={toggle.isPending} onClick={() => toggle.mutate(true)} />
+        ) : enabling ? (
+          <form className="ma-form" onSubmit={(event) => { event.preventDefault(); toggle.mutate(true); }}>
+            <Field id="consult-email" type="email" dir="ltr" label={t("بريد الحجوزات (اختياري)", "Bookings email (optional)")} value={email} onChange={setEmail} />
+            <Field id="consult-minutes" type="number" min={5} max={240} step={5} dir="ltr" label={t("مدة الجلسة (دقيقة)", "Session length (minutes)")} value={minutes} onChange={setMinutes} />
+            <FormActions>
+              <Button type="submit" kind="primary" icon="check" disabled={toggle.isPending} label={t("تفعيل", "Turn on")} />
+              <Button kind="ghost" label={t("إلغاء", "Cancel")} onClick={() => setEnabling(false)} />
+            </FormActions>
+          </form>
+        ) : (
+          <Button kind="primary" icon="plus" label={t("تفعيل الاستشارات لهذا المدرّب", "Turn on consultations")} onClick={() => setEnabling(true)} />
+        )}
+        <ErrorAlert error={toggle.error} title={t("تعذّر تحديث الاستشارات", "Couldn't update consultations")} />
+      </div>
     </Card>
   );
 }
 
-function PackageTable({ rows }: { rows: ExpertPackage[] }) {
+function PreviewTab({ expert }: { expert: ExpertProfileDetail }) {
   const t = useT();
-  const [search, setSearch] = useState("");
-
-  const filtered = useMemo(() => {
-    return rows.filter((r) => !search || (r.name?.toLowerCase().includes(search.toLowerCase()) ?? false));
-  }, [rows, search]);
-
-  const columns: Column<ExpertPackage>[] = [
-    {
-      key: "name",
-      header: t("الحزمة / الدبلوم", "Package / Diploma"),
-      cell: (row) => (
-        <AppLink className="ma-cell-flex ma-link ma-link--plain" to={`/learning/backoffice/package/${row.id}`}>
-          <Avatar
-            initials={initialsOf(row.name)}
-            src={row.image ?? (row as unknown as { square_image?: string | null }).square_image ?? (row as unknown as { squareImage?: string | null }).squareImage}
-            color="var(--purple)"
-            alt={row.name ?? undefined}
-            square
-          />
-          <span>
-            <span className="ma-cell-main">{row.name}</span>
-            <span className="ma-cell-sub">{t(`${formatNumber(row.course_count)} دورة`, `${formatNumber(row.course_count)} courses`)}</span>
-          </span>
-        </AppLink>
-      ),
-    },
-    {
-      key: "price",
-      header: t("السعر", "Price"),
-      align: "end",
-      cell: (row) => <span className="ma-num">{formatNumber(row.current_price?.price ?? row.price ?? 0)}</span>,
-    },
-    {
-      key: "active",
-      header: t("الحالة", "Status"),
-      cell: (row) => (
-        <Badge
-          def={{
-            label: row.active ? { ar: "نشطة", en: "Active" } : { ar: "موقوفة", en: "Inactive" },
-            tone: row.active ? "success" : "warning",
-          }}
-        />
-      ),
-    },
-  ];
-
-  const toolbar = (
-    <SearchBox placeholder={t("ابحث في الحزم…", "Search packages…")} value={search} onChange={setSearch} />
-  );
-
+  const [device, setDevice] = useState<PreviewDevice>("desktop");
   return (
-    <Card title={t("الحزم والدبلومات", "Packages & Diplomas")} className="ma-section-gap">
-      <DataTable rows={filtered} columns={columns} toolbar={toolbar} empty={t("لا حزم.", "No packages.")} />
-    </Card>
-  );
-}
-
-function ConsultationTable({ rows }: { rows: ExpertConsultation[] }) {
-  const t = useT();
-  const [search, setSearch] = useState("");
-
-  const filtered = useMemo(() => {
-    return rows.filter((r) => !search || (r.name?.toLowerCase().includes(search.toLowerCase()) ?? false));
-  }, [rows, search]);
-
-  const columns: Column<ExpertConsultation>[] = [
-    {
-      key: "name",
-      header: t("الاستشارة", "Consultation"),
-      cell: (row) => (
-        <AppLink className="ma-cell-flex ma-link ma-link--plain" to={`/learning/consultations/${row.id}`}>
-          <Avatar
-            initials={initialsOf(row.name)}
-            src={row.image ?? (row as unknown as { square_image?: string | null }).square_image ?? (row as unknown as { squareImage?: string | null }).squareImage}
-            color="var(--coral)"
-            alt={row.name ?? undefined}
-            square
-          />
-          <span>
-            <span className="ma-cell-main">{row.name}</span>
-            <span className="ma-cell-sub">{t(`${formatNumber(row.number_of_sessions)} جلسة`, `${formatNumber(row.number_of_sessions)} sessions`)}</span>
-          </span>
-        </AppLink>
-      ),
-    },
-    {
-      key: "price",
-      header: t("السعر", "Price"),
-      align: "end",
-      cell: (row) => <span className="ma-num">{formatNumber(row.price ?? 0)}</span>,
-    },
-    {
-      key: "slots",
-      header: t("الجلسات المتاحة", "Available slots"),
-      align: "end",
-      cell: (row) => <span className="ma-num">{formatNumber(row.available_slot_count)}</span>,
-    },
-    {
-      key: "active",
-      header: t("الحالة", "Status"),
-      cell: (row) => (
-        <Badge
-          def={{
-            label: row.active ? { ar: "نشطة", en: "Active" } : { ar: "موقوفة", en: "Inactive" },
-            tone: row.active ? "success" : "warning",
-          }}
-        />
-      ),
-    },
-  ];
-
-  const toolbar = (
-    <SearchBox placeholder={t("ابحث في الاستشارات…", "Search consultations…")} value={search} onChange={setSearch} />
-  );
-
-  return (
-    <Card title={t("الاستشارات", "Consultations")} className="ma-section-gap">
-      <DataTable rows={filtered} columns={columns} toolbar={toolbar} empty={t("لا استشارات.", "No consultations.")} />
+    <Card
+      title={t("معاينة صفحة المدرّب", "Expert page preview")}
+      actions={
+        <div className="ma-seg" role="group" aria-label={t("جهاز المعاينة", "Preview device")}>
+          <button type="button" aria-pressed={device === "desktop"} onClick={() => setDevice("desktop")} title={t("سطح المكتب", "Desktop")}>
+            <Monitor size={16} aria-hidden />
+          </button>
+          <button type="button" aria-pressed={device === "mobile"} onClick={() => setDevice("mobile")} title={t("الجوال", "Mobile")}>
+            <Smartphone size={16} aria-hidden />
+          </button>
+        </div>
+      }
+    >
+      {expert.status !== "active" ? (
+        <Alert kind="warning" title={t("الملف موقوف", "This profile is inactive")}>
+          {t("الصفحة مخفية عن الموقع؛ تظهر هنا في المعاينة فقط.", "The page is hidden from the site; only this preview shows it.")}
+        </Alert>
+      ) : null}
+      <div style={{ height: "75vh" }}>
+        <ExpertPreview expertKey={expert.key} device={device} />
+      </div>
     </Card>
   );
 }

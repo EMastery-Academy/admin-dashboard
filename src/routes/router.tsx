@@ -10,6 +10,7 @@ import OrderDetailPage from "@/features/sales/pages/order-detail-page";
 import PaymentsPage from "@/features/sales/pages/payments-page";
 import PaymentDetailPage from "@/features/sales/pages/payment-detail-page";
 import RefundsPage from "@/features/sales/pages/refunds-page";
+import RefundCaseDetailPage from "@/features/sales/pages/refund-case-detail-page";
 import InvoicesPage from "@/features/sales/pages/invoices-page";
 import CouponsPage from "@/features/marketing/pages/coupons-page";
 import CouponNewPage from "@/features/marketing/pages/coupon-new-page";
@@ -53,6 +54,7 @@ import ConsultationDetailPage from "@/features/learning/pages/consultation-detai
 import ConsultantsPage from "@/features/learning/pages/consultants-page";
 import ConsultantDetailPage from "@/features/learning/pages/consultant-detail-page";
 import InstructorsPage from "@/features/learning/pages/instructors-page";
+import ExpertStudioPage from "@/features/learning/expert-profile/expert-studio-page";
 import InstructorDetailPage from "@/features/learning/pages/instructor-detail-page";
 import AnalyticsSalesPage, {
   CouponsReportPage,
@@ -111,6 +113,7 @@ export const ROUTER = createBrowserRouter([
       { path: "sales/payments", element: <PaymentsPage /> },
       { path: "sales/payments/:id", element: <PaymentDetailPage /> },
       { path: "sales/refunds", element: <RefundsPage /> },
+      { path: "sales/refunds/:id", element: <RefundCaseDetailPage /> },
       { path: "sales/invoices", element: <InvoicesPage /> },
       { path: "sales/coupons", element: <CouponsPage /> },
       { path: "sales/coupons/new", element: <CouponNewPage /> },
@@ -142,6 +145,8 @@ export const ROUTER = createBrowserRouter([
       { path: "learning/consultants/:id", element: <ConsultantDetailPage /> },
       { path: "learning/instructors", element: <InstructorsPage /> },
       { path: "learning/instructors/:trainerId", element: <InstructorDetailPage /> },
+      { path: "learning/instructors/:trainerId/studio", element: <ExpertStudioPage />, handle: { studio: true } },
+      { path: "learning/instructors/:trainerId/:tab", element: <InstructorDetailPage /> },
       { path: "learning/applications", element: <InstructorApplicationsPage /> },
       { path: "learning/applications/:id", element: <InstructorApplicationsPage /> },
       { path: "trainers", element: <Navigate to="/learning/instructors" replace /> },

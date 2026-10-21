@@ -1,12 +1,20 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { studioQueries, type ProductView, type SearchProductDetail } from "@/lib/api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  listProductResources,
+  studioQueries,
+  updateResourceDuration,
+  type ProductView,
+  type SearchProductDetail,
+} from "@/lib/api";
+import { getProductResourceRefundComparisons } from "@/lib/api/sales/refund-cases";
 import { useT } from "@/lib/i18n";
 import { studioHref } from "@/lib/refs";
 import { AppLink } from "@/components/ui/app-link";
 import { RichHtml } from "@/components/ui/rich-html";
 import { formatNumber } from "@/lib/format";
 import { Icon } from "@/components/ui/icon";
+import { toast } from "@/components/ui/toast";
 import { cleanHtmlText } from "../model";
 
 interface ResourcesTabProps {
@@ -21,6 +29,37 @@ export function ResourcesTab({ productRef, data, searchDetail }: ResourcesTabPro
 
   const assetsQuery = useQuery(studioQueries.assets(productRef));
   const assets = assetsQuery.data?.items ?? [];
+  const b2cId = productRef.startsWith("b2c:") ? productRef.slice(4) : data.b2c ? data.product.ref?.replace(/^b2c:/, "") ?? "" : "";
+  const refundComparison = useQuery({
+    queryKey: ["resource-refund-comparison", b2cId],
+    queryFn: () => getProductResourceRefundComparisons(b2cId),
+    enabled: Boolean(b2cId),
+  });
+
+  // B2C-owned resource durations — the source of truth for the search duration filter/sort.
+  const queryClient = useQueryClient();
+  const resourcesQuery = useQuery({
+    queryKey: ["product-resource-durations", productRef],
+    queryFn: () => listProductResources(productRef),
+  });
+  const resources = resourcesQuery.data ?? [];
+  const [durationDraft, setDurationDraft] = useState<Record<string, string>>({});
+  const saveDuration = useMutation({
+    mutationFn: ({ resourceId, value }: { resourceId: string; value: string }) =>
+      updateResourceDuration(resourceId, {
+        duration_minutes: value.trim() === "" ? null : Number(value),
+      }),
+    onSuccess: (updated) => {
+      setDurationDraft((prev) => {
+        const next = { ...prev };
+        delete next[updated.resource_id];
+        return next;
+      });
+      queryClient.invalidateQueries({ queryKey: ["product-resource-durations", productRef] });
+      toast.success(t("تم تحديث مدة المورد", "Resource duration updated"));
+    },
+    onError: () => toast.error(t("تعذّر تحديث مدة المورد", "Couldn't update the resource duration")),
+  });
 
   const item = data.product;
   const rawDesc =
@@ -54,6 +93,85 @@ export function ResourcesTab({ productRef, data, searchDetail }: ResourcesTabPro
 
   return (
     <div className="cd-bento">
+      {data.b2c ? <section className="cd-card cd-s12">
+        <div className="cd-card__h"><h2><Icon name="chart" />{t("المشتريات والاستردادات حسب المورد", "Purchases and refunds by resource")}</h2></div>
+        <div className="cd-card__b">
+          {refundComparison.isLoading ? <p>{t("جارٍ التحميل…", "Loading…")}</p> : null}
+          {refundComparison.isError ? <p role="alert">{t("تعذّر تحميل المقارنة.", "Could not load comparison.")}</p> : null}
+          {refundComparison.data?.length ? <div style={{ display: "grid", gap: 14 }}>
+            {refundComparison.data.map((row) => <div key={row.resource_id}>
+              <strong>{row.resource_type} · {row.lms_reference_id}</strong>
+              <p>{t("مشتريات مكتملة", "Completed purchases")}: {formatNumber(row.completed_purchases)} · {t("استردادات", "Refunded purchases")}: {formatNumber(row.refunded_purchases)}</p>
+              <div style={{ display: "flex", width: "100%", height: 12, borderRadius: 6, overflow: "hidden", background: "var(--line)" }} aria-label={t("نسبة المشتريات المحتفظ بها والمستردة", "Retained and refunded purchase share")}>
+                <span style={{ width: `${row.completed_purchases ? row.retained_purchases / row.completed_purchases * 100 : 0}%`, background: "var(--series-2, #10b981)" }} />
+                <span style={{ width: `${row.completed_purchases ? row.refunded_purchases / row.completed_purchases * 100 : 0}%`, background: "var(--series-4, #ef4444)" }} />
+              </div>
+            </div>)}
+          </div> : !refundComparison.isLoading && !refundComparison.isError ? <p>{t("لا توجد موارد مرتبطة.", "No linked resources.")}</p> : null}
+        </div>
+      </section> : null}
+      {data.b2c ? <section className="cd-card cd-s12">
+        <div className="cd-card__h"><h2><Icon name="clock" />{t("مدة الموارد", "Resource durations")}</h2></div>
+        <div className="cd-card__b">
+          <p className="cd-muted" style={{ marginBlockEnd: 12 }}>
+            {t(
+              "المدة هنا هي المصدر المعتمد للبحث (بالدقائق) ولا تعتمد على المزامنة القديمة.",
+              "This duration (minutes) is the search source of truth and no longer depends on the legacy sync.",
+            )}
+          </p>
+          {resourcesQuery.isLoading ? <p>{t("جارٍ التحميل…", "Loading…")}</p> : null}
+          {resourcesQuery.isError ? <p role="alert">{t("تعذّر تحميل الموارد.", "Could not load resources.")}</p> : null}
+          {!resourcesQuery.isLoading && !resourcesQuery.isError && resources.length === 0 ? (
+            <p>{t("لا توجد موارد مرتبطة.", "No linked resources.")}</p>
+          ) : null}
+          {resources.length ? <div style={{ display: "grid", gap: 14 }}>
+            {resources.map((resource) => {
+              const value =
+                durationDraft[resource.resource_id] ??
+                (resource.duration_minutes == null ? "" : String(resource.duration_minutes));
+              const pending =
+                saveDuration.isPending && saveDuration.variables?.resourceId === resource.resource_id;
+              return (
+                <div key={resource.resource_id} style={{ display: "flex", alignItems: "flex-end", gap: 12, flexWrap: "wrap" }}>
+                  <div style={{ flex: 1, minWidth: 220 }}>
+                    <strong>{resource.title || resource.lms_reference_id}</strong>
+                    <p className="cd-muted" style={{ margin: 0 }}>
+                      {resource.resource_type} · <span className="cd-ltr">{resource.lms_reference_id}</span>
+                      {resource.duration_minutes != null
+                        ? ` · ${t("حالياً", "currently")} ${formatNumber(resource.duration_minutes)} ${t("دقيقة", "min")}`
+                        : ""}
+                    </p>
+                  </div>
+                  <div style={{ width: 170 }}>
+                    <label className="ma-label" htmlFor={`resource-duration-${resource.resource_id}`}>
+                      {t("المدة (دقيقة)", "Duration (minutes)")}
+                    </label>
+                    <input
+                      id={`resource-duration-${resource.resource_id}`}
+                      className="ma-input"
+                      type="number"
+                      min={0}
+                      inputMode="numeric"
+                      value={value}
+                      onChange={(event) =>
+                        setDurationDraft((prev) => ({ ...prev, [resource.resource_id]: event.target.value }))
+                      }
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    className="ma-btn ma-btn--sm ma-btn--primary"
+                    disabled={pending}
+                    onClick={() => saveDuration.mutate({ resourceId: resource.resource_id, value })}
+                  >
+                    {t("حفظ", "Save")}
+                  </button>
+                </div>
+              );
+            })}
+          </div> : null}
+        </div>
+      </section> : null}
       {/* Description */}
       <section className="cd-card cd-s7">
         <div className="cd-card__h">

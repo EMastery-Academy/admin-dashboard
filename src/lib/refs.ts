@@ -5,6 +5,8 @@
 
 export const orderHref = (ref: string): string => `/sales/orders/${encodeURIComponent(ref)}`;
 export const paymentHref = (ref: string): string => `/sales/payments/${encodeURIComponent(ref)}`;
+/** A refund case (plain B2C case id; refund cases have no legacy counterpart). */
+export const refundCaseHref = (caseId: string): string => `/sales/refunds/${encodeURIComponent(caseId)}`;
 export const customerHref = (ref: string): string => `/customers/${encodeURIComponent(ref)}`;
 export const productHref = (ref: string): string => `/learning/catalog/${encodeURIComponent(ref)}`;
 /** A product's detail page opened on one tab (`?tab=`), e.g. right after it is created. */

@@ -45,6 +45,78 @@ export function paymentStatusBadge(status: string | null | undefined): BadgeDef 
   }
 }
 
+/** Refund case workflow, in review order. The single source for the refunds filter, KPIs and badges. */
+export const REFUND_CASE_STATUSES = [
+  "requested",
+  "processing",
+  "pending",
+  "requires_action",
+  "needs_reconciliation",
+  "succeeded",
+  "failed",
+  "rejected",
+  "canceled",
+] as const;
+
+export function refundCaseStatusBadge(status: string | null | undefined): BadgeDef | null {
+  switch (status) {
+    case "requested":
+      return { label: { ar: "بانتظار القرار", en: "Awaiting decision" }, tone: "warning" };
+    case "processing":
+      return { label: { ar: "قيد التنفيذ", en: "Processing" }, tone: "info" };
+    case "pending":
+      return { label: { ar: "معلّق لدى البوابة", en: "Pending at gateway" }, tone: "info" };
+    case "requires_action":
+      return { label: { ar: "يتطلب إجراء", en: "Requires action" }, tone: "warning" };
+    case "needs_reconciliation":
+      return { label: { ar: "يحتاج مطابقة", en: "Needs reconciliation" }, tone: "danger" };
+    case "succeeded":
+      return { label: { ar: "تم الاسترداد", en: "Refunded" }, tone: "success" };
+    case "failed":
+      return { label: { ar: "فشل", en: "Failed" }, tone: "danger" };
+    case "rejected":
+      return { label: { ar: "مرفوض", en: "Rejected" }, tone: "neutral" };
+    case "canceled":
+      return { label: { ar: "ملغى", en: "Canceled" }, tone: "neutral" };
+    default:
+      return status ? { label: { ar: status, en: status } } : null;
+  }
+}
+
+const REFUND_REASONS: Record<string, { ar: string; en: string }> = {
+  open_request_exists: { ar: "يوجد طلب آخر قيد المراجعة", en: "Another request is open" },
+  learning_started: { ar: "بدأ التعلم", en: "Learning started" },
+  outside_30_day_window: { ar: "تجاوز 30 يومًا", en: "Outside 30 days" },
+  payment_not_captured: { ar: "الدفع غير مكتمل", en: "Payment not captured" },
+  unallocated_existing_refund: { ar: "استرداد سابق غير مرتبط بطلب", en: "Earlier refund not linked to a case" },
+  fully_refunded_or_reserved: { ar: "مسترد بالكامل أو محجوز", en: "Fully refunded or reserved" },
+  consultation_not_provider_failed: { ar: "الاستشارة غير مؤهلة", en: "Consultation not eligible" },
+  customer_cancelled_or_missed: { ar: "إلغاء العميل أو غيابه", en: "Customer cancelled or missed" },
+  subscription_period_ended: { ar: "انتهت فترة الاشتراك", en: "Subscription period ended" },
+  subscription_period_missing: { ar: "فترة الاشتراك غير معروفة", en: "Subscription period unknown" },
+  resource_mapping_missing: { ar: "ربط الموارد بالمنصة ناقص", en: "LMS resource mapping missing" },
+  unsupported_product_type: { ar: "نوع منتج غير مدعوم", en: "Unsupported product type" },
+  verification_unavailable: { ar: "تعذّر التحقق من المنصة", en: "LMS check unavailable" },
+};
+
+export function refundReasonLabel(code: string): { ar: string; en: string } {
+  return REFUND_REASONS[code] ?? { ar: code, en: code };
+}
+
+const REFUND_EVENTS: Record<string, { ar: string; en: string }> = {
+  requested: { ar: "طلب العميل الاسترداد", en: "Customer requested a refund" },
+  admin_created: { ar: "أنشأت الإدارة الطلب", en: "Created by an admin" },
+  approved: { ar: "تمت الموافقة", en: "Approved" },
+  rejected: { ar: "تم الرفض", en: "Rejected" },
+  provider_status: { ar: "تحديث من البوابة", en: "Gateway update" },
+  provider_uncertain: { ar: "استجابة البوابة غير مؤكدة", en: "Gateway response uncertain" },
+  expert_service_failure: { ar: "تعذّر تقديم الاستشارة", en: "Expert service failure" },
+};
+
+export function refundEventLabel(code: string): { ar: string; en: string } {
+  return REFUND_EVENTS[code] ?? { ar: code, en: code };
+}
+
 export function customerStatusBadge(status: string | null | undefined): BadgeDef | null {
   switch (status) {
     case "active":

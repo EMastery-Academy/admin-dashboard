@@ -16,14 +16,15 @@ import { badgeLabel } from "@/lib/export/columns";
 import { useTableExport } from "@/lib/export/use-table-export";
 import type { ExportColumn } from "@/lib/export/types";
 import { ExportActions } from "@/components/reports/export-actions";
-import { initialsOf, orderStatusBadge, paymentStatusBadge } from "@/lib/status";
+import { initialsOf, orderStatusBadge, paymentStatusBadge, refundReasonLabel } from "@/lib/status";
 import { AppLink } from "@/components/ui/app-link";
-import { Avatar, Badge, Button, Card, Dl, Empty, ErrorAlert, Loading, PageHead } from "@/components/ui/kit";
+import { Alert, Avatar, Badge, Button, Card, Dl, Empty, ErrorAlert, Field, FormActions, Loading, PageHead } from "@/components/ui/kit";
 import { DataTable, type Column } from "@/components/ui/data-table";
 import { PageState } from "@/components/ui/primitives";
 import { SearchBox } from "@/components/ui/paged-list";
 import { SourceBadge } from "@/components/ui/source-badge";
-import { customerHref, isLegacy, paymentHref, productHref, refParam, shortRef } from "@/lib/refs";
+import { customerHref, isLegacy, paymentHref, productHref, refParam, refundCaseHref, shortRef } from "@/lib/refs";
+import { createRefundCase, refundCasesQueries } from "@/lib/api/sales/refund-cases";
 
 export default function OrderDetailPage() {
   const t = useT();
@@ -161,6 +162,7 @@ export default function OrderDetailPage() {
             </div>
 
             <Lines lines={data.lines ?? []} />
+            {!isLegacy(data) && ["paid", "partially_refunded"].includes(data.status) ? <RefundCreator lines={data.lines ?? []} /> : null}
             {isLegacy(data) ? null : (
               <>
                 <Invoices invoices={data.invoices ?? []} />
@@ -175,6 +177,98 @@ export default function OrderDetailPage() {
         )}
       </PageState>
     </>
+  );
+}
+
+function RefundCreator({ lines }: { lines: AdminOrderLine[] }) {
+  const t = useT();
+  const lang = useLang();
+  const [itemId, setItemId] = useState("");
+  const [reason, setReason] = useState("");
+  const [amount, setAmount] = useState("");
+  const [created, setCreated] = useState("");
+  const selected = lines.find((line) => line.order_item_id === itemId);
+  const check = useQuery({ ...refundCasesQueries.itemPreview(itemId), enabled: Boolean(itemId) });
+  const remaining = check.data?.remaining_minor ?? 0;
+  const amountMinor = amount === "" ? remaining : Math.round(Number(amount) * 100);
+  const amountInvalid = amount !== "" && (!(amountMinor > 0) || amountMinor > remaining);
+  const create = useMutation({
+    mutationFn: () => createRefundCase(itemId, amountMinor, reason.trim()),
+    onSuccess: (result) => {
+      setCreated(result.case_id);
+      setReason("");
+      setAmount("");
+    },
+  });
+  const options: [string, string][] = [
+    ["", t("اختر المنتج", "Choose product")],
+    ...lines
+      .filter((line) => line.order_item_id)
+      .map((line): [string, string] => [line.order_item_id!, `${line.title ?? line.slug ?? line.product_type} · ${formatMinor(line.total_amount_minor, line.currency_code)}`]),
+  ];
+  return (
+    <Card title={t("بدء استرداد", "Start a refund")} className="ma-section-gap">
+      <p className="ma-note">{t("اختر بندًا مدفوعًا، راجع الأهلية، ثم أنشئ طلبًا يراجعه مسؤول الاسترداد.", "Choose a paid item, review eligibility, then create a request for the refund approver.")}</p>
+      <form
+        className="ma-form"
+        noValidate
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (check.data?.eligible && reason.trim().length >= 10 && !amountInvalid) create.mutate();
+        }}
+      >
+        <Field id="refund-item" label={t("المنتج", "Product")} value={itemId} options={options} onChange={(value) => { setItemId(value); setCreated(""); }} />
+        {check.data ? (
+          check.data.eligible ? (
+            <Alert kind="success" title={t("مؤهل للاسترداد", "Eligible for a refund")}>
+              {t("المتبقي القابل للاسترداد:", "Refundable remaining:")} <span className="ma-num">{formatMinor(remaining, selected?.currency_code ?? "USD")}</span>
+            </Alert>
+          ) : (
+            <Alert kind="warning" title={t("غير مؤهل", "Not eligible")}>
+              {check.data.reasons.map((code) => { const label = refundReasonLabel(code); return lang === "ar" ? label.ar : label.en; }).join(" · ")}
+            </Alert>
+          )
+        ) : null}
+        <ErrorAlert error={check.error} />
+        {check.data?.eligible ? (
+          <>
+            <Field
+              id="refund-amount"
+              type="number"
+              label={t("المبلغ", "Amount")}
+              hint={amountInvalid ? t(`أدخل مبلغًا بين 0.01 و ${remaining / 100}.`, `Enter an amount between 0.01 and ${remaining / 100}.`) : t("اتركه فارغًا لاسترداد كامل المتبقي.", "Leave blank to refund everything remaining.")}
+              value={amount}
+              onChange={setAmount}
+              min="0.01"
+              max={remaining / 100}
+              step="0.01"
+              dir="ltr"
+              aria-invalid={amountInvalid || undefined}
+            />
+            <Field
+              id="refund-reason"
+              type="textarea"
+              label={t("سبب الطلب", "Reason")}
+              hint={t("10 أحرف على الأقل.", "At least 10 characters.")}
+              value={reason}
+              onChange={setReason}
+              required
+              rows={3}
+              maxLength={2000}
+            />
+            <ErrorAlert error={create.error} />
+            <FormActions>
+              <Button type="submit" kind="primary" label={t("إنشاء طلب", "Create request")} disabled={create.isPending || reason.trim().length < 10 || amountInvalid} />
+            </FormActions>
+          </>
+        ) : null}
+      </form>
+      {created ? (
+        <Alert kind="success" title={t("أُنشئ طلب الاسترداد", "Refund request created")}>
+          <AppLink className="ma-link" to={refundCaseHref(created)}>{t("افتح الطلب لمراجعته", "Open the request to review it")}</AppLink>
+        </Alert>
+      ) : null}
+    </Card>
   );
 }
 

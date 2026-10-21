@@ -20,9 +20,11 @@ export * from "@/lib/api/dashboard/dashboard";
 // Sales
 export * from "@/lib/api/sales/orders";
 export * from "@/lib/api/sales/payments";
+export * from "@/lib/api/sales/refund-cases";
 
 // Customers
 export * from "@/lib/api/customers/customers";
+export * from "@/lib/api/customers/customer-admin";
 export * from "@/lib/api/customers/tickets";
 
 // Learning
@@ -34,6 +36,7 @@ export * from "@/lib/api/learning/live-diplomas";
 export * from "@/lib/api/learning/pricing";
 export * from "@/lib/api/learning/consultations";
 export * from "@/lib/api/learning/consultants";
+export * from "@/lib/api/learning/expert-profiles";
 export * from "@/lib/api/learning/experts";
 export * from "@/lib/api/learning/instructors";
 
