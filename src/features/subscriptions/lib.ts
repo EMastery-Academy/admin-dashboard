@@ -18,7 +18,7 @@ type Label = { ar: string; en: string };
 export const PLAN_TYPE_LABELS: Record<string, Label> = {
   standard: { ar: "قياسية", en: "Standard" },
   full_library: { ar: "المكتبة الكاملة", en: "Full library" },
-  choose_x: { ar: "اختر عددًا من الدورات", en: "Choose X" },
+  choose_x: { ar: "اختر عددًا من البرامج", en: "Choose X" },
 };
 export const AUDIENCE_LABELS: Record<string, Label> = {
   individual: { ar: "أفراد", en: "Individual" },
@@ -89,8 +89,8 @@ export const PLAN_TYPE_SUMMARY: Record<string, Label> = {
     en: "Subscribers automatically get every published course and diploma, including ones published later.",
   },
   choose_x: {
-    ar: "يختار المشترك عددًا محددًا من الدورات من قائمة تحددها، سنويًا فقط.",
-    en: "Subscribers pick a set number of courses from a list you choose. Yearly only.",
+    ar: "يختار المشترك عددًا محددًا من الدورات والدبلومات والحزم والباقات المنشورة، سنويًا فقط.",
+    en: "Subscribers pick a set number of published courses, diplomas, packages or bundles. Yearly only.",
   },
 };
 
@@ -108,7 +108,7 @@ export const PLAN_FIELD_HELP = {
     body: [
       { ar: "قياسية: الموارد التي تضيفها «مضمّنة» فقط، شهريًا أو سنويًا.", en: "Standard: only the resources you add as “Included”. Monthly or yearly." },
       { ar: "المكتبة الكاملة: كل دورة ودبلوم منشور يُمنح تلقائيًا، ومنها ما يُنشر لاحقًا. لا حاجة لإضافة موارد.", en: "Full library: every published course and diploma is granted automatically, including future ones. No resources to add." },
-      { ar: "اختر عددًا: يختار المشترك حتى X دورة من «قائمة الاختيار». يمكن الاستبدال قبل بدء التعلّم فقط، ولا يُرحّل غير المستخدم للسنة التالية. سنوية فقط.", en: "Choose X: subscribers pick up to X courses from the “Selectable” pool. A pick can be swapped only before learning starts; unused picks don't roll over. Yearly only." },
+      { ar: "اختر عددًا: يختار المشترك حتى X برامج من الكتالوج المنشور. يمكنك إضافة موارد مضمّنة اختياريًا. يمكن الاستبدال قبل بدء التعلّم فقط. سنوية فقط.", en: "Choose X: subscribers pick up to X programs from the published catalog. Optional Included resources go to everyone. A pick can be swapped only before learning starts. Yearly only." },
     ],
   },
   interval: {
@@ -126,8 +126,8 @@ export const PLAN_FIELD_HELP = {
     ],
   },
   allowance: {
-    title: { ar: "عدد الدورات المسموح", en: "Courses allowed" },
-    body: [{ ar: "كم دورة يختار المشترك في كل سنة اشتراك. يجب أن تضيف على الأقل هذا العدد إلى قائمة الاختيار قبل النشر.", en: "How many courses a subscriber picks per subscription year. Add at least this many to the selectable pool before publishing." }],
+    title: { ar: "عدد البرامج المسموح", en: "Programs allowed" },
+    body: [{ ar: "كم برنامجًا يختار المشترك من الكتالوج المنشور في كل سنة اشتراك. لا تحتاج إلى إنشاء قائمة اختيار.", en: "How many programs a subscriber picks from the published catalog per subscription year. No selectable pool is required." }],
   },
   replacements: {
     title: { ar: "حد الاستبدال", en: "Replacement limit" },
@@ -167,7 +167,7 @@ export const PLAN_FIELD_HELP = {
     title: { ar: "طريقة الوصول", en: "Access mode" },
     body: [
       { ar: "مضمّنة: يحصل عليها كل مشترك فور الاشتراك.", en: "Included: every subscriber gets it as soon as they subscribe." },
-      { ar: "قائمة الاختيار (باقات «اختر» فقط): يختار المشترك منها حتى العدد المسموح.", en: "Selectable (Choose X only): subscribers pick from it up to the allowance." },
+      { ar: "في باقات «اختر»، يختار المشتركون من الكتالوج المنشور؛ الموارد المضمّنة اختيارية وتُمنح للجميع.", en: "For Choose X, subscribers pick from the published catalog; optional Included resources go to everyone." },
     ],
   },
   features: {
@@ -204,6 +204,7 @@ export function adminPlanToPreview(plan: SubscriptionPlan): SubscriptionPlanPrev
   const ar = translationFor(plan, "ar");
   return {
     ...plan,
+    selectable_products: plan.plan_type === "choose_x" ? [] : plan.selectable_products,
     title: ar?.title ?? plan.title,
     subtitle: ar?.subtitle ?? plan.subtitle,
     short_description: ar?.short_description ?? plan.short_description,

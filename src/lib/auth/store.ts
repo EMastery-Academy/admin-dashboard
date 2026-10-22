@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { ApiError, setUnauthorizedHandler } from "@/lib/api/client";
 import {
   adminLogin,
+  adminQALogin,
   adminLogout,
   adminMe,
   adminRefresh,
@@ -17,6 +18,7 @@ export type AdminAuthState = {
   admin: AdminProfile | null;
   bootstrap: () => Promise<AdminProfile | null>;
   login: (credentials: AdminLoginRequest) => Promise<AdminProfile>;
+  qaLogin: (credentials: { email: string; key: string }) => Promise<AdminProfile>;
   logout: () => Promise<void>;
   refresh: (refresh_token?: string) => Promise<AdminProfile | null>;
   setAuthenticated: (admin: AdminProfile) => void;
@@ -90,6 +92,13 @@ export const useAdminAuth = create<AdminAuthState>((set, get) => ({
 
   login: async (credentials) => {
     const session = await adminLogin(credentials);
+    get().setAuthenticated(session.admin);
+    announce("signed-in");
+    return session.admin;
+  },
+
+  qaLogin: async (credentials) => {
+    const session = await adminQALogin(credentials);
     get().setAuthenticated(session.admin);
     announce("signed-in");
     return session.admin;

@@ -12,6 +12,7 @@ import {
   curriculumQueries,
   getStudio,
   productKeys,
+  productQueries,
   publishStudio,
   putProductReadme,
   studioKeys,
@@ -35,7 +36,7 @@ import type { StudioEditor as Editor, StudioPartialBlock } from "@/features/lear
 import { useDraftSaver, type SaveState } from "@/features/learning/studio/hooks/use-draft-saver";
 import { documentProblem, emptyMeta, outlineOf, toDocument } from "@/features/learning/studio/model/document";
 import { AssetLibrary, AssetPickerDialog } from "@/features/learning/studio/panels/asset-library";
-import { MetaPanel } from "@/features/learning/studio/panels/meta-panel";
+import { MetaPanel, type MetaPanelCurrent } from "@/features/learning/studio/panels/meta-panel";
 import { VersionsPanel } from "@/features/learning/studio/panels/versions-panel";
 import { PackageCoursesCard } from "@/features/learning/components/package-courses-card";
 import { ReadmePanel } from "@/features/learning/studio/panels/readme-panel";
@@ -194,6 +195,27 @@ function StudioWorkspace({ productRef, initial }: { productRef: string; initial:
   const hasCurriculum = initial.product_type === "course" || initial.product_type === "diploma";
   const base = useQuery(studioQueries.previewBase(productRef));
   const unitsQuery = useQuery({ ...curriculumQueries.units(productRef), enabled: hasCurriculum });
+  // What the page shows today: its product image and trainers. Page Details offers them when the draft is empty.
+  const productQuery = useQuery({ ...productQueries.detail(productRef), staleTime: 60_000 });
+  const productInstructors = useQuery({ ...productQueries.instructors(productRef), retry: false, staleTime: 60_000 });
+  const currentMedia = useMemo<MetaPanelCurrent | null>(() => {
+    const product = productQuery.data?.product;
+    const url = product?.image || product?.square_image;
+    if (!url) return null;
+    const alt = product?.title ?? "";
+    return { cover: { url, alt }, banner: { url, alt, headline: "" } };
+  }, [productQuery.data]);
+  // The preview reflects the page as it is today: when the draft has no cover, show the product's current image.
+  const previewDocument = useMemo(() => {
+    if (meta.cover || !currentMedia?.cover) return document;
+    return {
+      ...document,
+      meta: {
+        ...(document.meta ?? emptyMeta()),
+        cover: { asset_id: null, url: currentMedia.cover.url, alt: currentMedia.cover.alt ?? "" },
+      },
+    };
+  }, [document, meta.cover, currentMedia]);
   const words = kindWords(initial.product_type, t);
 
   const kind: PreviewKind = (base.data?.kind as PreviewKind | undefined) ?? (initial.product_type as PreviewKind) ?? "course";
@@ -504,7 +526,7 @@ function StudioWorkspace({ productRef, initial }: { productRef: string; initial:
           {showPreview ? (
             <section className="ma-studio__preview" aria-label={t("المعاينة", "Preview")}>
               {base.isError ? <ErrorAlert error={base.error} title={t("تعذّر تحميل بيانات المعاينة", "Couldn't load preview data")} /> : null}
-              <PreviewFrame base={liveBase} document={document} kind={kind} device={device} focusBlockId={focus} />
+              <PreviewFrame base={liveBase} document={previewDocument} kind={kind} device={device} focusBlockId={focus} />
             </section>
           ) : null}
         </div>
@@ -520,7 +542,7 @@ function StudioWorkspace({ productRef, initial }: { productRef: string; initial:
           {showPreview ? (
             <section className="ma-studio__preview" aria-label={t("المعاينة", "Preview")}>
               {base.isError ? <ErrorAlert error={base.error} title={t("تعذّر تحميل بيانات المعاينة", "Couldn't load preview data")} /> : null}
-              <PreviewFrame base={liveBase} document={document} kind={kind} device={device} readme={readmeText} focusBlockId={{ id: "about", at: 0 }} />
+              <PreviewFrame base={liveBase} document={previewDocument} kind={kind} device={device} readme={readmeText} focusBlockId={{ id: "about", at: 0 }} />
             </section>
           ) : null}
         </div>
@@ -534,7 +556,7 @@ function StudioWorkspace({ productRef, initial }: { productRef: string; initial:
           {showPreview ? (
             <section className="ma-studio__preview" aria-label={t("المعاينة", "Preview")}>
               {base.isError ? <ErrorAlert error={base.error} title={t("تعذّر تحميل بيانات المعاينة", "Couldn't load preview data")} /> : null}
-              <PreviewFrame base={liveBase} document={document} kind={kind} device={device} readme={readmeText} focusBlockId={{ id: "contents", at: 0 }} />
+              <PreviewFrame base={liveBase} document={previewDocument} kind={kind} device={device} readme={readmeText} focusBlockId={{ id: "contents", at: 0 }} />
             </section>
           ) : null}
         </div>
@@ -560,7 +582,7 @@ function StudioWorkspace({ productRef, initial }: { productRef: string; initial:
               ) : null}
               <PreviewFrame
                 base={liveBase}
-                document={document}
+                document={previewDocument}
                 kind={kind}
                 device={device}
                 focusBlockId={{ id: "curriculum", at: Date.now() }}
@@ -581,7 +603,7 @@ function StudioWorkspace({ productRef, initial }: { productRef: string; initial:
             }}
           >
             <Card title={t("بيانات وتفاصيل الصفحة", "Page Details")}>
-              <MetaPanel meta={meta} productRef={productRef} onChange={onMeta} pickAsset={pickAsset} />
+            <MetaPanel meta={meta} productRef={productRef} current={currentMedia} instructorDetails={productInstructors.data ?? []} onChange={onMeta} pickAsset={pickAsset} />
             </Card>
           </section>
 
@@ -592,7 +614,7 @@ function StudioWorkspace({ productRef, initial }: { productRef: string; initial:
               ) : null}
               <PreviewFrame
                 base={liveBase}
-                document={document}
+                document={previewDocument}
                 kind={kind}
                 device={device}
               />

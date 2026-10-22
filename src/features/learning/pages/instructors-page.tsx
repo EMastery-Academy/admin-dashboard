@@ -144,6 +144,7 @@ export default function InstructorsPage() {
       />
       <PagedList
         queryKeyBase={expertProfilesKeys.list()}
+        refreshOnFocus
         fetchPage={({ query, offset, limit, filters: selected }) =>
           listExpertProfiles({
             query: query || undefined,

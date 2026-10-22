@@ -97,10 +97,22 @@ export function unassignExpertProduct(key: string, product_id: string): Promise<
 }
 
 export const expertProfilesQueries = {
-  detail: (key: string) => queryOptions({ queryKey: expertProfilesKeys.detail(key), queryFn: () => getExpertProfile(key) }),
+  detail: (key: string) => queryOptions({
+    queryKey: expertProfilesKeys.detail(key),
+    queryFn: () => getExpertProfile(key),
+    staleTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
+  }),
   readme: (key: string) => queryOptions({ queryKey: expertProfilesKeys.readme(key), queryFn: () => getExpertReadme(key) }),
   products: (key: string) =>
-    queryOptions({ queryKey: expertProfilesKeys.products(key), queryFn: () => listExpertProducts(key) }),
+    queryOptions({
+      queryKey: expertProfilesKeys.products(key),
+      queryFn: () => listExpertProducts(key),
+      staleTime: 0,
+      refetchOnMount: "always",
+      refetchOnWindowFocus: true,
+    }),
 };
 
 type DuplicatesOp = "list_duplicate_instructors_api_v1_admin_catalog_instructors_duplicates_get";

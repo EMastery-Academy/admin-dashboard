@@ -23,8 +23,8 @@ type Mode = "included" | "selectable";
 type Item = { product_id: string; access_mode: Mode; title: string; product_type: string | null; slug: string | null; status: string | null };
 
 /**
- * The catalog resources a plan grants: `included` (every subscriber gets them) and, for Choose-X
- * plans, the `selectable` pool subscribers pick from. Only types subscription fulfilment delivers
+ * The catalog resources a plan grants: `included` (every subscriber gets them). Choose-X
+ * subscribers choose separately from the live published catalog. Only types subscription fulfilment delivers
  * are offered: courses, diplomas, packages and bundles. A full-library plan needs none: it grants
  * every published course and diploma.
  */
@@ -35,7 +35,7 @@ export function PlanResourcesTab({ plan, libraryCount }: { plan: SubscriptionPla
   const chooseX = plan.plan_type === "choose_x";
   // One type at a time: the cards endpoint caps a page at 200, which a mixed list would hit.
   const [typeFilter, setTypeFilter] = useState<string>("course");
-  const [addMode, setAddMode] = useState<Mode>(chooseX ? "selectable" : "included");
+  const addMode: Mode = "included";
   const { cards, isLoading } = useProductCards([typeFilter]);
 
   const [items, setItems] = useState<Item[]>(() =>
@@ -50,7 +50,7 @@ export function PlanResourcesTab({ plan, libraryCount }: { plan: SubscriptionPla
         status: p.status ?? null,
       })),
   );
-  const selectedIds = useMemo(() => new Set(items.map((i) => i.product_id)), [items]);
+  const selectedIds = useMemo(() => new Set(items.filter((i) => i.access_mode === "included").map((i) => i.product_id)), [items]);
 
   const typeLabel = (type: string | null) => t(productTypeLabel(type).ar, productTypeLabel(type).en);
   const options = cards.map((card) => ({ value: card.product_id, label: card.title ?? card.slug, hint: typeLabel(card.product_type) }));
@@ -97,9 +97,8 @@ export function PlanResourcesTab({ plan, libraryCount }: { plan: SubscriptionPla
     items
       .filter((i) => i.access_mode === mode)
       .map((i, index) => ({ product_id: i.product_id, access_mode: i.access_mode, sort_order: index, slug: i.slug, product_type: i.product_type, title: i.title, status: i.status }));
-  usePlanPreviewPatch({ included_products: asPreview("included"), selectable_products: asPreview("selectable") });
+  usePlanPreviewPatch({ included_products: asPreview("included"), selectable_products: chooseX ? [] : asPreview("selectable") });
 
-  const selectableCount = items.filter((i) => i.access_mode === "selectable").length;
   const dirty =
     JSON.stringify(items.map((i) => [i.product_id, i.access_mode])) !==
     JSON.stringify([...(plan.products ?? [])].sort((a, b) => a.sort_order - b.sort_order).map((p) => [p.product_id, p.access_mode]));
@@ -152,20 +151,14 @@ export function PlanResourcesTab({ plan, libraryCount }: { plan: SubscriptionPla
             )}
           </Alert>
         ) : null}
-        <Card title={t(`مضمّنة لكل المشتركين (${items.length - selectableCount})`, `Included for every subscriber (${items.length - selectableCount})`)}>
+        {chooseX ? (
+          <Alert kind="info" title={t("المشتركون يختارون من الكتالوج المنشور", "Subscribers choose from the published catalog")}>
+            {t("يمكنهم اختيار الدورات والدبلومات والحزم والباقات المنشورة. الموارد أدناه اختيارية وتُمنح للجميع دون استخدام أحد اختياراتهم.", "They can pick published courses, diplomas, packages and bundles. The optional resources below go to everyone without using a pick.")}
+          </Alert>
+        ) : null}
+        <Card title={t(`مضمّنة لكل المشتركين (${selectedIds.size})`, `Included for every subscriber (${selectedIds.size})`)}>
           {list("included")}
         </Card>
-        {chooseX ? (
-          <Card title={t(`قائمة الاختيار (${selectableCount})`, `Selectable pool (${selectableCount})`)}>
-            {selectableCount < (plan.selection_allowance ?? 0) ? (
-              <Alert kind="warning" title={t(
-                `يختار المشترك ${plan.selection_allowance} موارد؛ أضف ${plan.selection_allowance} على الأقل قبل النشر.`,
-                `Subscribers pick ${plan.selection_allowance}; add at least ${plan.selection_allowance} before publishing.`,
-              )} />
-            ) : null}
-            {list("selectable")}
-          </Card>
-        ) : null}
         <ErrorAlert error={save.error} title={t("تعذّر حفظ الموارد", "Couldn't save resources")} />
         {writable ? (
           <FormActions>
@@ -177,10 +170,6 @@ export function PlanResourcesTab({ plan, libraryCount }: { plan: SubscriptionPla
       {writable ? (
         <Card title={<HelpLabel text={t("إضافة موارد", "Add resources")} help="accessMode" />}>
           <div className="ma-form">
-            {chooseX ? (
-              <SelectField label={t("أضف إلى", "Add to")} value={addMode} onChange={(v) => setAddMode(v as Mode)} size="md"
-                options={[{ value: "selectable", label: t("قائمة الاختيار", "Selectable pool") }, { value: "included", label: t("مضمّنة للجميع", "Included for all") }]} />
-            ) : null}
             <SelectField label={t("النوع", "Type")} value={typeFilter} onChange={setTypeFilter} size="md"
               options={SUBSCRIPTION_RESOURCE_TYPES.map((type) => ({ value: type, label: typeLabel(type) }))} />
             {isLoading ? <Loading /> : (

@@ -25,9 +25,32 @@ import { initialsOf } from "@/lib/status";
 import { CommandPalette, KIND_META, useCommandPalette, usePaletteStore } from "./command-palette";
 
 const COLLAPSED_KEY = "admin.sidebarCollapsed";
+const NAV_STATE_KEY = "admin.navState";
 
 function readCollapsed(): boolean {
   return typeof localStorage !== "undefined" && localStorage.getItem(COLLAPSED_KEY) === "1";
+}
+
+type NavState = {
+  /** `${moduleId}:${sectionIndex}` → open. Missing means "default": open only when it holds the active page. */
+  openSections: Record<string, boolean>;
+  /** `${moduleId}:${itemHref}` → open. Missing means "default": open only when the item or a child is active. */
+  openSubMenus: Record<string, boolean>;
+};
+
+const EMPTY_NAV_STATE: NavState = { openSections: {}, openSubMenus: {} };
+
+function readNavState(): NavState {
+  if (typeof localStorage === "undefined") return EMPTY_NAV_STATE;
+  try {
+    const parsed = JSON.parse(localStorage.getItem(NAV_STATE_KEY) ?? "null") as Partial<NavState> | null;
+    return {
+      openSections: parsed?.openSections ?? {},
+      openSubMenus: parsed?.openSubMenus ?? {},
+    };
+  } catch {
+    return EMPTY_NAV_STATE;
+  }
 }
 
 export function Shell() {
@@ -39,7 +62,6 @@ export function Shell() {
   const logout = useAdminAuth((state) => state.logout);
   const [collapsed, setCollapsed] = useState(readCollapsed);
   const [navOpen, setNavOpen] = useState(false);
-  const [previewId, setPreviewId] = useState<string | null>(null);
   const palette = useCommandPalette();
   const studio = useMatches().some((match) => (match.handle as { studio?: boolean } | undefined)?.studio);
 
@@ -47,10 +69,9 @@ export function Shell() {
     localStorage.setItem(COLLAPSED_KEY, collapsed ? "1" : "0");
   }, [collapsed]);
 
-  // Any navigation closes the mobile drawer and clears a rail preview.
+  // Any navigation closes the mobile drawer.
   useEffect(() => {
     setNavOpen(false);
-    setPreviewId(null);
   }, [location.pathname]);
 
   // Ctrl/⌘ K opens the command palette; Ctrl/⌘ B collapses the sidebar (NavModule).
@@ -73,7 +94,6 @@ export function Shell() {
   const nav = useMemo(() => navigation.filter((m) => m.disabled || m.sections.length), []);
   const active = useMemo(() => matchActive(location.pathname, flatItems(nav)), [location.pathname, nav]);
   const activeModule = nav.find((m) => m.id === (active?.module.id ?? "")) ?? nav[0];
-  const shownModule: NavModule = (previewId && nav.find((m) => m.id === previewId)) || activeModule;
 
   const crumbs = useMemo(() => {
     if (!active) return [];
@@ -89,10 +109,10 @@ export function Shell() {
   }, [active, lang]);
 
   return (
-    <div className={cn("ma-shell", studio && "is-studio", collapsed && "is-sidebar-collapsed", collapsed && previewId && !navOpen && "is-peek", navOpen && "is-nav-open")}>
+    <div className={cn("ma-shell", studio && "is-studio", collapsed && "is-sidebar-collapsed", navOpen && "is-nav-open")}>
       <CommandPalette open={palette.open} onClose={palette.close} />
 
-      <div className="ma-nav-drawer" id="nav-drawer" onMouseLeave={() => setPreviewId(null)}>
+      <div className="ma-nav-drawer" id="nav-drawer">
         {/* Rail */}
         <nav className="ma-rail" aria-label={t("المجالات", "Domains")}>
           <Link className="ma-rail__logo" to="/dashboard" aria-label={t("ماستري أكاديمي - الرئيسية", "Mastery Academy home")}>
@@ -106,19 +126,17 @@ export function Shell() {
             return (
               <Link
                 key={m.id}
-                className={cn("ma-rail__item", m.disabled && "is-disabled", previewId === m.id && m.id !== activeModule.id && "is-previewed")}
-                to={m.disabled ? "/dashboard" : `#${first}`}
+                className={cn("ma-rail__item", m.disabled && "is-disabled")}
+                to={m.disabled ? "/dashboard" : first}
                 onClick={(event) => {
-                  event.preventDefault();
-                  if (m.disabled) return;
-                  if (navOpen) {
-                    setPreviewId(m.id);
+                  if (m.disabled) {
+                    event.preventDefault();
                     return;
                   }
-                  navigate(first);
+                  // Clicking a different root domain reveals the contextual panel again.
+                  if (m.id !== activeModule.id) setCollapsed(false);
+                  setNavOpen(false);
                 }}
-                onMouseEnter={() => setPreviewId(m.id)}
-                onFocus={() => setPreviewId(m.id)}
                 aria-current={current ? "true" : undefined}
                 title={translate(useLangStore.getState().lang, m.title.ar, m.title.en)}
               >
@@ -139,14 +157,14 @@ export function Shell() {
         </nav>
 
         {/* Sidebar */}
-        <nav className="ma-sidebar" aria-label={translate(useLangStore.getState().lang, shownModule.title.ar, shownModule.title.en)}>
-          <Sidebar module={shownModule} activeHref={active?.href} onCollapse={() => setCollapsed(true)} />
+        <nav className="ma-sidebar" aria-label={translate(useLangStore.getState().lang, activeModule.title.ar, activeModule.title.en)}>
+          <Sidebar module={activeModule} activeHref={active?.href} onCollapse={() => setCollapsed(true)} />
         </nav>
       </div>
 
       <div className="ma-scrim" onClick={() => setNavOpen(false)} />
 
-      <div className="ma-main" onMouseLeave={() => setPreviewId(null)}>
+      <div className="ma-main">
         <header className="ma-topbar">
           <span className="ma-topbar__mobile">
             <IconButton iconNode={<MenuIcon size={22} />} label={t("فتح القائمة", "Open menu")} onClick={() => setNavOpen(true)} />
@@ -192,8 +210,58 @@ function Sidebar({ module, activeHref, onCollapse }: { module: NavModule; active
   const location = useLocation();
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
-  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
-  const [openSubMenus, setOpenSubMenus] = useState<Record<string, boolean>>({});
+  const [navState, setNavState] = useState<NavState>(readNavState);
+
+  // Persist section / sub-menu disclosure so the panel keeps the user's shape across reloads.
+  useEffect(() => {
+    try {
+      localStorage.setItem(NAV_STATE_KEY, JSON.stringify(navState));
+    } catch {
+      // Storage unavailable (private mode / quota) — fall back to in-memory state.
+    }
+  }, [navState]);
+
+  // The in-panel search is scoped to the active domain; drop it when the domain changes.
+  useEffect(() => {
+    setQuery("");
+    setDebouncedQuery("");
+  }, [module.id]);
+
+  // Navigating to a page reveals its section and parent item even if the user collapsed them.
+  useEffect(() => {
+    if (!activeHref) return;
+    setNavState((prev) => {
+      const openSections = { ...prev.openSections };
+      const openSubMenus = { ...prev.openSubMenus };
+      let changed = false;
+
+      module.sections.forEach((section, si) => {
+        const sectionKey = `${module.id}:${si}`;
+        const holdsSection = section.items.some(
+          (item) => item.href === activeHref || activeHref.startsWith(`${item.href}/`),
+        );
+        if (holdsSection && openSections[sectionKey] === false) {
+          openSections[sectionKey] = true;
+          changed = true;
+        }
+
+        for (const item of section.items) {
+          if (!item.children?.length) continue;
+          const itemKey = `${module.id}:${item.href}`;
+          const holdsItem =
+            item.href === activeHref ||
+            activeHref.startsWith(`${item.href}/`) ||
+            item.children.some((child) => child.href === activeHref || activeHref.startsWith(`${child.href}/`));
+          if (holdsItem && openSubMenus[itemKey] === false) {
+            openSubMenus[itemKey] = true;
+            changed = true;
+          }
+        }
+      });
+
+      return changed ? { openSections, openSubMenus } : prev;
+    });
+  }, [activeHref, module.id, module.sections]);
 
   const rawTerm = query.trim();
   const q = rawTerm.toLowerCase();
@@ -309,14 +377,21 @@ function Sidebar({ module, activeHref, onCollapse }: { module: NavModule; active
         {matchingModuleSections.map(({ section, si, items }) => {
           const holdsActive = section.items.some((item) => item.href === activeHref);
           const key = `${module.id}:${si}`;
-          const open = holdsActive || !collapsedSections[key];
+          // Default: only the section holding the current page is open; the rest stay collapsed
+          // until the user opens them (their choice is persisted).
+          const open = Boolean(navState.openSections[key] ?? holdsActive);
           return (
             <div className="ma-sidebar__section" key={key}>
               <button
                 type="button"
                 className="ma-sidebar__section-btn"
                 aria-expanded={q ? true : open}
-                onClick={() => setCollapsedSections((state) => ({ ...state, [key]: !open }))}
+                onClick={() =>
+                  setNavState((state) => ({
+                    ...state,
+                    openSections: { ...state.openSections, [key]: !open },
+                  }))
+                }
               >
                 <Icon name="chevron" />
                 {translate(lang, section.title.ar, section.title.en)}
@@ -335,7 +410,7 @@ function Sidebar({ module, activeHref, onCollapse }: { module: NavModule; active
                   );
                   const isItemActive = item.href === activeHref || (!isChildActive && location.pathname === item.href);
                   const itemKey = `${module.id}:${item.href}`;
-                  const isSubOpen = Boolean(q || isChildActive || (openSubMenus[itemKey] ?? isItemActive));
+                  const isSubOpen = Boolean(q || (navState.openSubMenus[itemKey] ?? (isItemActive || isChildActive)));
 
                   return (
                     <li key={item.href} className={cn("ma-sidebar__item", hasChildren && "has-children")}>
@@ -355,7 +430,10 @@ function Sidebar({ module, activeHref, onCollapse }: { module: NavModule; active
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              setOpenSubMenus((prev) => ({ ...prev, [itemKey]: !isSubOpen }));
+                              setNavState((state) => ({
+                                ...state,
+                                openSubMenus: { ...state.openSubMenus, [itemKey]: !isSubOpen },
+                              }));
                             }}
                           >
                             <Icon name="chevron" className="ma-sidebar__sub-chevron" />

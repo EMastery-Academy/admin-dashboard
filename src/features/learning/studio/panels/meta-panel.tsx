@@ -1,13 +1,63 @@
 import { useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowDown, ArrowUp, GripVertical, ImageIcon, Upload, UserRound, X } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  ChevronUp,
+  GripVertical,
+  ImageIcon,
+  Info,
+  Mail,
+  MapPin,
+  Phone,
+  Upload,
+  UserRound,
+  X,
+} from "lucide-react";
 
 import { ErrorAlert, Field } from "@/components/ui/kit";
 import { ReactPhotoEditor } from "react-photo-editor";
-import { listAdminInstructors, studioKeys, uploadStudioAsset, type StudioAsset, type StudioMeta } from "@/lib/api";
+import {
+  getAdminInstructor,
+  listAdminInstructors,
+  studioKeys,
+  uploadStudioAsset,
+  type AdminInstructor,
+  type StudioAsset,
+  type StudioMeta,
+} from "@/lib/api";
 import { useT } from "@/lib/i18n";
 
 type Instructor = NonNullable<StudioMeta["instructors"]>[number];
+
+/** The images the product page shows today, used as a preview until the admin picks one. */
+export type MetaPanelCurrent = {
+  cover?: { url: string; alt?: string } | null;
+  banner?: { url: string; alt?: string; headline?: string } | null;
+};
+
+const TRAINER_REF = /^legacy:trainer:(\d+)$/;
+
+function legacyTrainerId(ref: string): number | null {
+  const match = TRAINER_REF.exec(ref);
+  return match ? Number(match[1]) : null;
+}
+
+/** Plain text of a trainer bio (the legacy fields are HTML). */
+function plainText(value: string | null | undefined): string {
+  if (!value) return "";
+  if (typeof document === "undefined") {
+    return value.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  }
+  const element = document.createElement("div");
+  element.innerHTML = value;
+  return (element.textContent ?? "").replace(/\s+/g, " ").trim();
+}
+
+function yearsLabel(value: unknown): string | null {
+  const years = typeof value === "number" ? value : value == null || value === "" ? null : Number(value);
+  return years !== null && Number.isFinite(years) && years >= 0 ? `${years}` : null;
+}
 
 /**
  * Page details shown above the content: title, summary, cover, banner, intro video and instructors. Empty
@@ -16,17 +66,27 @@ type Instructor = NonNullable<StudioMeta["instructors"]>[number];
 export function MetaPanel({
   meta,
   productRef,
+  current,
+  instructorDetails = [],
   onChange,
   pickAsset,
 }: {
   meta: StudioMeta;
   productRef?: string;
+  /** The product's current live images, shown as a fallback in the empty pickers. */
+  current?: MetaPanelCurrent | null;
+  /** Current trainers of the product (with their bio/contact details), from the product API. */
+  instructorDetails?: AdminInstructor[];
   onChange: (meta: StudioMeta) => void;
   pickAsset: (kind?: "image") => Promise<StudioAsset | null>;
 }) {
   const t = useT();
   const set = (patch: Partial<StudioMeta>) => onChange({ ...meta, ...patch });
   const instructors = meta.instructors ?? [];
+
+  const currentCover = current?.cover ?? null;
+  const currentBanner: { url: string; alt?: string; headline?: string } | null =
+    current?.banner ?? current?.cover ?? null;
 
   return (
     <div className="ma-studio-meta">
@@ -44,6 +104,10 @@ export function MetaPanel({
       <ImagePicker
         label={t("صورة الغلاف", "Cover image")}
         value={meta.cover ?? null}
+        fallback={currentCover}
+        onUseFallback={() =>
+          currentCover && set({ cover: { url: currentCover.url, alt: currentCover.alt ?? meta.title ?? "" } })
+        }
         productRef={productRef}
         onPick={async () => {
           const asset = await pickAsset("image");
@@ -59,6 +123,17 @@ export function MetaPanel({
       <ImagePicker
         label={t("بانر الصفحة", "Page banner")}
         value={meta.banner ?? null}
+        fallback={currentBanner}
+        onUseFallback={() =>
+          currentBanner &&
+          set({
+            banner: {
+              url: currentBanner.url,
+              alt: currentBanner.alt ?? "",
+              headline: meta.banner?.headline ?? currentBanner.headline ?? "",
+            },
+          })
+        }
         productRef={productRef}
         onPick={async () => {
           const asset = await pickAsset("image");
@@ -90,7 +165,11 @@ export function MetaPanel({
         onChange={(value) => set({ intro_video_id: value.trim() || null })}
       />
 
-      <InstructorsEditor value={instructors} onChange={(next) => set({ instructors: next })} />
+      <InstructorsEditor
+        value={instructors}
+        details={instructorDetails}
+        onChange={(next) => set({ instructors: next })}
+      />
     </div>
   );
 }
@@ -98,6 +177,8 @@ export function MetaPanel({
 function ImagePicker({
   label,
   value,
+  fallback,
+  onUseFallback,
   productRef,
   onPick,
   onUploaded,
@@ -107,6 +188,8 @@ function ImagePicker({
 }: {
   label: string;
   value: { url: string; alt?: string } | null;
+  fallback?: { url: string; alt?: string } | null;
+  onUseFallback?: () => void;
   productRef?: string;
   onPick: () => void;
   onUploaded?: (asset: StudioAsset) => void;
@@ -121,6 +204,9 @@ function ImagePicker({
   const [uploadError, setUploadError] = useState<unknown>(null);
   const [editingFile, setEditingFile] = useState<File | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+
+  const usingFallback = !value && Boolean(fallback);
+  const shown = value ?? fallback ?? null;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -175,10 +261,26 @@ function ImagePicker({
     <div className="ma-field">
       <span className="ma-label">{label}</span>
       <div className="ma-studio-image">
-        <button type="button" className="ma-studio-image__thumb" onClick={onPick} aria-label={label}>
-          {value ? <img src={value.url} alt={value.alt ?? ""} /> : <ImageIcon size={22} aria-hidden />}
+        <button
+          type="button"
+          className="ma-studio-image__thumb"
+          onClick={usingFallback && onUseFallback ? onUseFallback : onPick}
+          aria-label={usingFallback ? t("استخدام الصورة الحالية", "Use current image") : label}
+          title={usingFallback ? t("الصورة المعروضة على الصفحة حالياً", "The image currently live on the page") : undefined}
+        >
+          {shown ? <img src={shown.url} alt={shown.alt ?? ""} /> : <ImageIcon size={22} aria-hidden />}
         </button>
         <div className="ma-studio-image__side">
+          {usingFallback ? (
+            <>
+              <span className="ma-muted" style={{ flexBasis: "100%", fontSize: 12 }}>
+                {t("الصورة الحالية على الصفحة", "Currently live on the page")}
+              </span>
+              <button type="button" className="ma-sblock__btn" onClick={onUseFallback}>
+                {t("استخدام الصورة الحالية", "Use current image")}
+              </button>
+            </>
+          ) : null}
           {productRef ? (
             <>
               <button
@@ -234,11 +336,19 @@ function ImagePicker({
   );
 }
 
-
-function InstructorsEditor({ value, onChange }: { value: Instructor[]; onChange: (value: Instructor[]) => void }) {
+function InstructorsEditor({
+  value,
+  details,
+  onChange,
+}: {
+  value: Instructor[];
+  details: AdminInstructor[];
+  onChange: (value: Instructor[]) => void;
+}) {
   const t = useT();
   const [query, setQuery] = useState("");
   const [dragging, setDragging] = useState<number | null>(null);
+  const detailsById = new Map(details.map((item) => [item.legacy_trainer_id, item]));
   const search = useQuery({
     queryKey: ["learning", "studio", "instructor-search", query],
     queryFn: () => listAdminInstructors({ query: query || undefined, limit: 8 }),
@@ -253,15 +363,39 @@ function InstructorsEditor({ value, onChange }: { value: Instructor[]; onChange:
     onChange(next);
   };
 
+  const add = (item: AdminInstructor) => {
+    const ref = `legacy:trainer:${item.legacy_trainer_id}`;
+    if (value.some((current) => current.ref === ref)) return;
+    onChange([
+      ...value,
+      {
+        ref,
+        display_name: item.name ?? "",
+        avatar_url: item.avatar?.startsWith("https://") ? item.avatar : null,
+      },
+    ]);
+    setQuery("");
+  };
+
+  const hasRef = (item: AdminInstructor) =>
+    value.some((current) => current.ref === `legacy:trainer:${item.legacy_trainer_id}`);
+  const notSelected = details.filter((item) => !hasRef(item));
+
   return (
     <div className="ma-field">
       <span className="ma-label">{t("المدربون", "Instructors")}</span>
+      <span className="ma-muted" style={{ fontSize: 12 }}>
+        {t("اضغط ⓘ لعرض نبذة المدرب وبياناته.", "Press ⓘ to see the trainer's bio and details.")}
+      </span>
       <ol className="ma-studio-list">
         {value.map((item, index) => (
-          <li
+          <InstructorRow
             key={item.ref}
-            className={dragging === index ? "is-dragging" : undefined}
-            draggable
+            item={item}
+            detail={detailsById.get(legacyTrainerId(item.ref) ?? -1)}
+            index={index}
+            total={value.length}
+            dragging={dragging === index}
             onDragStart={() => setDragging(index)}
             onDragOver={(event) => event.preventDefault()}
             onDrop={() => {
@@ -269,24 +403,37 @@ function InstructorsEditor({ value, onChange }: { value: Instructor[]; onChange:
               setDragging(null);
             }}
             onDragEnd={() => setDragging(null)}
-          >
-            <GripVertical size={14} aria-hidden className="ma-studio-list__grip" />
-            <span className="ma-sblock__avatar ma-sblock__avatar--sm">
-              {item.avatar_url ? <img src={item.avatar_url} alt="" /> : <UserRound size={14} aria-hidden />}
-            </span>
-            <span className="ma-studio-list__name">{item.display_name}</span>
-            <button type="button" aria-label={t("لأعلى", "Move up")} onClick={() => move(index, index - 1)}>
-              <ArrowUp size={14} aria-hidden />
-            </button>
-            <button type="button" aria-label={t("لأسفل", "Move down")} onClick={() => move(index, index + 1)}>
-              <ArrowDown size={14} aria-hidden />
-            </button>
-            <button type="button" aria-label={t("إزالة", "Remove")} onClick={() => onChange(value.filter((_, i) => i !== index))}>
-              <X size={14} aria-hidden />
-            </button>
-          </li>
+            onMoveUp={() => move(index, index - 1)}
+            onMoveDown={() => move(index, index + 1)}
+            onRemove={() => onChange(value.filter((_, i) => i !== index))}
+          />
         ))}
       </ol>
+
+      {notSelected.length > 0 ? (
+        <div className="ma-field" style={{ marginBlockEnd: 8 }}>
+          <span className="ma-label">{t("المدربون الحاليون على الصفحة", "Instructors currently on the page")}</span>
+          <ul className="ma-studio-suggest">
+            {notSelected.map((item) => (
+              <li key={item.legacy_trainer_id}>
+                <button type="button" onClick={() => add(item)} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span className="ma-sblock__avatar ma-sblock__avatar--sm">
+                    {item.avatar ? <img src={item.avatar} alt="" /> : <UserRound size={14} aria-hidden />}
+                  </span>
+                  <span style={{ display: "grid", gap: 2, textAlign: "start", minWidth: 0 }}>
+                    <span>{item.name ?? t("مدرب بدون اسم", "Unnamed instructor")}</span>
+                    <TrainerSubtitle detail={item} />
+                  </span>
+                  <span className="ma-muted" style={{ marginInlineStart: "auto", fontSize: 12 }}>
+                    {t("إضافة", "Add")}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
       <input
         className="ma-input"
         placeholder={t("ابحث عن مدرب لإضافته…", "Search an instructor to add…")}
@@ -296,24 +443,21 @@ function InstructorsEditor({ value, onChange }: { value: Instructor[]; onChange:
       {search.data?.items.length ? (
         <ul className="ma-studio-suggest">
           {search.data.items
-            .filter((item) => !value.some((current) => current.ref === `legacy:trainer:${item.legacy_trainer_id}`))
+            .filter((item) => !hasRef(item))
             .map((item) => (
               <li key={item.legacy_trainer_id}>
                 <button
                   type="button"
-                  onClick={() => {
-                    onChange([
-                      ...value,
-                      {
-                        ref: `legacy:trainer:${item.legacy_trainer_id}`,
-                        display_name: item.name ?? "",
-                        avatar_url: item.avatar?.startsWith("https://") ? item.avatar : null,
-                      },
-                    ]);
-                    setQuery("");
-                  }}
+                  onClick={() => add(item)}
+                  style={{ display: "flex", alignItems: "center", gap: 8 }}
                 >
-                  {item.name}
+                  <span className="ma-sblock__avatar ma-sblock__avatar--sm">
+                    {item.avatar ? <img src={item.avatar} alt="" /> : <UserRound size={14} aria-hidden />}
+                  </span>
+                  <span style={{ display: "grid", gap: 2, textAlign: "start", minWidth: 0 }}>
+                    <span>{item.name}</span>
+                    <TrainerSubtitle detail={item} />
+                  </span>
                 </button>
               </li>
             ))}
@@ -321,4 +465,197 @@ function InstructorsEditor({ value, onChange }: { value: Instructor[]; onChange:
       ) : null}
     </div>
   );
+}
+
+function TrainerSubtitle({ detail }: { detail: AdminInstructor }) {
+  const t = useT();
+  const specialization = detail.specialization?.trim();
+  const years = yearsLabel(detail.years_of_experience);
+  const parts = [
+    specialization,
+    years ? t(`${years} سنوات خبرة`, `${years} years of experience`) : null,
+  ].filter(Boolean);
+  if (parts.length === 0) {
+    const bio = plainText(detail.bio);
+    return (
+      <small className="ma-muted">
+        {detail.email ?? (bio ? `${bio.slice(0, 90)}${bio.length > 90 ? "…" : ""}` : t("لا توجد تفاصيل إضافية", "No extra details"))}
+      </small>
+    );
+  }
+  return <small className="ma-muted">{parts.join(" · ")}</small>;
+}
+
+function InstructorRow({
+  item,
+  detail,
+  index,
+  total,
+  dragging,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  onDragEnd,
+  onMoveUp,
+  onMoveDown,
+  onRemove,
+}: {
+  item: Instructor;
+  detail?: AdminInstructor;
+  index: number;
+  total: number;
+  dragging: boolean;
+  onDragStart: () => void;
+  onDragOver: (event: React.DragEvent<HTMLLIElement>) => void;
+  onDrop: () => void;
+  onDragEnd: () => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+  onRemove: () => void;
+}) {
+  const t = useT();
+  const [open, setOpen] = useState(false);
+  const trainerId = legacyTrainerId(item.ref);
+  // A trainer added from search may not be on the product yet; load their full card on demand.
+  const fallback = useQuery({
+    queryKey: ["learning", "studio", "instructor-detail", trainerId],
+    queryFn: () => getAdminInstructor(trainerId as number),
+    enabled: open && trainerId !== null && !detail,
+    staleTime: 5 * 60_000,
+    retry: false,
+  });
+  const data = detail ?? fallback.data;
+  const bio = plainText(data?.bio);
+  const subtitle = data ? detailsLine(data) : null;
+
+  return (
+    <li
+      className={dragging ? "is-dragging" : undefined}
+      style={{ flexWrap: "wrap" }}
+      draggable
+      onDragStart={onDragStart}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+      onDragEnd={onDragEnd}
+    >
+      <GripVertical size={14} aria-hidden className="ma-studio-list__grip" />
+      <span className="ma-sblock__avatar ma-sblock__avatar--sm">
+        {item.avatar_url ? <img src={item.avatar_url} alt="" /> : <UserRound size={14} aria-hidden />}
+      </span>
+      <span className="ma-studio-list__name">
+        <span style={{ display: "block" }}>{item.display_name}</span>
+        {subtitle ? (
+          <small className="ma-muted" style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {subtitle}
+          </small>
+        ) : null}
+      </span>
+      <button
+        type="button"
+        aria-label={open ? t("إخفاء التفاصيل", "Hide details") : t("عرض التفاصيل", "Show details")}
+        title={open ? t("إخفاء التفاصيل", "Hide details") : t("عرض التفاصيل", "Show details")}
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+      >
+        {open ? <ChevronUp size={14} aria-hidden /> : <Info size={14} aria-hidden />}
+      </button>
+      <button type="button" aria-label={t("لأعلى", "Move up")} disabled={index === 0} onClick={onMoveUp}>
+        <ArrowUp size={14} aria-hidden />
+      </button>
+      <button type="button" aria-label={t("لأسفل", "Move down")} disabled={index === total - 1} onClick={onMoveDown}>
+        <ArrowDown size={14} aria-hidden />
+      </button>
+      <button type="button" aria-label={t("إزالة", "Remove")} onClick={onRemove}>
+        <X size={14} aria-hidden />
+      </button>
+
+      {open ? (
+        <div
+          style={{
+            flexBasis: "100%",
+            display: "grid",
+            gap: 8,
+            paddingBlockStart: 8,
+            borderBlockStart: "1px solid var(--line)",
+          }}
+        >
+          {fallback.isLoading && !data ? (
+            <span className="ma-muted" style={{ fontSize: 12 }}>
+              {t("جارٍ تحميل تفاصيل المدرب…", "Loading trainer details…")}
+            </span>
+          ) : null}
+          {!fallback.isLoading && !data ? (
+            <span className="ma-muted" style={{ fontSize: 12 }}>
+              {t("لا توجد تفاصيل إضافية لهذا المدرب.", "No extra details for this trainer.")}
+            </span>
+          ) : null}
+          {data ? (
+            <>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+                  gap: 6,
+                  fontSize: 12,
+                }}
+              >
+                <DetailItem icon={<Mail size={13} aria-hidden />} label={t("البريد", "Email")} value={data.email} />
+                <DetailItem icon={<Phone size={13} aria-hidden />} label={t("الهاتف", "Phone")} value={data.phone} />
+                <DetailItem icon={<MapPin size={13} aria-hidden />} label={t("المدينة", "City")} value={data.city} />
+                <DetailItem icon={<MapPin size={13} aria-hidden />} label={t("الجنسية", "Nationality")} value={data.nationality} />
+                <DetailItem
+                  icon={<Info size={13} aria-hidden />}
+                  label={t("التخصص", "Specialization")}
+                  value={data.specialization}
+                />
+                <DetailItem
+                  icon={<Info size={13} aria-hidden />}
+                  label={t("سنوات الخبرة", "Years of experience")}
+                  value={yearsLabel(data.years_of_experience)}
+                />
+              </div>
+              {bio ? (
+                <p
+                  className="ma-muted"
+                  style={{
+                    margin: 0,
+                    fontSize: 12,
+                    lineHeight: 1.8,
+                    maxHeight: 180,
+                    overflow: "auto",
+                  }}
+                >
+                  {bio}
+                </p>
+              ) : (
+                <span className="ma-muted" style={{ fontSize: 12 }}>
+                  {t("لا توجد نبذة مكتوبة.", "No bio written.")}
+                </span>
+              )}
+            </>
+          ) : null}
+        </div>
+      ) : null}
+    </li>
+  );
+}
+
+function DetailItem({ icon, label, value }: { icon: React.ReactNode; label: string; value: string | null | undefined }) {
+  if (!value?.trim()) return null;
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 5, color: "var(--text-muted)" }}>
+      {icon}
+      <strong style={{ fontWeight: 600, color: "var(--text)" }}>{label}:</strong>
+      <span>{value}</span>
+    </span>
+  );
+}
+
+function detailsLine(detail: AdminInstructor): string | null {
+  const years = yearsLabel(detail.years_of_experience);
+  const contact = detail.email ?? detail.phone ?? null;
+  const parts = [detail.specialization, years ? `${years}` : null, contact].filter(Boolean);
+  if (parts.length > 0) return parts.join(" · ");
+  const bio = plainText(detail.bio);
+  return bio ? `${bio.slice(0, 90)}${bio.length > 90 ? "…" : ""}` : null;
 }

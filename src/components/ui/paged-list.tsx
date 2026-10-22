@@ -50,6 +50,8 @@ export type PagedListProps<T> = {
   toolbar?: ReactNode;
   empty?: string;
   pageSize?: number;
+  /** Refresh this list on navigation and when the admin returns to the browser tab. */
+  refreshOnFocus?: boolean;
   /**
    * Server-side sort over the whole list: a "Sort by" select plus a direction toggle, and header
    * clicks on columns that declare a matching `sortKey`.
@@ -83,6 +85,7 @@ export function PagedList<T>({
   toolbar,
   empty,
   pageSize = 25,
+  refreshOnFocus = false,
   sort,
   exportConfig,
 }: PagedListProps<T>) {
@@ -103,6 +106,7 @@ export function PagedList<T>({
     queryKey: [...queryKeyBase, { search, offset, values, multiValues, order }],
     queryFn: () =>
       fetchPage({ query: search || undefined, offset, limit: pageSize, filters: values, multi: multiValues, sort: order }),
+    ...(refreshOnFocus ? { staleTime: 0, refetchOnMount: "always" as const, refetchOnWindowFocus: true } : {}),
   });
 
   const activeFilters = [

@@ -149,7 +149,7 @@ export function PlanDetailsTab({ plan }: { plan: SubscriptionPlan }) {
                 options={[
                   { value: "standard", label: t("قياسية", "Standard") },
                   { value: "full_library", label: t("المكتبة الكاملة", "Full library") },
-                  { value: "choose_x", label: t("اختر عددًا من الدورات", "Choose X courses") },
+                  { value: "choose_x", label: t("اختر عددًا من البرامج", "Choose X programs") },
                 ]} />
               <span className="ma-help">{t(PLAN_TYPE_SUMMARY[planType].ar, PLAN_TYPE_SUMMARY[planType].en)}</span>
             </div>
@@ -163,7 +163,7 @@ export function PlanDetailsTab({ plan }: { plan: SubscriptionPlan }) {
                   : <HelpLabel text={t("السعر الأساسي (USD)", "List price (USD)")} help="price" />} />
               {chooseX ? (
                 <>
-                  <Field id="d-allowance" type="number" min={1} label={<HelpLabel text={t("عدد الدورات المسموح", "Courses allowed")} help="allowance" />} value={allowance} onChange={setAllowance} />
+                  <Field id="d-allowance" type="number" min={1} label={<HelpLabel text={t("عدد البرامج المسموح", "Programs allowed")} help="allowance" />} value={allowance} onChange={setAllowance} />
                   <Field id="d-repl" type="number" min={0} label={<HelpLabel text={t("حد الاستبدال لكل فترة", "Replacements per period")} help="replacements" />} value={maxReplacements}
                     onChange={setMaxReplacements} hint={t("فارغ = بلا حد", "Empty = no limit")} />
                 </>

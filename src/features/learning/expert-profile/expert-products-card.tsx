@@ -112,10 +112,12 @@ export function ExpertProductsCard({ expertKey, consultantHref }: { expertKey: s
       title={t("المنتجات والموارد", "Products & resources")}
       actions={<Button kind="primary" icon="plus" label={t("إسناد منتج", "Assign a product")} onClick={() => setAssigning(true)} />}
     >
-      <ErrorAlert error={products.error ?? unassign.error} />
-      {rows.length === 0 ? (
+      <ErrorAlert error={products.error} title={t("تعذّر تحميل المنتجات", "Couldn't load products")} />
+      {products.isError ? <Button sm kind="ghost" icon="refresh" label={t("إعادة المحاولة", "Retry")} onClick={() => { void products.refetch(); }} /> : null}
+      <ErrorAlert error={unassign.error} />
+      {rows.length === 0 && !products.isError ? (
         <Empty text={t("لم يُسند أي منتج لهذا المدرّب بعد.", "Nothing assigned to this expert yet.")} />
-      ) : (
+      ) : rows.length > 0 ? (
         <div className="grid gap-6">
           {KINDS.map((kind) => {
             const ofKind = rows.filter((row) => row.product_type === kind);
@@ -129,7 +131,7 @@ export function ExpertProductsCard({ expertKey, consultantHref }: { expertKey: s
             ) : null;
           })}
         </div>
-      )}
+      ) : null}
       {assigning ? (
         <AssignProductModal expertKey={expertKey} onClose={() => setAssigning(false)} onAssigned={settle} />
       ) : null}

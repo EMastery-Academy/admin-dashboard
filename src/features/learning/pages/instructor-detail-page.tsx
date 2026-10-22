@@ -31,6 +31,7 @@ export default function InstructorDetailPage() {
   const expert = query.data;
   const base = `/learning/instructors/${encodeURIComponent(key)}`;
   const active: Tab = tab === "products" || tab === "preview" ? tab : "";
+  const queryClient = useQueryClient();
 
   return (
     <>
@@ -41,6 +42,7 @@ export default function InstructorDetailPage() {
         sub={expert?.headline || expert?.specialized || `#${key}`}
         actions={
           <>
+            <Button kind="ghost" icon="refresh" label={t("تحديث", "Refresh")} onClick={() => { void queryClient.invalidateQueries({ queryKey: expertProfilesKeys.all }); }} />
             <Button kind="primary" icon="edit" label={t("فتح الاستوديو", "Open Studio")} href={`${base}/studio`} />
             <Button kind="ghost" icon="link" label={t("الصفحة العامة", "Public page")} href={expertPublicUrl(key)} target="_blank" rel="noopener noreferrer" />
           </>

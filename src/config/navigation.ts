@@ -58,6 +58,7 @@ export const navigation: NavModule[] = [
         title: { ar: "التسعير", en: "Pricing" },
         items: [
           { title: { ar: "الكوبونات", en: "Coupons" }, href: "/sales/coupons", permission: "coupons.read" },
+          { title: { ar: "قسائم الرصيد", en: "Vouchers" }, href: "/sales/vouchers", permission: "coupons.read" },
           { title: { ar: "قوائم الأسعار", en: "Price lists" }, href: "/sales/price-lists", permission: "pricing.read" },
           { title: { ar: "العروض", en: "Offers" }, href: "/sales/offers", permission: "pricing.read" },
         ],

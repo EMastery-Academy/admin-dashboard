@@ -14,6 +14,10 @@ import RefundCaseDetailPage from "@/features/sales/pages/refund-case-detail-page
 import InvoicesPage from "@/features/sales/pages/invoices-page";
 import CouponsPage from "@/features/marketing/pages/coupons-page";
 import CouponNewPage from "@/features/marketing/pages/coupon-new-page";
+import CouponDetailPage from "@/features/marketing/pages/coupon-detail-page";
+import VouchersPage from "@/features/marketing/pages/vouchers-page";
+import VoucherIssuePage from "@/features/marketing/pages/voucher-issue-page";
+import VoucherDetailPage from "@/features/marketing/pages/voucher-detail-page";
 import CustomersPage from "@/features/customers/pages/customers-page";
 import CustomerDetailPage from "@/features/customers/pages/customer-detail-page";
 import AccountsPage from "@/features/customers/pages/accounts-page";
@@ -117,6 +121,10 @@ export const ROUTER = createBrowserRouter([
       { path: "sales/invoices", element: <InvoicesPage /> },
       { path: "sales/coupons", element: <CouponsPage /> },
       { path: "sales/coupons/new", element: <CouponNewPage /> },
+      { path: "sales/coupons/:promotionId", element: <CouponDetailPage /> },
+      { path: "sales/vouchers", element: <VouchersPage /> },
+      { path: "sales/vouchers/new", element: <VoucherIssuePage /> },
+      { path: "sales/vouchers/:voucherId", element: <VoucherDetailPage /> },
       { path: "sales/price-lists", element: <PriceListsPage /> },
       { path: "sales/offers", element: <OffersPage /> },
 

@@ -58,6 +58,9 @@ import {
   getProductPrices,
   getProductRules,
   getPromotion,
+  getCoupon,
+  listCoupons,
+  listCouponRedemptions,
   getReferralPartner,
   getRefundPreview,
   getSupportTicket,
@@ -726,6 +729,18 @@ function liveEndpointTests(): LiveTest[] {
         const page = await listOffers({ limit: 5 });
         ctx.offerId = page.items[0]?.legacy_offer_id;
         if (ctx.offerId) await getOffer(ctx.offerId);
+      },
+    },
+
+    // -- native coupons (read-only: no writes against shared data)
+    {
+      name: "GET /admin/coupons[/{id}[/redemptions]]",
+      run: async () => {
+        const page = await listCoupons({ limit: 5 });
+        const first = page.items[0];
+        if (!first) throw new SkipTest("no coupon");
+        await getCoupon(first.promotion_id);
+        await listCouponRedemptions(first.promotion_id, { limit: 5 });
       },
     },
 

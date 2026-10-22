@@ -19,6 +19,7 @@ export type AdminWho = AdminProfile;
 
 export const authPaths = {
   login: "admin/auth/login",
+  qaLogin: "admin/auth/qa/login",
   refresh: "admin/auth/refresh",
   logout: "admin/auth/logout",
   me: "admin/me",
@@ -31,6 +32,10 @@ export const authKeys = {
 
 export function adminLogin(body: AdminLoginRequest): Promise<AdminAuthResponse> {
   return apiPost(authPaths.login, { body });
+}
+
+export function adminQALogin(body: { email: string; key: string }): Promise<AdminAuthResponse> {
+  return apiPost(authPaths.qaLogin, { body });
 }
 
 export function adminRefresh(body: AdminRefreshRequest = {}): Promise<AdminAuthResponse> {

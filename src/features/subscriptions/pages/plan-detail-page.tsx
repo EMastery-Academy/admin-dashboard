@@ -34,10 +34,7 @@ function publishBlockers(plan: SubscriptionPlan, t: (ar: string, en: string) => 
   const titled = new Set((plan.translations ?? []).filter((tr) => tr.title.trim()).map((tr) => tr.locale_code.split("-")[0]));
   if (!titled.has("ar")) issues.push(t("أضف الاسم بالعربية", "Add the Arabic title"));
   if (!titled.has("en")) issues.push(t("أضف الاسم بالإنجليزية", "Add the English title"));
-  if (plan.plan_type !== "full_library" && !(plan.products ?? []).length) issues.push(t("أضف موردًا واحدًا على الأقل", "Add at least one resource"));
-  if (plan.plan_type === "choose_x" && (plan.selectable_products ?? []).length < (plan.selection_allowance ?? 0)) {
-    issues.push(t(`أضف ${plan.selection_allowance} موارد قابلة للاختيار على الأقل`, `Add at least ${plan.selection_allowance} selectable resources`));
-  }
+  if (plan.plan_type === "standard" && !(plan.products ?? []).length) issues.push(t("أضف موردًا واحدًا على الأقل", "Add at least one resource"));
   return issues;
 }
 
@@ -86,13 +83,15 @@ function OverviewTab({ plan }: { plan: SubscriptionPlan }) {
           [t("الفوترة", "Billing"), t(labelOf(INTERVAL_LABELS, plan.billing_interval).ar, labelOf(INTERVAL_LABELS, plan.billing_interval).en)],
           [t("السعر الأساسي", "List price"), formatAmount(toNumber(plan.price), plan.currency_code)],
           ...(plan.plan_type === "choose_x"
-            ? ([[t("عدد الدورات المسموح", "Courses allowed"), String(plan.selection_allowance ?? "—")],
+            ? ([[t("عدد البرامج المسموح", "Programs allowed"), String(plan.selection_allowance ?? "—")],
                 [t("حد الاستبدال", "Replacement limit"), plan.max_replacements_per_period == null ? t("بلا حد", "No limit") : String(plan.max_replacements_per_period)]] as [string, string][])
             : []),
           ...(plan.audience_type === "company"
             ? ([[t("حجم الفريق", "Team size"), t(`${plan.min_seats ?? 1}–${plan.max_seats} موظفًا`, `${plan.min_seats ?? 1}–${plan.max_seats} employees`)]] as [string, string][])
             : []),
-          [t("الموارد", "Resources"), t(`${(plan.included_products ?? []).length} مضمّنة · ${(plan.selectable_products ?? []).length} للاختيار`, `${(plan.included_products ?? []).length} included · ${(plan.selectable_products ?? []).length} selectable`)],
+          [t("الموارد", "Resources"), plan.plan_type === "choose_x"
+            ? t(`${(plan.included_products ?? []).length} مضمّنة · الاختيار من الكتالوج المنشور`, `${(plan.included_products ?? []).length} included · picks from published catalog`)
+            : t(`${(plan.included_products ?? []).length} مضمّنة`, `${(plan.included_products ?? []).length} included`)],
           [t("الإصدار", "Version"), `v${plan.version}`],
           [t("أُنشئت", "Created"), formatDate(plan.created_at)],
           [t("آخر تحديث", "Updated"), formatDate(plan.updated_at)],

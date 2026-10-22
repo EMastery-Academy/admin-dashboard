@@ -3865,7 +3865,11 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Checkout Quote */
+        /**
+         * Checkout Quote
+         * @description Cart totals; the optional body previews a coupon and vouchers (an unusable coupon is
+         *     reported in `coupon.status`, not as an error).
+         */
         post: operations["checkout_quote_api_v1_checkout_quote_post"];
         delete?: never;
         options?: never;
@@ -7050,6 +7054,249 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/checkout/product-quote": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Product Quote
+         * @description Buy-now totals for one product with an optional coupon and vouchers.
+         */
+        post: operations["product_quote_api_v1_checkout_product_quote_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/coupons": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Coupons */
+        get: operations["list_coupons_api_v1_admin_coupons_get"];
+        put?: never;
+        /** Create Coupon */
+        post: operations["create_coupon_api_v1_admin_coupons_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/coupons/{promotion_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Coupon */
+        get: operations["get_coupon_api_v1_admin_coupons__promotion_id__get"];
+        /**
+         * Update Coupon
+         * @description Code, type and value are locked once the coupon has been used.
+         */
+        put: operations["update_coupon_api_v1_admin_coupons__promotion_id__put"];
+        post?: never;
+        /**
+         * Archive Coupon
+         * @description Archives (soft-deletes) the coupon; its redemptions and reports are kept.
+         */
+        delete: operations["archive_coupon_api_v1_admin_coupons__promotion_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/coupons/{promotion_id}/active": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Set Coupon Active */
+        put: operations["set_coupon_active_api_v1_admin_coupons__promotion_id__active_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/coupons/{promotion_id}/redemptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Coupon Redemptions */
+        get: operations["list_coupon_redemptions_api_v1_admin_coupons__promotion_id__redemptions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/vouchers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Vouchers */
+        get: operations["my_vouchers_api_v1_me_vouchers_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/vouchers/{voucher_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Voucher */
+        get: operations["my_voucher_api_v1_me_vouchers__voucher_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/vouchers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Vouchers */
+        get: operations["list_vouchers_api_v1_admin_vouchers_get"];
+        put?: never;
+        /**
+         * Issue Voucher
+         * @description Issue a voucher to one customer (by id or email).
+         */
+        post: operations["issue_voucher_api_v1_admin_vouchers_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/vouchers/bulk/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Preview Bulk
+         * @description Customers matching a spend segment (e.g. lifetime paid spend >= $300), before issuing.
+         */
+        post: operations["preview_bulk_api_v1_admin_vouchers_bulk_preview_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/vouchers/bulk": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Issue Bulk */
+        post: operations["issue_bulk_api_v1_admin_vouchers_bulk_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/vouchers/{voucher_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Voucher */
+        get: operations["get_voucher_api_v1_admin_vouchers__voucher_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/vouchers/{voucher_id}/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Revoke Voucher */
+        post: operations["revoke_voucher_api_v1_admin_vouchers__voucher_id__revoke_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/vouchers/{voucher_id}/expiry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set Voucher Expiry
+         * @description Extend or shorten a voucher; a past date expires it now.
+         */
+        put: operations["set_voucher_expiry_api_v1_admin_vouchers__voucher_id__expiry_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -9489,6 +9736,11 @@ export interface components {
             currency_code: string;
             /** Cohort Id */
             cohort_id?: string | null;
+            /**
+             * Discount Amount Minor
+             * @default 0
+             */
+            discount_amount_minor: number;
         };
         /** CartResponse */
         CartResponse: {
@@ -9844,6 +10096,22 @@ export interface components {
         };
         /** CheckoutQuoteResponse */
         CheckoutQuoteResponse: {
+            coupon?: components["schemas"]["QuotedCouponResponse"] | null;
+            /**
+             * Voucher Amount Minor
+             * @default 0
+             */
+            voucher_amount_minor: number;
+            /**
+             * Vouchers Applied
+             * @default []
+             */
+            vouchers_applied: components["schemas"]["QuotedVoucherResponse"][];
+            /**
+             * Available Vouchers
+             * @default []
+             */
+            available_vouchers: components["schemas"]["QuotedVoucherResponse"][];
             /**
              * Cart Id
              * Format: uuid
@@ -9907,6 +10175,10 @@ export interface components {
             phone_number?: string | null;
             /** Failure Url */
             failure_url?: string | null;
+            /** Coupon Code */
+            coupon_code?: string | null;
+            /** Voucher Ids */
+            voucher_ids?: string[] | null;
         };
         /** CheckoutSessionResponse */
         CheckoutSessionResponse: {
@@ -18007,6 +18279,486 @@ export interface components {
             /** Has Avatar */
             has_avatar: boolean;
         };
+        /** CouponActiveIn */
+        CouponActiveIn: {
+            /** Is Active */
+            is_active: boolean;
+        };
+        /** CouponIn */
+        CouponIn: {
+            /**
+             * Code
+             * @description Normalised to upper case without spaces.
+             */
+            code: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "percent" | "fixed";
+            /**
+             * Value
+             * @description Percent (0-100] for `percent`; amount in major units for `fixed`.
+             */
+            value: number | string;
+            /** Name */
+            name?: string | null;
+            /** Description */
+            description?: string | null;
+            /**
+             * Currency Code
+             * @default USD
+             */
+            currency_code: string;
+            /**
+             * Max Discount Minor
+             * @description Cap for percent coupons.
+             */
+            max_discount_minor?: number | null;
+            /** Min Subtotal Minor */
+            min_subtotal_minor?: number | null;
+            /**
+             * Product Ids
+             * @description Empty with no categories = whole order.
+             */
+            product_ids?: string[];
+            /** Category Ids */
+            category_ids?: string[];
+            /** Usage Limit */
+            usage_limit?: number | null;
+            /** Per Customer Limit */
+            per_customer_limit?: number | null;
+            /** Starts At */
+            starts_at?: string | null;
+            /** Ends At */
+            ends_at?: string | null;
+            /**
+             * Is Active
+             * @default true
+             */
+            is_active: boolean;
+            /**
+             * First Purchase Only
+             * @default false
+             */
+            first_purchase_only: boolean;
+            /**
+             * Customer Id
+             * @description Personal coupon: only this customer can use it.
+             */
+            customer_id?: string | null;
+        };
+        /** CouponOut */
+        CouponOut: {
+            /**
+             * Code
+             * @description Normalised to upper case without spaces.
+             */
+            code: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "percent" | "fixed";
+            /**
+             * Value
+             * @description Percent (0-100] for `percent`; amount in major units for `fixed`.
+             */
+            value: string;
+            /** Name */
+            name?: string | null;
+            /** Description */
+            description?: string | null;
+            /**
+             * Currency Code
+             * @default USD
+             */
+            currency_code: string;
+            /**
+             * Max Discount Minor
+             * @description Cap for percent coupons.
+             */
+            max_discount_minor?: number | null;
+            /** Min Subtotal Minor */
+            min_subtotal_minor?: number | null;
+            /**
+             * Product Ids
+             * @description Empty with no categories = whole order.
+             */
+            product_ids?: string[];
+            /** Category Ids */
+            category_ids?: string[];
+            /** Usage Limit */
+            usage_limit?: number | null;
+            /** Per Customer Limit */
+            per_customer_limit?: number | null;
+            /** Starts At */
+            starts_at?: string | null;
+            /** Ends At */
+            ends_at?: string | null;
+            /**
+             * Is Active
+             * @default true
+             */
+            is_active: boolean;
+            /**
+             * First Purchase Only
+             * @default false
+             */
+            first_purchase_only: boolean;
+            /**
+             * Customer Id
+             * @description Personal coupon: only this customer can use it.
+             */
+            customer_id?: string | null;
+            /**
+             * Promotion Id
+             * Format: uuid
+             */
+            promotion_id: string;
+            /** Source */
+            source: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "inactive" | "scheduled" | "expired" | "archived";
+            /** Created At */
+            created_at?: string | null;
+            /** Updated At */
+            updated_at?: string | null;
+            /** Archived At */
+            archived_at?: string | null;
+            stats: components["schemas"]["CouponStatsOut"];
+        };
+        /** CouponPage */
+        CouponPage: {
+            /** Items */
+            items: components["schemas"]["CouponOut"][];
+            /** Total */
+            total: number;
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+        };
+        /** CouponRedemptionOut */
+        CouponRedemptionOut: {
+            /**
+             * Redemption Id
+             * Format: uuid
+             */
+            redemption_id: string;
+            /**
+             * Customer Id
+             * Format: uuid
+             */
+            customer_id: string;
+            /** Customer Email */
+            customer_email: string | null;
+            /** Customer Name */
+            customer_name: string | null;
+            /** Order Id */
+            order_id: string | null;
+            /** Status */
+            status: string;
+            /** Discount Minor */
+            discount_minor: number;
+            /** Order Total Minor */
+            order_total_minor: number;
+            /** Currency Code */
+            currency_code: string;
+            /** Redeemed At */
+            redeemed_at: string | null;
+        };
+        /** CouponRedemptionPage */
+        CouponRedemptionPage: {
+            /** Items */
+            items: components["schemas"]["CouponRedemptionOut"][];
+            /** Total */
+            total: number;
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+        };
+        /** CouponStatsOut */
+        CouponStatsOut: {
+            /** Redemptions */
+            redemptions: number;
+            /** Reserved */
+            reserved: number;
+            /** Unique Customers */
+            unique_customers: number;
+            /** Discount Minor */
+            discount_minor: number;
+            /** Revenue Minor */
+            revenue_minor: number;
+            /** Attempts */
+            attempts: number;
+            /**
+             * Conversion Rate
+             * @description Paid redemptions / customers who applied the code.
+             */
+            conversion_rate: number | null;
+        };
+        /** ProductQuoteRequest */
+        ProductQuoteRequest: {
+            /** Coupon Code */
+            coupon_code?: string | null;
+            /** Voucher Ids */
+            voucher_ids?: string[] | null;
+            /**
+             * Product Id
+             * Format: uuid
+             */
+            product_id: string;
+            /**
+             * Quantity
+             * @default 1
+             */
+            quantity: number;
+        };
+        /** ProductQuoteResponse */
+        ProductQuoteResponse: {
+            coupon?: components["schemas"]["QuotedCouponResponse"] | null;
+            /**
+             * Voucher Amount Minor
+             * @default 0
+             */
+            voucher_amount_minor: number;
+            /**
+             * Vouchers Applied
+             * @default []
+             */
+            vouchers_applied: components["schemas"]["QuotedVoucherResponse"][];
+            /**
+             * Available Vouchers
+             * @default []
+             */
+            available_vouchers: components["schemas"]["QuotedVoucherResponse"][];
+            /**
+             * Product Id
+             * Format: uuid
+             */
+            product_id: string;
+            /** Quantity */
+            quantity: number;
+            /** Currency Code */
+            currency_code: string;
+            /** Subtotal Amount Minor */
+            subtotal_amount_minor: number;
+            /** Discount Amount Minor */
+            discount_amount_minor: number;
+            /**
+             * Tax Amount Minor
+             * @default 0
+             */
+            tax_amount_minor: number;
+            /** Total Amount Minor */
+            total_amount_minor: number;
+        };
+        /** QuoteIncentivesRequest */
+        QuoteIncentivesRequest: {
+            /** Coupon Code */
+            coupon_code?: string | null;
+            /** Voucher Ids */
+            voucher_ids?: string[] | null;
+        };
+        /** QuotedCouponResponse */
+        QuotedCouponResponse: {
+            /** Code */
+            code: string;
+            /** Status */
+            status: string;
+            /** Discount Amount Minor */
+            discount_amount_minor: number;
+        };
+        /** QuotedVoucherResponse */
+        QuotedVoucherResponse: {
+            /**
+             * Voucher Id
+             * Format: uuid
+             */
+            voucher_id: string;
+            /** Code */
+            code: string;
+            /** Amount Minor */
+            amount_minor: number;
+            /** Expires At */
+            expires_at?: string | null;
+        };
+        /** BulkIssueIn */
+        BulkIssueIn: {
+            segment: components["schemas"]["SegmentIn"];
+            voucher: components["schemas"]["VoucherIssueIn"];
+        };
+        /** BulkIssueOut */
+        BulkIssueOut: {
+            /**
+             * Batch Id
+             * Format: uuid
+             */
+            batch_id: string;
+            /** Issued */
+            issued: number;
+        };
+        /** SegmentCustomerOut */
+        SegmentCustomerOut: {
+            /**
+             * Customer Id
+             * Format: uuid
+             */
+            customer_id: string;
+            /** Email */
+            email: string | null;
+            /** Full Name */
+            full_name: string | null;
+            /** Spend Minor */
+            spend_minor: number;
+            /** Paid Orders */
+            paid_orders: number;
+        };
+        /** SegmentIn */
+        SegmentIn: {
+            /**
+             * Min Spend Minor
+             * @description Lifetime paid spend in cents (USD), e.g. 30000.
+             * @default 0
+             */
+            min_spend_minor: number;
+            /**
+             * Min Orders
+             * @default 1
+             */
+            min_orders: number;
+            /** Paid Since */
+            paid_since?: string | null;
+            /** Product Id */
+            product_id?: string | null;
+        };
+        /** SegmentPreviewOut */
+        SegmentPreviewOut: {
+            /** Total */
+            total: number;
+            /** Sample */
+            sample: components["schemas"]["SegmentCustomerOut"][];
+        };
+        /** VoucherExpiryIn */
+        VoucherExpiryIn: {
+            /** Expires At */
+            expires_at: string | null;
+        };
+        /** VoucherIssueIn */
+        VoucherIssueIn: {
+            /**
+             * Amount Minor
+             * @description Amount in cents (USD).
+             */
+            amount_minor: number;
+            /** Expires At */
+            expires_at?: string | null;
+            /** Note */
+            note?: string | null;
+        };
+        /** VoucherIssueOneIn */
+        VoucherIssueOneIn: {
+            /**
+             * Amount Minor
+             * @description Amount in cents (USD).
+             */
+            amount_minor: number;
+            /** Expires At */
+            expires_at?: string | null;
+            /** Note */
+            note?: string | null;
+            /** Customer Id */
+            customer_id?: string | null;
+            /** Email */
+            email?: string | null;
+        };
+        /** VoucherOut */
+        VoucherOut: {
+            /**
+             * Voucher Id
+             * Format: uuid
+             */
+            voucher_id: string;
+            /** Code */
+            code: string;
+            /**
+             * Customer Id
+             * Format: uuid
+             */
+            customer_id: string;
+            /** Customer Email */
+            customer_email: string | null;
+            /** Customer Name */
+            customer_name: string | null;
+            /** Currency Code */
+            currency_code: string;
+            /** Initial Amount Minor */
+            initial_amount_minor: number;
+            /** Balance Minor */
+            balance_minor: number;
+            /** Reserved Minor */
+            reserved_minor: number;
+            /** Spendable Minor */
+            spendable_minor: number;
+            /** Used Minor */
+            used_minor: number;
+            /** Orders */
+            orders: number;
+            /**
+             * Status
+             * @description active | exhausted | expired | revoked
+             */
+            status: string;
+            /** Expires At */
+            expires_at: string | null;
+            /** Source */
+            source: string;
+            /** Note */
+            note: string | null;
+            /** Created At */
+            created_at: string | null;
+            /**
+             * Transactions
+             * @default []
+             */
+            transactions: components["schemas"]["VoucherTransactionOut"][];
+        };
+        /** VoucherPage */
+        VoucherPage: {
+            /** Items */
+            items: components["schemas"]["VoucherOut"][];
+            /** Total */
+            total: number;
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+        };
+        /** VoucherRevokeIn */
+        VoucherRevokeIn: {
+            /** Note */
+            note?: string | null;
+        };
+        /** VoucherTransactionOut */
+        VoucherTransactionOut: {
+            /** Txn Type */
+            txn_type: string;
+            /** Amount Minor */
+            amount_minor: number;
+            /** Balance After Minor */
+            balance_after_minor: number;
+            /** Order Id */
+            order_id: string | null;
+            /** Note */
+            note: string | null;
+            /** Created At */
+            created_at: string | null;
+        };
     };
     responses: never;
     parameters: never;
@@ -25946,7 +26698,11 @@ export interface operations {
                 b2c_access_token?: string | null;
             };
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["QuoteIncentivesRequest"] | null;
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
@@ -33301,6 +34057,626 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExpertDetailResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    product_quote_api_v1_checkout_product_quote_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                b2c_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProductQuoteRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductQuoteResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_coupons_api_v1_admin_coupons_get: {
+        parameters: {
+            query?: {
+                /** @description Code or name contains. */
+                query?: string | null;
+                status?: ("active" | "inactive" | "expired" | "archived") | null;
+                /** @description Page size (max items returned). */
+                limit?: number;
+                /** @description Number of items to skip (for paging). */
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CouponPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_coupon_api_v1_admin_coupons_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CouponIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CouponOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_coupon_api_v1_admin_coupons__promotion_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                promotion_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CouponOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_coupon_api_v1_admin_coupons__promotion_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                promotion_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CouponIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CouponOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    archive_coupon_api_v1_admin_coupons__promotion_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                promotion_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CouponOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_coupon_active_api_v1_admin_coupons__promotion_id__active_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                promotion_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CouponActiveIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CouponOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_coupon_redemptions_api_v1_admin_coupons__promotion_id__redemptions_get: {
+        parameters: {
+            query?: {
+                /** @description Page size (max items returned). */
+                limit?: number;
+                /** @description Number of items to skip (for paging). */
+                offset?: number;
+            };
+            header?: never;
+            path: {
+                promotion_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CouponRedemptionPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    my_vouchers_api_v1_me_vouchers_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                b2c_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VoucherPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    my_voucher_api_v1_me_vouchers__voucher_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                voucher_id: string;
+            };
+            cookie?: {
+                b2c_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VoucherOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_vouchers_api_v1_admin_vouchers_get: {
+        parameters: {
+            query?: {
+                /** @description Code, customer email or name. */
+                query?: string | null;
+                status?: ("active" | "exhausted" | "expired" | "revoked") | null;
+                customer_id?: string | null;
+                /** @description Page size (max items returned). */
+                limit?: number;
+                /** @description Number of items to skip (for paging). */
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VoucherPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    issue_voucher_api_v1_admin_vouchers_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VoucherIssueOneIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VoucherOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    preview_bulk_api_v1_admin_vouchers_bulk_preview_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SegmentIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SegmentPreviewOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    issue_bulk_api_v1_admin_vouchers_bulk_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BulkIssueIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BulkIssueOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_voucher_api_v1_admin_vouchers__voucher_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                voucher_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VoucherOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    revoke_voucher_api_v1_admin_vouchers__voucher_id__revoke_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                voucher_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VoucherRevokeIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VoucherOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_voucher_expiry_api_v1_admin_vouchers__voucher_id__expiry_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                voucher_id: string;
+            };
+            cookie?: {
+                /** @description Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent. */
+                b2c_admin_access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VoucherExpiryIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VoucherOut"];
                 };
             };
             /** @description Validation Error */

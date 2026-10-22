@@ -3,3 +3,5 @@ dist
 docs/contract/
 .playwright-cli
 admin_demo
+.env*
+!.env.example

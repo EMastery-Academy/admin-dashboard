@@ -7,11 +7,12 @@ import { useT } from "@/lib/i18n";
 import { Alert, Button, Field } from "@/components/ui/kit";
 
 export default function LoginPage() {
-  const { login } = useAdminAuth();
+  const { login, qaLogin } = useAdminAuth();
   const navigate = useNavigate();
   const t = useT();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [qaMode, setQaMode] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -34,12 +35,15 @@ export default function LoginPage() {
             setBusy(true);
             setError(null);
             try {
-              await login({ email, password });
+              if (qaMode) await qaLogin({ email, key: password });
+              else await login({ email, password });
               navigate("/", { replace: true });
             } catch (err) {
               setError(
                 err instanceof ApiError && err.status === 401
-                  ? t("البريد الإلكتروني أو كلمة المرور غير صحيحة. تحقق منهما وحاول مرة أخرى.", "Wrong email or password. Check both and try again.")
+                  ? qaMode
+                    ? t("البريد الإلكتروني أو مفتاح QA غير صحيح.", "Wrong QA email or key.")
+                    : t("البريد الإلكتروني أو كلمة المرور غير صحيحة. تحقق منهما وحاول مرة أخرى.", "Wrong email or password. Check both and try again.")
                   : err instanceof Error
                     ? err.message
                     : t("فشل تسجيل الدخول.", "Sign-in failed."),
@@ -50,7 +54,12 @@ export default function LoginPage() {
           }}
         >
           <Field id="email" type="email" label={t("البريد الإلكتروني", "Email")} autoComplete="email" dir="ltr" required value={email} onChange={setEmail} />
-          <Field id="password" type="password" label={t("كلمة المرور", "Password")} autoComplete="current-password" dir="ltr" required value={password} onChange={setPassword} />
+          <Field id="password" type="password" label={qaMode ? t("مفتاح QA", "QA key") : t("كلمة المرور", "Password")} autoComplete={qaMode ? "off" : "current-password"} dir="ltr" required value={password} onChange={setPassword} />
+          {import.meta.env.VITE_QA_LOGIN_ENABLED === "true" ? (
+            <button type="button" className="ma-link" onClick={() => { setQaMode(!qaMode); setPassword(""); }}>
+              {qaMode ? t("الدخول بكلمة المرور", "Use password") : t("الدخول بحساب QA", "Use QA account")}
+            </button>
+          ) : null}
           {error ? <Alert kind="danger" title={t("تعذّر تسجيل الدخول", "Couldn't sign in")}>{error}</Alert> : null}
           <Button
             kind="primary"

@@ -78,8 +78,7 @@ export default function SubscriptionPlanNewPage() {
       }),
     onSuccess: (plan) => {
       toast.success(t("تم إنشاء الباقة كمسودة", "Plan created as a draft"));
-      // A full-library plan has no resources to pick; its features come next.
-      navigate(`/subscriptions/plans/${plan.plan_id}?tab=${planType === "full_library" ? "features" : "resources"}`);
+      navigate(`/subscriptions/plans/${plan.plan_id}?tab=${planType === "standard" ? "resources" : "features"}`);
     },
   });
 
@@ -115,8 +114,8 @@ export default function SubscriptionPlanNewPage() {
       <PageHead
         title={t("باقة اشتراك جديدة", "New subscription plan")}
         sub={t(
-          "ابدأ بالأساسيات فقط. تُحفظ الباقة كمسودة، ثم تضيف الموارد والمزايا والمحتوى من صفحتها وتنشرها.",
-          "Start with the essentials. The plan is saved as a draft; then add resources, features and content on its page and publish it.",
+          "ابدأ بالأساسيات فقط. تُحفظ الباقة كمسودة، ثم تضيف المزايا والمحتوى والموارد المضمّنة عند الحاجة وتنشرها.",
+          "Start with the essentials. The plan is saved as a draft; then add features, content and any Included resources before publishing.",
         )}
         back={{ href: "/subscriptions/plans", label: t("الباقات", "Plans") }}
       />
@@ -138,7 +137,7 @@ export default function SubscriptionPlanNewPage() {
                   options={[
                     { value: "standard", label: t("قياسية", "Standard") },
                     { value: "full_library", label: t("المكتبة الكاملة", "Full library") },
-                    { value: "choose_x", label: t("اختر عددًا من الدورات", "Choose X courses") },
+                    { value: "choose_x", label: t("اختر عددًا من البرامج", "Choose X programs") },
                   ]} />
                 <span className="ma-help">{t(summary.ar, summary.en)}</span>
               </div>
@@ -152,7 +151,7 @@ export default function SubscriptionPlanNewPage() {
                     ? <HelpLabel text={t("السعر لكل موظف (USD)", "Price per employee (USD)")} help="seatPrice" />
                     : <HelpLabel text={t("السعر (USD)", "Price (USD)")} help="price" />} />
                 {chooseX ? (
-                  <Field id="plan-allowance" type="number" min={1} label={<HelpLabel text={t("عدد الدورات المسموح", "Courses allowed")} help="allowance" />}
+                  <Field id="plan-allowance" type="number" min={1} label={<HelpLabel text={t("عدد البرامج المسموح", "Programs allowed")} help="allowance" />}
                     value={allowance} onChange={setAllowance} required />
                 ) : null}
                 {company ? (
@@ -186,6 +185,11 @@ export default function SubscriptionPlanNewPage() {
               ? t(
                   "لا تحتاج لإضافة موارد: كل الدورات والدبلومات المنشورة تُمنح تلقائيًا. أضف المزايا وعناصر البطاقة والوصف ثم انشر.",
                   "No resources to add: every published course and diploma is granted automatically. Add features, card items and a description, then publish.",
+                )
+              : planType === "choose_x"
+              ? t(
+                  "يختار المشترك برامجه من كل الدورات والدبلومات والحزم والباقات المنشورة. يمكنك إضافة موارد مضمّنة للجميع اختياريًا، ثم المزايا والمحتوى، ثم النشر.",
+                  "Subscribers pick from every published course, diploma, package and bundle. You may add optional Included resources for everyone, then features and content, then publish.",
                 )
               : t(
                   "أضف الموارد التي تمنحها الباقة، ثم المزايا وعناصر البطاقة والوصف، ثم انشر.",

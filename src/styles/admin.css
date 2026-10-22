@@ -61,7 +61,6 @@ svg.ma-icon--fill { fill: currentColor; stroke: none; }
 .ma-rail__item:hover { background: var(--fill-soft); color: var(--text); }
 .ma-rail__item[aria-current="true"] { background: var(--coral); color: var(--ink); font-weight: 700; }
 .ma-rail__item.is-disabled { opacity: 0.48; }
-.ma-rail__item.is-previewed { background: var(--fill-soft); color: var(--text); }
 .ma-rail__item .ma-icon { width: 22px; height: 22px; }
 .ma-rail__dot {
   position: absolute; top: 2px; inset-inline-end: 6px;
@@ -137,13 +136,6 @@ svg.ma-icon--fill { fill: currentColor; stroke: none; }
 .ma-sidebar__sublink:hover { background: var(--fill-soft); color: var(--text); }
 .ma-sidebar__sublink.is-active, .ma-sidebar__sublink[aria-current="page"] {
   background: var(--fill-soft-hover); color: var(--accent); font-weight: 600;
-}
-/* Hover preview of another domain; with the sidebar collapsed it opens as a fly-out over the page. */
-@media (min-width: 1024px) {
-  .ma-shell.is-peek .ma-sidebar {
-    visibility: visible; position: fixed; inset-block: 0; inset-inline-start: var(--rail-w); z-index: 45;
-    width: var(--sidebar-w); height: 100vh;
-  }
 }
 
 .ma-main { grid-column: -2 / -1; min-width: 0; display: flex; flex-direction: column; }

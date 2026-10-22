@@ -48,6 +48,8 @@ export * from "@/lib/api/subscriptions/admin";
 
 // Marketing
 export * from "@/lib/api/marketing/promotions";
+export * from "@/lib/api/marketing/coupons";
+export * from "@/lib/api/marketing/vouchers";
 export * from "@/lib/api/marketing/referrals";
 export * from "@/lib/api/marketing/content";
 
