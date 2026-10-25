@@ -30,6 +30,7 @@ import {
   CustomerHistoryCard,
   CustomerNotesCard,
 } from "@/features/customers/components/customer-management";
+import { CustomerReferralsCard } from "@/features/customers/components/customer-referrals-card";
 
 const STATUS_OPTIONS: { value: string; ar: string; en: string }[] = [
   { value: "active", ar: "تفعيل", en: "Activate" },
@@ -176,6 +177,11 @@ export default function CustomerDetailPage() {
             ) : (
               <Entitlements entitlements={customer360.data?.entitlements} loading={customer360.isLoading} />
             )}
+            {!readOnly && profile.customer_id && can("affiliates.read") ? (
+              <div className="ma-section-gap">
+                <CustomerReferralsCard customerId={profile.customer_id} />
+              </div>
+            ) : null}
             {!readOnly ? (
               <div className="ma-section-gap">
                 <CustomerHistoryCard customerRef={profile.ref} />

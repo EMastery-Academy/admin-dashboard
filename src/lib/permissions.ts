@@ -31,6 +31,8 @@ const AREA_SCOPE: Record<string, string> = {
   customers: "admin:customers:read",
   tickets: "admin:operations:read",
   affiliates: "admin:operations:read",
+  // Create/approve affiliates, issue their coupons, approve commissions, referral program settings.
+  affiliatesWrite: "admin:operations:manage",
   marketing: "admin:operations:read",
   reports: "admin:operations:read",
   settings: "admin:operations:read",

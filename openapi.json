@@ -36959,6 +36959,2458 @@
           }
         }
       }
+    },
+    "/api/v1/admin/affiliates/partners": {
+      "get": {
+        "tags": [
+          "Admin Affiliates"
+        ],
+        "summary": "List Partners",
+        "operationId": "list_partners_api_v1_admin_affiliates_partners_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Query"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "pending",
+                    "active",
+                    "suspended",
+                    "rejected"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "marketer",
+                    "student"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Kind"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "description": "Page size (max items returned).",
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "Page size (max items returned)."
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of items to skip (for paging).",
+              "default": 0,
+              "title": "Offset"
+            },
+            "description": "Number of items to skip (for paging)."
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin Affiliates"
+        ],
+        "summary": "Create Partner",
+        "description": "Creates the marketer in B2C, then in Tolt (partner + `?ref=` link). A Tolt failure leaves\n`sync_status=failed` for retry; the partner is still created.",
+        "operationId": "create_partner_api_v1_admin_affiliates_partners_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartnerIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/affiliates/partners/{partner_id}": {
+      "get": {
+        "tags": [
+          "Admin Affiliates"
+        ],
+        "summary": "Get Partner",
+        "operationId": "get_partner_api_v1_admin_affiliates_partners__partner_id__get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "partner_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Partner Id"
+            }
+          },
+          {
+            "name": "include_tolt_stats",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Include Tolt Stats"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Admin Affiliates"
+        ],
+        "summary": "Update Partner",
+        "description": "Email and referral code are fixed once created (Tolt identity and live links).",
+        "operationId": "update_partner_api_v1_admin_affiliates_partners__partner_id__put",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "partner_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Partner Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartnerIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Admin Affiliates"
+        ],
+        "summary": "Archive Partner",
+        "description": "Archives the partner here and rejects it in Tolt. Sales and commissions stay.",
+        "operationId": "archive_partner_api_v1_admin_affiliates_partners__partner_id__delete",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "partner_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Partner Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/affiliates/partners/{partner_id}/status": {
+      "post": {
+        "tags": [
+          "Admin Affiliates"
+        ],
+        "summary": "Set Partner Status",
+        "description": "Approve (`active`), suspend or reject; mirrored to Tolt.",
+        "operationId": "set_partner_status_api_v1_admin_affiliates_partners__partner_id__status_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "partner_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Partner Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartnerStatusIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/affiliates/partners/{partner_id}/resync": {
+      "post": {
+        "tags": [
+          "Admin Affiliates"
+        ],
+        "summary": "Resync Partner",
+        "operationId": "resync_partner_api_v1_admin_affiliates_partners__partner_id__resync_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "partner_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Partner Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/affiliates/partners/{partner_id}/customers": {
+      "get": {
+        "tags": [
+          "Admin Affiliates"
+        ],
+        "summary": "Partner Customers",
+        "operationId": "partner_customers_api_v1_admin_affiliates_partners__partner_id__customers_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "partner_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Partner Id"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "description": "Page size (max items returned).",
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "Page size (max items returned)."
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of items to skip (for paging).",
+              "default": 0,
+              "title": "Offset"
+            },
+            "description": "Number of items to skip (for paging)."
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttributionPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/affiliates/partners/{partner_id}/coupons": {
+      "get": {
+        "tags": [
+          "Admin Affiliates"
+        ],
+        "summary": "Partner Coupons",
+        "operationId": "partner_coupons_api_v1_admin_affiliates_partners__partner_id__coupons_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "partner_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Partner Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CouponOut"
+                  },
+                  "title": "Response Partner Coupons Api V1 Admin Affiliates Partners  Partner Id  Coupons Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin Affiliates"
+        ],
+        "summary": "Create Partner Coupon",
+        "description": "A coupon owned by the partner: customers who use it are attributed to them (also a Tolt promotion code).",
+        "operationId": "create_partner_coupon_api_v1_admin_affiliates_partners__partner_id__coupons_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "partner_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Partner Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CouponIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CouponOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/affiliates/groups": {
+      "get": {
+        "tags": [
+          "Admin Affiliates"
+        ],
+        "summary": "Tolt Groups",
+        "operationId": "tolt_groups_api_v1_admin_affiliates_groups_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ToltGroupOut"
+                  },
+                  "title": "Response Tolt Groups Api V1 Admin Affiliates Groups Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/affiliates/attributions/{customer_id}": {
+      "get": {
+        "tags": [
+          "Admin Affiliates"
+        ],
+        "summary": "Customer Attribution",
+        "operationId": "customer_attribution_api_v1_admin_affiliates_attributions__customer_id__get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "customer_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Customer Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AttributionOut"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Response Customer Attribution Api V1 Admin Affiliates Attributions  Customer Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Admin Affiliates"
+        ],
+        "summary": "Unassign Customer",
+        "operationId": "unassign_customer_api_v1_admin_affiliates_attributions__customer_id__delete",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "customer_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Customer Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/affiliates/customers/{customer_id}": {
+      "get": {
+        "tags": [
+          "Admin Affiliates"
+        ],
+        "summary": "Customer Referrals",
+        "description": "Who referred this customer, and (when they are a referrer) their link, counts and rewards.",
+        "operationId": "customer_referrals_api_v1_admin_affiliates_customers__customer_id__get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "customer_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Customer Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerReferralsOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/affiliates/attributions": {
+      "post": {
+        "tags": [
+          "Admin Affiliates"
+        ],
+        "summary": "Assign Customer",
+        "operationId": "assign_customer_api_v1_admin_affiliates_attributions_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/affiliates/conversions": {
+      "get": {
+        "tags": [
+          "Admin Affiliates"
+        ],
+        "summary": "List Conversions",
+        "operationId": "list_conversions_api_v1_admin_affiliates_conversions_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "partner_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Partner Id"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "description": "Page size (max items returned).",
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "Page size (max items returned)."
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of items to skip (for paging).",
+              "default": 0,
+              "title": "Offset"
+            },
+            "description": "Number of items to skip (for paging)."
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversionPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/affiliates/commissions": {
+      "get": {
+        "tags": [
+          "Admin Affiliates"
+        ],
+        "summary": "List Commissions",
+        "operationId": "list_commissions_api_v1_admin_affiliates_commissions_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "partner_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Partner Id"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 30
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "description": "Page size (max items returned).",
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "Page size (max items returned)."
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of items to skip (for paging).",
+              "default": 0,
+              "title": "Offset"
+            },
+            "description": "Number of items to skip (for paging)."
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommissionPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/affiliates/commissions/{commission_id}": {
+      "post": {
+        "tags": [
+          "Admin Affiliates"
+        ],
+        "summary": "Set Commission",
+        "description": "Approve or decline a Tolt commission (e.g. decline after a partial refund).",
+        "operationId": "set_commission_api_v1_admin_affiliates_commissions__commission_id__post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "commission_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Commission Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CommissionActionIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/affiliates/sync": {
+      "post": {
+        "tags": [
+          "Admin Affiliates"
+        ],
+        "summary": "Sync Now",
+        "description": "Push everything pending to Tolt now and pull commissions (the sweep, on demand).",
+        "operationId": "sync_now_api_v1_admin_affiliates_sync_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "integer"
+                  },
+                  "title": "Response Sync Now Api V1 Admin Affiliates Sync Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/affiliates/referral-program": {
+      "get": {
+        "tags": [
+          "Admin Affiliates"
+        ],
+        "summary": "Get Referral Program",
+        "operationId": "get_referral_program_api_v1_admin_affiliates_referral_program_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferralSettingsIO-Output"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Admin Affiliates"
+        ],
+        "summary": "Save Referral Program",
+        "operationId": "save_referral_program_api_v1_admin_affiliates_referral_program_put",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReferralSettingsIO-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferralSettingsIO-Output"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/affiliates/program": {
+      "get": {
+        "tags": [
+          "Admin Affiliates"
+        ],
+        "summary": "Get Affiliate Program Settings",
+        "operationId": "get_affiliate_program_settings_api_v1_admin_affiliates_program_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateProgramIO-Output"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Admin Affiliates"
+        ],
+        "summary": "Save Affiliate Program Settings",
+        "operationId": "save_affiliate_program_settings_api_v1_admin_affiliates_program_put",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AffiliateProgramIO-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateProgramIO-Output"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/affiliates/referral-rewards": {
+      "get": {
+        "tags": [
+          "Admin Affiliates"
+        ],
+        "summary": "List Referral Rewards",
+        "operationId": "list_referral_rewards_api_v1_admin_affiliates_referral_rewards_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "pending",
+                    "granted",
+                    "revoked"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "description": "Page size (max items returned).",
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "Page size (max items returned)."
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of items to skip (for paging).",
+              "default": 0,
+              "title": "Offset"
+            },
+            "description": "Number of items to skip (for paging)."
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferralRewardPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/affiliates/referral-rewards/{reward_id}/grant": {
+      "post": {
+        "tags": [
+          "Admin Affiliates"
+        ],
+        "summary": "Grant Referral Reward",
+        "description": "Skip the holding period and issue the referrer's voucher now.",
+        "operationId": "grant_referral_reward_api_v1_admin_affiliates_referral_rewards__reward_id__grant_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "reward_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Reward Id"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "integer"
+                  },
+                  "title": "Response Grant Referral Reward Api V1 Admin Affiliates Referral Rewards  Reward Id  Grant Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/affiliates/import/legacy/preview": {
+      "post": {
+        "tags": [
+          "Admin Affiliates"
+        ],
+        "summary": "Legacy Preview",
+        "operationId": "legacy_preview_api_v1_admin_affiliates_import_legacy_preview_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LegacyImportIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegacyPreviewOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/affiliates/import/legacy": {
+      "post": {
+        "tags": [
+          "Admin Affiliates"
+        ],
+        "summary": "Legacy Import",
+        "description": "Copies legacy affiliates into B2C (keeping their codes). Tolt is not touched.",
+        "operationId": "legacy_import_api_v1_admin_affiliates_import_legacy_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LegacyImportIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegacyImportOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/affiliates/import/legacy/push": {
+      "post": {
+        "tags": [
+          "Admin Affiliates"
+        ],
+        "summary": "Legacy Push",
+        "description": "Creates the next batch of imported active partners in Tolt (no welcome email).",
+        "operationId": "legacy_push_api_v1_admin_affiliates_import_legacy_push_post",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LegacyPushIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegacyPushOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/affiliates/analytics": {
+      "get": {
+        "tags": [
+          "Admin Affiliates"
+        ],
+        "summary": "Affiliate Analytics",
+        "operationId": "affiliate_analytics_api_v1_admin_affiliates_analytics_get",
+        "security": [
+          {
+            "B2C Admin JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Start"
+            }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "End"
+            }
+          },
+          {
+            "name": "b2c_admin_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent.",
+              "title": "B2C Admin Access Token"
+            },
+            "description": "Admin access token cookie set by `POST /admin/auth/login`; used when no Bearer header is sent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/referrals": {
+      "get": {
+        "tags": [
+          "Referrals"
+        ],
+        "summary": "My Referrals",
+        "operationId": "my_referrals_api_v1_me_referrals_get",
+        "security": [
+          {
+            "B2C JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "b2c_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "B2C Access Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyReferralsOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/referrals/join": {
+      "post": {
+        "tags": [
+          "Referrals"
+        ],
+        "summary": "Join Referrals",
+        "description": "Get a personal referral link (mirrored to Tolt in the background).",
+        "operationId": "join_referrals_api_v1_me_referrals_join_post",
+        "security": [
+          {
+            "B2C JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "b2c_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "B2C Access Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyReferralsOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/referrals/invites": {
+      "get": {
+        "tags": [
+          "Referrals"
+        ],
+        "summary": "My Invites",
+        "operationId": "my_invites_api_v1_me_referrals_invites_get",
+        "security": [
+          {
+            "B2C JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "b2c_access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "B2C Access Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttributionPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/affiliates/webhooks/tolt": {
+      "post": {
+        "tags": [
+          "Affiliate Webhooks"
+        ],
+        "summary": "Tolt Webhook",
+        "operationId": "tolt_webhook_api_v1_affiliates_webhooks_tolt_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "boolean"
+                  },
+                  "type": "object",
+                  "title": "Response Tolt Webhook Api V1 Affiliates Webhooks Tolt Post"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/affiliates/program": {
+      "get": {
+        "tags": [
+          "Affiliate program"
+        ],
+        "summary": "Affiliate Program",
+        "description": "Terms shown on the storefront marketers page.",
+        "operationId": "affiliate_program_api_v1_affiliates_program_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateProgramIO-Output"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/affiliates/applications": {
+      "post": {
+        "tags": [
+          "Affiliate program"
+        ],
+        "summary": "Apply As Marketer",
+        "description": "Join as a marketer: stored as a pending partner, sent to Tolt once an admin approves it.",
+        "operationId": "apply_as_marketer_api_v1_affiliates_applications_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AffiliateApplicationIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "boolean"
+                  },
+                  "type": "object",
+                  "title": "Response Apply As Marketer Api V1 Affiliates Applications Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -47618,6 +50070,14 @@
             },
             "type": "array",
             "title": "Unavailable Product Ids",
+            "default": []
+          },
+          "suggested_coupons": {
+            "items": {
+              "$ref": "#/components/schemas/SuggestedCouponResponse"
+            },
+            "type": "array",
+            "title": "Suggested Coupons",
             "default": []
           }
         },
@@ -66660,6 +69120,14 @@
             "type": "integer",
             "title": "Sort Order",
             "default": 0
+          },
+          "category_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Category Ids"
           }
         },
         "type": "object",
@@ -72969,6 +75437,1953 @@
           "display_order"
         ],
         "title": "CategoryResponse"
+      },
+      "AffiliateApplicationIn": {
+        "properties": {
+          "full_name": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 5,
+            "title": "Full Name",
+            "description": "Full (three-part) name."
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 200,
+            "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+            "title": "Email"
+          },
+          "phone": {
+            "type": "string",
+            "pattern": "^\\+?[0-9]{7,20}$",
+            "title": "Phone"
+          },
+          "country": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 2,
+            "title": "Country"
+          },
+          "country_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z]{2}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country Code"
+          },
+          "city": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 2,
+            "title": "City"
+          },
+          "po_box": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Po Box"
+          },
+          "postal_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Postal Code"
+          },
+          "address": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 3,
+            "title": "Address"
+          },
+          "is_blogger": {
+            "type": "string",
+            "enum": [
+              "yes",
+              "no"
+            ],
+            "title": "Is Blogger"
+          },
+          "has_email_list": {
+            "type": "string",
+            "enum": [
+              "yes",
+              "no"
+            ],
+            "title": "Has Email List"
+          },
+          "has_social_followers": {
+            "type": "string",
+            "enum": [
+              "yes",
+              "no"
+            ],
+            "title": "Has Social Followers"
+          },
+          "is_influencer": {
+            "type": "string",
+            "enum": [
+              "yes",
+              "no"
+            ],
+            "title": "Is Influencer"
+          },
+          "has_whatsapp_list": {
+            "type": "string",
+            "enum": [
+              "yes",
+              "no"
+            ],
+            "title": "Has Whatsapp List"
+          },
+          "channels": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Channels",
+            "description": "Links to the blog / accounts."
+          },
+          "audience_size": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audience Size"
+          },
+          "marketing_plan": {
+            "type": "string",
+            "maxLength": 3000,
+            "minLength": 20,
+            "title": "Marketing Plan"
+          },
+          "accept_terms": {
+            "type": "boolean",
+            "const": true,
+            "title": "Accept Terms"
+          },
+          "website": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Website"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "full_name",
+          "email",
+          "phone",
+          "country",
+          "city",
+          "address",
+          "is_blogger",
+          "has_email_list",
+          "has_social_followers",
+          "is_influencer",
+          "has_whatsapp_list",
+          "marketing_plan",
+          "accept_terms"
+        ],
+        "title": "AffiliateApplicationIn",
+        "description": "The storefront \"join as a marketer\" form."
+      },
+      "AffiliateProgramIO-Input": {
+        "properties": {
+          "applications_open": {
+            "type": "boolean",
+            "title": "Applications Open"
+          },
+          "commission_percent": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              }
+            ],
+            "title": "Commission Percent",
+            "description": "Shown on the public page; keep it in line with the Tolt group."
+          },
+          "cookie_days": {
+            "type": "integer",
+            "maximum": 365.0,
+            "minimum": 1.0,
+            "title": "Cookie Days"
+          },
+          "payout_terms": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Payout Terms"
+          },
+          "minimum_payout_minor": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Minimum Payout Minor"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "applications_open",
+          "commission_percent",
+          "cookie_days",
+          "payout_terms",
+          "minimum_payout_minor"
+        ],
+        "title": "AffiliateProgramIO",
+        "description": "Public marketer-programme terms (also edited by the admin)."
+      },
+      "AffiliateProgramIO-Output": {
+        "properties": {
+          "applications_open": {
+            "type": "boolean",
+            "title": "Applications Open"
+          },
+          "commission_percent": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Commission Percent",
+            "description": "Shown on the public page; keep it in line with the Tolt group."
+          },
+          "cookie_days": {
+            "type": "integer",
+            "maximum": 365.0,
+            "minimum": 1.0,
+            "title": "Cookie Days"
+          },
+          "payout_terms": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Payout Terms"
+          },
+          "minimum_payout_minor": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Minimum Payout Minor"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "applications_open",
+          "commission_percent",
+          "cookie_days",
+          "payout_terms",
+          "minimum_payout_minor"
+        ],
+        "title": "AffiliateProgramIO",
+        "description": "Public marketer-programme terms (also edited by the admin)."
+      },
+      "AttributionOut": {
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Customer Id"
+          },
+          "partner_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Partner Id"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "ref_value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ref Value"
+          },
+          "attributed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attributed At"
+          },
+          "sync_status": {
+            "type": "string",
+            "title": "Sync Status"
+          },
+          "customer_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Email"
+          },
+          "customer_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Name"
+          },
+          "partner_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partner Name"
+          },
+          "partner_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partner Code"
+          },
+          "paid_orders": {
+            "type": "integer",
+            "title": "Paid Orders"
+          },
+          "revenue_minor": {
+            "type": "integer",
+            "title": "Revenue Minor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer_id",
+          "partner_id",
+          "source",
+          "ref_value",
+          "attributed_at",
+          "sync_status",
+          "customer_email",
+          "customer_name",
+          "partner_name",
+          "partner_code",
+          "paid_orders",
+          "revenue_minor"
+        ],
+        "title": "AttributionOut"
+      },
+      "AttributionPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AttributionOut"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "AttributionPage"
+      },
+      "CommissionActionIn": {
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "approve",
+              "decline"
+            ],
+            "title": "Action"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "action"
+        ],
+        "title": "CommissionActionIn"
+      },
+      "CommissionOut": {
+        "properties": {
+          "tolt_commission_id": {
+            "type": "string",
+            "title": "Tolt Commission Id"
+          },
+          "partner_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partner Id"
+          },
+          "conversion_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conversion Id"
+          },
+          "amount_minor": {
+            "type": "integer",
+            "title": "Amount Minor"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "payout_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payout Id"
+          },
+          "tolt_created_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tolt Created At"
+          },
+          "order_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Order Id"
+          },
+          "partner_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partner Name"
+          },
+          "customer_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Email"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tolt_commission_id",
+          "partner_id",
+          "conversion_id",
+          "amount_minor",
+          "status",
+          "payout_id",
+          "tolt_created_at",
+          "order_id",
+          "partner_name",
+          "customer_email"
+        ],
+        "title": "CommissionOut"
+      },
+      "CommissionPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CommissionOut"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "CommissionPage"
+      },
+      "ConversionOut": {
+        "properties": {
+          "conversion_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Conversion Id"
+          },
+          "order_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Order Id"
+          },
+          "partner_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Partner Id"
+          },
+          "customer_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Customer Id"
+          },
+          "base_amount_minor": {
+            "type": "integer",
+            "title": "Base Amount Minor"
+          },
+          "is_first_purchase": {
+            "type": "boolean",
+            "title": "Is First Purchase"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "tolt_transaction_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tolt Transaction Id"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "customer_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Email"
+          },
+          "product_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Product Name"
+          },
+          "partner_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partner Name"
+          },
+          "commission_minor": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Commission Minor"
+          },
+          "commission_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Commission Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "conversion_id",
+          "order_id",
+          "partner_id",
+          "customer_id",
+          "base_amount_minor",
+          "is_first_purchase",
+          "status",
+          "tolt_transaction_id",
+          "created_at",
+          "customer_email",
+          "product_name",
+          "partner_name",
+          "commission_minor",
+          "commission_status"
+        ],
+        "title": "ConversionOut"
+      },
+      "ConversionPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ConversionOut"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "ConversionPage"
+      },
+      "CustomerReferralsOut": {
+        "properties": {
+          "attribution": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AttributionOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Who brought this customer (first touch)."
+          },
+          "partner": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PartnerOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Set when the customer is themselves a referrer."
+          },
+          "invited": {
+            "type": "integer",
+            "title": "Invited",
+            "default": 0
+          },
+          "qualified": {
+            "type": "integer",
+            "title": "Qualified",
+            "default": 0
+          },
+          "pending_rewards": {
+            "type": "integer",
+            "title": "Pending Rewards",
+            "default": 0
+          },
+          "granted_rewards": {
+            "type": "integer",
+            "title": "Granted Rewards",
+            "default": 0
+          },
+          "earned_minor": {
+            "type": "integer",
+            "title": "Earned Minor",
+            "default": 0
+          },
+          "rewards": {
+            "items": {
+              "$ref": "#/components/schemas/ReferralRewardOut"
+            },
+            "type": "array",
+            "title": "Rewards",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "attribution",
+          "partner"
+        ],
+        "title": "CustomerReferralsOut",
+        "description": "Everything referral-related about one customer, for the admin customer page."
+      },
+      "LegacyAffiliateOut": {
+        "properties": {
+          "legacy_id": {
+            "type": "integer",
+            "title": "Legacy Id"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Code"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "legacy_id"
+        ],
+        "title": "LegacyAffiliateOut"
+      },
+      "MyReferralsOut": {
+        "properties": {
+          "program_active": {
+            "type": "boolean",
+            "title": "Program Active"
+          },
+          "joined": {
+            "type": "boolean",
+            "title": "Joined"
+          },
+          "referral_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Referral Code"
+          },
+          "link": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Link"
+          },
+          "reward_minor": {
+            "type": "integer",
+            "title": "Reward Minor"
+          },
+          "friend_discount_percent": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Friend Discount Percent"
+          },
+          "holding_days": {
+            "type": "integer",
+            "title": "Holding Days"
+          },
+          "min_order_minor": {
+            "type": "integer",
+            "title": "Min Order Minor"
+          },
+          "invited": {
+            "type": "integer",
+            "title": "Invited",
+            "default": 0
+          },
+          "qualified": {
+            "type": "integer",
+            "title": "Qualified",
+            "default": 0
+          },
+          "pending_rewards": {
+            "type": "integer",
+            "title": "Pending Rewards",
+            "default": 0
+          },
+          "granted_rewards": {
+            "type": "integer",
+            "title": "Granted Rewards",
+            "default": 0
+          },
+          "earned_minor": {
+            "type": "integer",
+            "title": "Earned Minor",
+            "default": 0
+          },
+          "rewards": {
+            "items": {
+              "$ref": "#/components/schemas/ReferralRewardOut"
+            },
+            "type": "array",
+            "title": "Rewards",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "program_active",
+          "joined",
+          "reward_minor",
+          "friend_discount_percent",
+          "holding_days",
+          "min_order_minor"
+        ],
+        "title": "MyReferralsOut"
+      },
+      "PartnerIn": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "maxLength": 320,
+            "minLength": 3,
+            "title": "Email"
+          },
+          "full_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 50
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "country_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2,
+                "minLength": 2
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country Code"
+          },
+          "referral_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 50
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Referral Code",
+            "description": "?ref= value; generated when empty."
+          },
+          "tolt_group_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tolt Group Id",
+            "description": "Tolt group (commission plan)."
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "title": "PartnerIn"
+      },
+      "PartnerOut": {
+        "properties": {
+          "partner_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Partner Id"
+          },
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "full_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "country_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country Code"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "referral_code": {
+            "type": "string",
+            "title": "Referral Code"
+          },
+          "referral_link": {
+            "type": "string",
+            "title": "Referral Link"
+          },
+          "customer_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Id"
+          },
+          "tolt_partner_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tolt Partner Id"
+          },
+          "tolt_group_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tolt Group Id"
+          },
+          "sync_status": {
+            "type": "string",
+            "title": "Sync Status"
+          },
+          "sync_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sync Error"
+          },
+          "legacy_affiliate_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Legacy Affiliate Id"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/PartnerStatsOut"
+          },
+          "tolt_stats": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tolt Stats"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "default": "admin"
+          },
+          "application": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Application"
+          }
+        },
+        "type": "object",
+        "required": [
+          "partner_id",
+          "kind",
+          "email",
+          "full_name",
+          "phone",
+          "country_code",
+          "status",
+          "referral_code",
+          "referral_link",
+          "customer_id",
+          "tolt_partner_id",
+          "tolt_group_id",
+          "sync_status",
+          "sync_error",
+          "legacy_affiliate_id",
+          "notes",
+          "created_at",
+          "stats"
+        ],
+        "title": "PartnerOut"
+      },
+      "PartnerPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PartnerOut"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "PartnerPage"
+      },
+      "PartnerStatsOut": {
+        "properties": {
+          "customers": {
+            "type": "integer",
+            "title": "Customers"
+          },
+          "paying_customers": {
+            "type": "integer",
+            "title": "Paying Customers"
+          },
+          "conversions": {
+            "type": "integer",
+            "title": "Conversions"
+          },
+          "revenue_minor": {
+            "type": "integer",
+            "title": "Revenue Minor"
+          },
+          "commission_pending_minor": {
+            "type": "integer",
+            "title": "Commission Pending Minor"
+          },
+          "commission_approved_minor": {
+            "type": "integer",
+            "title": "Commission Approved Minor"
+          },
+          "commission_paid_minor": {
+            "type": "integer",
+            "title": "Commission Paid Minor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "customers",
+          "paying_customers",
+          "conversions",
+          "revenue_minor",
+          "commission_pending_minor",
+          "commission_approved_minor",
+          "commission_paid_minor"
+        ],
+        "title": "PartnerStatsOut"
+      },
+      "PartnerStatusIn": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "suspended",
+              "rejected"
+            ],
+            "title": "Status"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "PartnerStatusIn"
+      },
+      "ReferralIn": {
+        "properties": {
+          "ref": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ref",
+            "description": "The ?ref= value (partner code)."
+          },
+          "tolt_click_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tolt Click Id"
+          },
+          "tolt_partner_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tolt Partner Id"
+          }
+        },
+        "type": "object",
+        "title": "ReferralIn"
+      },
+      "ReferralRewardOut": {
+        "properties": {
+          "reward_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Reward Id"
+          },
+          "referrer_customer_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Referrer Customer Id"
+          },
+          "referred_customer_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Referred Customer Id"
+          },
+          "order_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Order Id"
+          },
+          "amount_minor": {
+            "type": "integer",
+            "title": "Amount Minor"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "eligible_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Eligible At"
+          },
+          "voucher_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Voucher Id"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "referrer_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Referrer Email"
+          },
+          "referred_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Referred Email"
+          },
+          "referred_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Referred Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reward_id",
+          "referrer_customer_id",
+          "referred_customer_id",
+          "order_id",
+          "amount_minor",
+          "status",
+          "eligible_at",
+          "voucher_id",
+          "created_at",
+          "referrer_email",
+          "referred_email",
+          "referred_name"
+        ],
+        "title": "ReferralRewardOut"
+      },
+      "ReferralRewardPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ReferralRewardOut"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "ReferralRewardPage"
+      },
+      "ReferralSettingsIO-Input": {
+        "properties": {
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "referrer_reward_minor": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Referrer Reward Minor",
+            "description": "Voucher for the referrer, in cents."
+          },
+          "reward_validity_days": {
+            "type": "integer",
+            "maximum": 3650.0,
+            "minimum": 1.0,
+            "title": "Reward Validity Days"
+          },
+          "friend_discount_percent": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              }
+            ],
+            "title": "Friend Discount Percent"
+          },
+          "friend_coupon_validity_days": {
+            "type": "integer",
+            "maximum": 3650.0,
+            "minimum": 1.0,
+            "title": "Friend Coupon Validity Days"
+          },
+          "min_order_minor": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Min Order Minor"
+          },
+          "holding_days": {
+            "type": "integer",
+            "maximum": 365.0,
+            "minimum": 0.0,
+            "title": "Holding Days",
+            "description": "Days without refund before the reward is granted."
+          },
+          "max_rewards_per_referrer": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Rewards Per Referrer"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "is_active",
+          "referrer_reward_minor",
+          "reward_validity_days",
+          "friend_discount_percent",
+          "friend_coupon_validity_days",
+          "min_order_minor",
+          "holding_days"
+        ],
+        "title": "ReferralSettingsIO"
+      },
+      "ReferralSettingsIO-Output": {
+        "properties": {
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "referrer_reward_minor": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Referrer Reward Minor",
+            "description": "Voucher for the referrer, in cents."
+          },
+          "reward_validity_days": {
+            "type": "integer",
+            "maximum": 3650.0,
+            "minimum": 1.0,
+            "title": "Reward Validity Days"
+          },
+          "friend_discount_percent": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Friend Discount Percent"
+          },
+          "friend_coupon_validity_days": {
+            "type": "integer",
+            "maximum": 3650.0,
+            "minimum": 1.0,
+            "title": "Friend Coupon Validity Days"
+          },
+          "min_order_minor": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Min Order Minor"
+          },
+          "holding_days": {
+            "type": "integer",
+            "maximum": 365.0,
+            "minimum": 0.0,
+            "title": "Holding Days",
+            "description": "Days without refund before the reward is granted."
+          },
+          "max_rewards_per_referrer": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Rewards Per Referrer"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "is_active",
+          "referrer_reward_minor",
+          "reward_validity_days",
+          "friend_discount_percent",
+          "friend_coupon_validity_days",
+          "min_order_minor",
+          "holding_days"
+        ],
+        "title": "ReferralSettingsIO"
+      },
+      "SuggestedCouponResponse": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "value": {
+            "type": "string",
+            "title": "Value",
+            "description": "Percent, or the amount in major units for fixed coupons."
+          },
+          "ends_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ends At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "kind",
+          "value"
+        ],
+        "title": "SuggestedCouponResponse"
+      },
+      "ToltGroupOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "is_default": {
+            "type": "boolean",
+            "title": "Is Default",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "ToltGroupOut"
+      },
+      "AnalyticsOut": {
+        "properties": {
+          "totals": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Totals"
+          },
+          "daily": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Daily"
+          },
+          "top": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Top"
+          }
+        },
+        "type": "object",
+        "required": [
+          "totals",
+          "daily",
+          "top"
+        ],
+        "title": "AnalyticsOut"
+      },
+      "AssignIn": {
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Customer Id"
+          },
+          "partner_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Partner Id"
+          },
+          "replace": {
+            "type": "boolean",
+            "title": "Replace",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "customer_id",
+          "partner_id"
+        ],
+        "title": "AssignIn"
+      },
+      "CompanyDraftProgress": {
+        "properties": {
+          "draftToken": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Drafttoken"
+          },
+          "step": {
+            "type": "string",
+            "enum": [
+              "company",
+              "training",
+              "departments",
+              "budget",
+              "needs"
+            ],
+            "title": "Step"
+          },
+          "answers": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Answers"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "draftToken",
+          "step",
+          "answers"
+        ],
+        "title": "CompanyDraftProgress"
+      },
+      "FormStepPoint": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "value": {
+            "type": "integer",
+            "title": "Value"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "value",
+          "id"
+        ],
+        "title": "FormStepPoint"
+      },
+      "LegacyImportIn": {
+        "properties": {
+          "only_approved": {
+            "type": "boolean",
+            "title": "Only Approved",
+            "default": true
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "LegacyImportIn"
+      },
+      "LegacyImportOut": {
+        "properties": {
+          "imported": {
+            "type": "integer",
+            "title": "Imported"
+          },
+          "skipped": {
+            "type": "integer",
+            "title": "Skipped"
+          }
+        },
+        "type": "object",
+        "required": [
+          "imported",
+          "skipped"
+        ],
+        "title": "LegacyImportOut"
+      },
+      "LegacyPreviewOut": {
+        "properties": {
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "already_imported": {
+            "type": "integer",
+            "title": "Already Imported"
+          },
+          "to_import": {
+            "type": "integer",
+            "title": "To Import"
+          },
+          "sample": {
+            "items": {
+              "$ref": "#/components/schemas/LegacyAffiliateOut"
+            },
+            "type": "array",
+            "title": "Sample"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total",
+          "already_imported",
+          "to_import",
+          "sample"
+        ],
+        "title": "LegacyPreviewOut"
+      },
+      "LegacyPushIn": {
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "maximum": 200.0,
+            "minimum": 1.0,
+            "title": "Limit",
+            "default": 50
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "LegacyPushIn"
+      },
+      "LegacyPushOut": {
+        "properties": {
+          "attempted": {
+            "type": "integer",
+            "title": "Attempted"
+          },
+          "pushed": {
+            "type": "integer",
+            "title": "Pushed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "attempted",
+          "pushed"
+        ],
+        "title": "LegacyPushOut"
       }
     },
     "securitySchemes": {

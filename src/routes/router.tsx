@@ -28,7 +28,13 @@ import TicketDetailPage from "@/features/customers/pages/ticket-detail-page";
 import TeamPage from "@/features/settings/pages/team-page";
 import AuditPage from "@/features/settings/pages/audit-page";
 import GeneralSettingsPage from "@/features/settings/pages/general-settings-page";
-import AffiliatesPage from "@/features/marketing/pages/affiliates-page";
+import PartnersPage from "@/features/marketing/pages/partners-page";
+import PartnerNewPage from "@/features/marketing/pages/partner-new-page";
+import PartnerDetailPage from "@/features/marketing/pages/partner-detail-page";
+import AffiliateCommissionsPage from "@/features/marketing/pages/affiliate-commissions-page";
+import AffiliateImportPage from "@/features/marketing/pages/affiliate-import-page";
+import ReferralProgramPage from "@/features/marketing/pages/referral-program-page";
+import AffiliatesAnalyticsPage from "@/features/marketing/pages/affiliates-analytics-page";
 import PayoutsPage from "@/features/marketing/pages/payouts-page";
 import CatalogPage from "@/features/learning/pages/catalog-page";
 import CourseNewPage from "@/features/learning/pages/course-new-page";
@@ -208,8 +214,13 @@ export const ROUTER = createBrowserRouter([
       { path: "admin/support/b2c/:ticketId", element: <Navigate to="/customers/tickets/:ticketId" replace /> },
 
       // Marketing
-      { path: "marketing/affiliates", element: <AffiliatesPage /> },
-      { path: "marketing/commissions", element: <CommissionsPage /> },
+      { path: "marketing/affiliates", element: <PartnersPage /> },
+      { path: "marketing/affiliates/new", element: <PartnerNewPage /> },
+      { path: "marketing/affiliates/import", element: <AffiliateImportPage /> },
+      { path: "marketing/affiliates/:partnerId", element: <PartnerDetailPage /> },
+      { path: "marketing/commissions", element: <AffiliateCommissionsPage /> },
+      { path: "marketing/commissions/legacy", element: <CommissionsPage /> },
+      { path: "marketing/referral-program", element: <ReferralProgramPage /> },
       { path: "marketing/payouts", element: <PayoutsPage /> },
       { path: "marketing/announcements", element: <AnnouncementsPage /> },
       { path: "marketing/policies", element: <PoliciesPage /> },
@@ -220,7 +231,8 @@ export const ROUTER = createBrowserRouter([
       { path: "analytics/products", element: <ProductsReportPage /> },
       { path: "analytics/coupons", element: <CouponsReportPage /> },
       { path: "analytics/customers", element: <CustomersReportPage /> },
-      { path: "analytics/affiliates", element: <AffiliatesReportPage /> },
+      { path: "analytics/affiliates", element: <AffiliatesAnalyticsPage /> },
+      { path: "analytics/affiliates/legacy", element: <AffiliatesReportPage /> },
       { path: "analytics/ratings", element: <RatingsPage /> },
       { path: "analytics/certificates", element: <CertificatesPage /> },
       { path: "analytics/behavior", element: <BehaviorOverviewPage /> },

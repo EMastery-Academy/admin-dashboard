@@ -218,6 +218,7 @@ function Sidebar({ module, activeHref, onCollapse }: { module: NavModule; active
   const t = useT();
   const lang = useLang();
   const location = useLocation();
+  const searchIcon = useRef<AnimatedIconHandle>(null);
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [navState, setNavState] = useState<NavState>(readNavState);
@@ -367,13 +368,15 @@ function Sidebar({ module, activeHref, onCollapse }: { module: NavModule; active
       </div>
       <div className="ma-sidebar__search">
         <div className="ma-search">
-          <Icon name="search" className="ma-search__icon" />
+          <SearchIcon ref={searchIcon} size={18} className="ma-search__icon" />
           <input
             className="ma-input ma-input--search"
             type="search"
             placeholder={t("ابحث في الصفحات أو المنصة…", "Search pages or platform…")}
             aria-label={t("ابحث في الصفحات أو المنصة", "Search pages or platform")}
             value={query}
+            onFocus={() => searchIcon.current?.startAnimation()}
+            onBlur={() => searchIcon.current?.stopAnimation()}
             onChange={(event) => setQuery(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === "Enter" && rawTerm) {

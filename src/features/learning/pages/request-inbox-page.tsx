@@ -14,10 +14,13 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } f
 
 type Kind = "company-training" | "trainer-applications";
 type RequestRecord = { request_id: string; name: string; email: string; company_name: string | null; status: string;
-  submitted_at: string; assigned_admin_id: string | null; payload: Record<string, unknown> };
+  submitted_at: string; assigned_admin_id: string | null; payload: Record<string, unknown>;
+  form_state: "in_progress" | "completed"; current_step: string | null; furthest_step: string | null;
+  last_activity_at: string | null; completed_at: string | null };
 type RequestPage = { items: RequestRecord[]; total: number; limit: number; offset: number };
 type Point = { label: string; value: number; id?: string };
-type Stats = { total: number; by_status: Point[]; by_month: Point[]; categories: Point[]; skills: Point[]; skills_request_count: number };
+type Stats = { total: number; by_status: Point[]; by_month: Point[]; categories: Point[]; skills: Point[];
+  skills_request_count: number; in_progress: number; by_step: Point[] };
 type Note = { note_id: string; body: string; author: string; created_at: string };
 type Attachment = { attachment_id: string; kind: string; filename: string; size_bytes: number };
 type Option = { id: string; name: string };
@@ -44,6 +47,8 @@ const labels: Record<string, [string, string]> = {
   hasTrainingBudget: ["ميزانية مخصصة للتدريب", "Dedicated training budget"],
   usedPlatformBefore: ["اشتركوا في منصة تدريب سابقاً", "Used a training platform before"],
   previousPlatforms: ["المنصات السابقة", "Previous platforms"], otherPlatform: ["منصة أخرى", "Other platform"],
+  otherTrainingGoal: ["هدف تدريب آخر", "Other training goal"], otherCategory: ["مجال آخر", "Other category"],
+  otherSkill: ["مهارة أخرى", "Other skill"], hasInternalLms: ["منصة تدريب داخلية", "Internal LMS"],
 };
 /** Answer codes of the company request (storefront `business-request/model/options.ts`). */
 const choices: Record<string, [string, string]> = {
@@ -64,6 +69,15 @@ const choices: Record<string, [string, string]> = {
 };
 const CHOICE_FIELDS = new Set(["industry", "trainingTypes", "trainingGoals", "departments", "previousPlatforms"]);
 const statuses = (company: boolean) => company ? ["new", "in_review", "contacted", "closed"] : ["new", "in_review", "approved", "declined", "legacy"];
+const formSteps = ["company", "training", "departments", "budget", "needs"] as const;
+function stepName(step: string | null, t: ReturnType<typeof useT>) {
+  const names: Record<string, [string, string]> = {
+    company: ["بيانات الشركة والتواصل", "Company and contact"], training: ["التدريب المطلوب", "Training"],
+    departments: ["الأقسام", "Departments"], budget: ["الميزانية والخبرة", "Budget"],
+    needs: ["المجالات والمهارات", "Needs"], completed: ["مكتمل", "Completed"],
+  };
+  return step && names[step] ? t(...names[step]) : "—";
+}
 function statusName(status: string, t: ReturnType<typeof useT>) {
   return ({ new: t("جديد", "New"), in_review: t("قيد المراجعة", "In review"), contacted: t("تم التواصل", "Contacted"),
     closed: t("مغلق", "Closed"), approved: t("مقبول", "Approved"), declined: t("مرفوض", "Declined"), legacy: t("قديم", "Legacy") } as Record<string, string>)[status] ?? status;
@@ -97,6 +111,8 @@ export function RequestInboxPage({ kind }: { kind: Kind }) {
   const [offset, setOffset] = useState(0);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("");
+  const [formState, setFormState] = useState("");
+  const [formStep, setFormStep] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [assignee, setAssignee] = useState("");
@@ -105,7 +121,8 @@ export function RequestInboxPage({ kind }: { kind: Kind }) {
   const [note, setNote] = useState("");
   const filters = { query: query || undefined, status: status || undefined, from_date: fromDate || undefined,
     to_date: toDate || undefined, assigned_admin_id: assignee || undefined, category_id: category || undefined,
-    skill_id: skill || undefined };
+    skill_id: skill || undefined, form_state: company ? formState || undefined : undefined,
+    step: company ? formStep || undefined : undefined };
   const list = useQuery({ queryKey: ["public-requests", kind, "list", filters, offset],
     queryFn: (): Promise<RequestPage> => apiGet(`admin/requests/${kind}`, { query: { ...filters, limit: 25, offset } }),
     refetchInterval: 30_000 });
@@ -143,6 +160,15 @@ export function RequestInboxPage({ kind }: { kind: Kind }) {
       exportValue: (row) => (company ? row.company_name : row.name) ?? "" },
     { key: "status", header: t("الحالة", "Status"), cell: (row) => <Status value={row.status} />,
       exportValue: (row) => statusName(row.status, t) },
+    ...(company ? [{ key: "progress", header: t("تقدّم الطلب", "Form progress"),
+      cell: (row: RequestRecord) => <div><span className={`ma-tag ma-tag--${row.form_state === "completed" ? "green" : "yellow"}`}>
+        {row.form_state === "completed" ? t("مكتمل", "Completed") : t("غير مكتمل", "Incomplete")}</span>
+        <span className="ma-cell-sub block">{stepName(row.current_step, t)}</span></div>,
+      exportValue: (row: RequestRecord) => `${row.form_state} · ${stepName(row.current_step, t)}` },
+      { key: "last_activity", header: t("آخر نشاط", "Last activity"),
+        cell: (row: RequestRecord) => row.last_activity_at ? formatDateTime(row.last_activity_at) : "—",
+        exportKind: "datetime" as const,
+        exportValue: (row: RequestRecord) => row.last_activity_at ? new Date(row.last_activity_at) : null }] : []),
     { key: "need", header: company ? t("الاحتياج", "Training need") : t("التخصص", "Specialty"),
       cell: (row) => <span className="ma-cell-sub">{String(row.payload[company ? "summary" : "specialized"] ?? "—").slice(0, 90)}</span>,
       exportValue: (row) => String(row.payload[company ? "summary" : "specialized"] ?? "") },
@@ -156,12 +182,12 @@ export function RequestInboxPage({ kind }: { kind: Kind }) {
     : value == null || value === "" ? "—" : typeof value === "boolean" ? value ? t("نعم", "Yes") : t("لا", "No") : String(value);
   const groups: Array<{ title: string; fields: string[] }> = company ? [
     // legalName and budget* only exist on requests sent before the multi-step form.
-    { title: t("بيانات الشركة", "Company details"), fields: ["companyName", "legalName", "industry", "websiteUrl", "companyRange", "country", "city"] },
-    { title: t("الاحتياج التدريبي", "Training needs"), fields: ["trainingTypes", "trainingGoals", "teamSize", "departments", "otherDepartment",
-      "categoryIds", "skillIds", "summary"] },
+    { title: t("بيانات الشركة وجهة التواصل", "Company and contact"), fields: ["companyName", "contactName", "jobTitle", "companyEmail", "contactPhone",
+      "legalName", "industry", "websiteUrl", "companyRange", "country", "city"] },
+    { title: t("الاحتياج التدريبي", "Training needs"), fields: ["trainingTypes", "trainingGoals", "otherTrainingGoal", "teamSize", "departments", "otherDepartment",
+      "categoryIds", "otherCategory", "skillIds", "otherSkill", "summary"] },
     { title: t("الميزانية والتجارب السابقة", "Budget and experience"), fields: ["hasTrainingBudget", "budgetRange", "budgetCurrency",
-      "usedPlatformBefore", "previousPlatforms", "otherPlatform"] },
-    { title: t("جهة التواصل", "Contact"), fields: ["contactName", "jobTitle", "companyEmail", "contactPhone"] },
+      "hasInternalLms", "usedPlatformBefore", "previousPlatforms", "otherPlatform"] },
   ] : [
     { title: t("الملف الشخصي", "Personal profile"), fields: ["title", "name", "email", "mobile", "nationality", "birthdate", "country", "city"] },
     { title: t("الخبرة", "Experience"), fields: ["educationalLevel", "major", "totalYearsOfExperience", "scopedExperience", "languages"] },
@@ -169,7 +195,13 @@ export function RequestInboxPage({ kind }: { kind: Kind }) {
     { title: t("الحضور الإلكتروني", "Online presence"), fields: ["youtubechannel", "instagramprofile", "facebookpage", "cvUrl", "recorded", "consultancy"] },
   ];
   const choiceName = (value: unknown) => typeof value === "string" && choices[value] ? t(...choices[value]) : value;
-  const formatField = (key: string, value: unknown) => key.toLowerCase().includes("url") && typeof value === "string" && /^https?:\/\//.test(value)
+  const formatField = (key: string, value: unknown) => key === "hasTrainingBudget" && value === "maybe"
+    ? t("نوعاً ما؛ تحدد حسب الاحتياج", "Maybe; decided by need")
+    : key === "companyEmail" && typeof value === "string"
+      ? <a className="ma-link" href={`mailto:${value}`}>{value}</a>
+    : key === "contactPhone" && typeof value === "string"
+      ? <a className="ma-link" href={`tel:${value.replace(/[^+\d]/g, "")}`}><bdi>{value}</bdi></a>
+    : key.toLowerCase().includes("url") && typeof value === "string" && /^https?:\/\//.test(value)
     ? <a className="ma-link" href={value} target="_blank" rel="noopener noreferrer">{value}</a>
     : display(CHOICE_FIELDS.has(key) ? Array.isArray(value) ? value.map(choiceName) : choiceName(value) : value);
   return <>
@@ -179,12 +211,16 @@ export function RequestInboxPage({ kind }: { kind: Kind }) {
         : t("مراجعة طلبات المدربين وخبراتهم ومرفقاتهم.", "Review trainer applications, experience and attachments.")} />
     <div className="ma-kpis">
       <Kpi label={t("كل الطلبات", "All requests")} value={stats.data?.total ?? "—"} icon="inbox" />
+      {company ? <Kpi label={t("غير مكتملة", "Incomplete")} value={stats.data?.in_progress ?? "—"} icon="clock" /> : null}
       <Kpi label={t("جديدة", "New")} value={stats.data ? count("new") : "—"} icon="sparkles" />
       <Kpi label={t("قيد المراجعة", "In review")} value={stats.data ? count("in_review") : "—"} icon="clock" />
     </div>
     {stats.error ? <ErrorAlert error={stats.error} /> : null}
     <div className="grid gap-4 lg:grid-cols-2">
       <MetricChart title={t("الطلبات شهرياً", "Monthly requests")} data={stats.data?.by_month ?? []} color="var(--purple)" />
+      {company ? <MetricChart title={t("أين توقفت الطلبات غير المكتملة", "Last step of incomplete requests")}
+        data={(stats.data?.by_step ?? []).map((point) => ({ ...point, label: stepName(point.id ?? point.label, t) }))}
+        color="var(--coral)" onSelect={(point) => { setFormState("in_progress"); setFormStep(point.id ?? ""); setOffset(0); }} /> : null}
       <MetricChart title={t("المجالات الأكثر طلباً", "Top categories")} data={stats.data?.categories ?? []} color="var(--teal)" />
       <MetricChart title={company ? t("مهارات يحتاجها الفريق", "Team skills to develop") : t("مهارات المدربين", "Trainer skills")}
         data={stats.data?.skills ?? []} color="var(--sky)"
@@ -200,6 +236,11 @@ export function RequestInboxPage({ kind }: { kind: Kind }) {
           placeholder={t("اسم أو بريد أو شركة", "Name, email or company")} value={query}
           onChange={(event) => { setQuery(event.target.value); setOffset(0); }} /></label>
         {pick(t("الحالة", "Status"), status, setStatus, statuses(company).map((value) => ({ id: value, name: statusName(value, t) })))}
+        {company ? pick(t("اكتمال الطلب", "Form completion"), formState, setFormState, [
+          { id: "in_progress", name: t("غير مكتمل", "Incomplete") }, { id: "completed", name: t("مكتمل", "Completed") },
+        ]) : null}
+        {company ? pick(t("آخر خطوة", "Last step"), formStep, setFormStep,
+          formSteps.map((value) => ({ id: value, name: stepName(value, t) }))) : null}
         {pick(t("المسؤول", "Assignee"), assignee, setAssignee, assignees.data ?? [])}
         {pick(t("المجال", "Category"), category, setCategory, categories.data ?? [])}
         {pick(t("المهارة", "Skill"), skill, setSkill, skills.data ?? [])}
@@ -207,8 +248,8 @@ export function RequestInboxPage({ kind }: { kind: Kind }) {
           onChange={(event) => { setFromDate(event.target.value); setOffset(0); }} /></label>
         <label className="ma-field"><span className="ma-label">{t("إلى تاريخ", "To")}</span><input className="ma-input" type="date" value={toDate}
           onChange={(event) => { setToDate(event.target.value); setOffset(0); }} /></label>
-        <div className="flex items-end"><Button label={t("مسح الفلاتر", "Clear filters")} disabled={!query && !status && !assignee && !category && !skill && !fromDate && !toDate}
-          onClick={() => { setQuery(""); setStatus(""); setAssignee(""); setCategory(""); setSkill(""); setFromDate(""); setToDate(""); setOffset(0); }} /></div>
+        <div className="flex items-end"><Button label={t("مسح الفلاتر", "Clear filters")} disabled={!query && !status && !formState && !formStep && !assignee && !category && !skill && !fromDate && !toDate}
+          onClick={() => { setQuery(""); setStatus(""); setFormState(""); setFormStep(""); setAssignee(""); setCategory(""); setSkill(""); setFromDate(""); setToDate(""); setOffset(0); }} /></div>
       </div>
     </Card>
     <Card title={t("الطلبات", "Requests")} flush>
@@ -225,6 +266,13 @@ export function RequestInboxPage({ kind }: { kind: Kind }) {
       {detail.error ? <ErrorAlert error={detail.error} /> : null}
       {detail.data ? <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
         <div className="grid content-start gap-4">
+          {company ? <Card title={t("تقدّم الطلب", "Form progress")}><Dl rows={[
+            [t("الاكتمال", "Completion"), detail.data.form_state === "completed" ? t("مكتمل", "Completed") : t("غير مكتمل", "Incomplete")],
+            [t("آخر خطوة", "Last step"), stepName(detail.data.current_step, t)],
+            [t("أبعد خطوة وصل إليها", "Furthest step reached"), stepName(detail.data.furthest_step, t)],
+            [t("آخر نشاط", "Last activity"), detail.data.last_activity_at ? formatDateTime(detail.data.last_activity_at) : "—"],
+            [t("تاريخ الاكتمال", "Completed at"), detail.data.completed_at ? formatDateTime(detail.data.completed_at) : "—"],
+          ]} /></Card> : null}
           {groups.map((group) => <Card key={group.title} title={group.title}>
             <Dl rows={group.fields.filter((key) => key in detail.data.payload).map((key) =>
               [labels[key] ? t(...labels[key]) : key, formatField(key, detail.data.payload[key])])} />

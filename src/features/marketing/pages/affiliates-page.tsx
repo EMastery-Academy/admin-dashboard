@@ -9,7 +9,8 @@ import { type Column } from "@/components/ui/data-table";
 import { PagedList, type ListFilter } from "@/components/ui/paged-list";
 import { affiliateStatusBadge } from "@/lib/status";
 
-export default function AffiliatesPage() {
+/** Legacy-platform affiliates (read-mostly). `embedded` drops the page header when shown as a tab. */
+export default function AffiliatesPage({ embedded = false }: { embedded?: boolean }) {
   const t = useT();
   const lang = useLang();
   const queryClient = useQueryClient();
@@ -54,7 +55,7 @@ export default function AffiliatesPage() {
 
   return (
     <>
-      <PageHead title={t("المسوقون بالعمولة", "Affiliates")} sub={t("شركاء الإحالة وأحوالهم.", "Referral partners and their states.")} />
+      {embedded ? null : <PageHead title={t("المسوقون بالعمولة", "Affiliates")} sub={t("شركاء الإحالة وأحوالهم.", "Referral partners and their states.")} />}
       <ErrorAlert error={approve.error} title={t("تعذّر اعتماد المسوّق", "Couldn't approve the partner")} />
       <PagedList
         queryKeyBase={["marketing", "referrals", "partners"]}
