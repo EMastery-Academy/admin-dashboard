@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "api:types": "openapi-typescript openapi.json -o src/types/openapi.ts",
     "test:api": "tsx --tsconfig tsconfig.app.json scripts/test-api-layer.ts",
-    "test:api:mutations": "tsx --tsconfig tsconfig.app.json scripts/test-api-layer.ts --include-mutations"
+    "test:api:mutations": "tsx --tsconfig tsconfig.app.json scripts/test-api-layer.ts --include-mutations",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@base-ui-components/react": "^1.0.0-rc.0",
@@ -43,6 +44,7 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.0",
     "@tailwindcss/postcss": "^4.1.18",
     "@types/file-saver": "^2.0.7",
     "@types/node": "^24.13.3",

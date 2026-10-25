@@ -25,6 +25,7 @@ export * from "@/lib/api/sales/refund-cases";
 // Customers
 export * from "@/lib/api/customers/customers";
 export * from "@/lib/api/customers/customer-admin";
+export * from "@/lib/api/entitlements/admin";
 export * from "@/lib/api/customers/tickets";
 
 // Learning

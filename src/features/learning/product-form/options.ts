@@ -66,8 +66,10 @@ export function useCatalogOptions() {
 
 /** Slim published product cards for the package/bundle member pickers. */
 export function useProductCards(productTypes: string[]) {
-  const query = useQuery(catalogQueries.cards({ product_type: productTypes, limit: 200 }));
-  return { cards: query.data?.items ?? [], isLoading: query.isLoading };
+  const pages = useQueries({
+    queries: [0, 200, 400].map((offset) => catalogQueries.cards({ product_type: productTypes, limit: 200, offset })),
+  });
+  return { cards: pages.flatMap((page) => page.data?.items ?? []), isLoading: pages.some((page) => page.isLoading) };
 }
 
 /**

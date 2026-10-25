@@ -39,6 +39,7 @@ import { AssetLibrary, AssetPickerDialog } from "@/features/learning/studio/pane
 import { MetaPanel, type MetaPanelCurrent } from "@/features/learning/studio/panels/meta-panel";
 import { VersionsPanel } from "@/features/learning/studio/panels/versions-panel";
 import { PackageCoursesCard } from "@/features/learning/components/package-courses-card";
+import { BundleTab } from "@/features/learning/product-detail/tabs/bundle-tab";
 import { ReadmePanel } from "@/features/learning/studio/panels/readme-panel";
 import { PreviewFrame, type PreviewDevice } from "@/features/learning/studio/preview/preview-frame";
 import { CurriculumTab } from "@/features/learning/curriculum";
@@ -70,7 +71,7 @@ function kindWords(productType: string | null | undefined, t: (ar: string, en: s
   }
 }
 
-type StudioSubPage = "editor" | "readme" | "package" | "curriculum" | "details" | "assets" | "history";
+type StudioSubPage = "editor" | "readme" | "package" | "bundle" | "curriculum" | "details" | "assets" | "history";
 type Picker = { kind?: "image" | "video" | "file"; resolve: (asset: StudioAsset | null) => void };
 
 const SAVE_LABEL: Record<SaveState, [string, string]> = {
@@ -197,7 +198,10 @@ function StudioWorkspace({ productRef, initial }: { productRef: string; initial:
   const unitsQuery = useQuery({ ...curriculumQueries.units(productRef), enabled: hasCurriculum });
   // What the page shows today: its product image and trainers. Page Details offers them when the draft is empty.
   const productQuery = useQuery({ ...productQueries.detail(productRef), staleTime: 60_000 });
-  const productInstructors = useQuery({ ...productQueries.instructors(productRef), retry: false, staleTime: 60_000 });
+  const productInstructors = useQuery({
+    ...productQueries.instructors(productRef), retry: false, staleTime: 60_000,
+    enabled: initial.product_type !== "bundle",
+  });
   const currentMedia = useMemo<MetaPanelCurrent | null>(() => {
     const product = productQuery.data?.product;
     const url = product?.image || product?.square_image;
@@ -448,6 +452,7 @@ function StudioWorkspace({ productRef, initial }: { productRef: string; initial:
             ["editor", "المحرر والمعاينة", "Editor & Preview"],
             ["readme", "README (المحتوى)", "README (content)"],
             ...(kind === "package" ? [["package", "دورات الباقة", "Package courses"]] : []),
+            ...(kind === "bundle" ? [["bundle", "عناصر الحزمة", "Bundle members"]] : []),
             ...(hasCurriculum ? [["curriculum", words.content, "Curriculum"]] : []),
             ["details", "بيانات الصفحة", "Page Details"],
             ["assets", "مكتبة الملفات", "Asset Library"],
@@ -557,6 +562,20 @@ function StudioWorkspace({ productRef, initial }: { productRef: string; initial:
             <section className="ma-studio__preview" aria-label={t("المعاينة", "Preview")}>
               {base.isError ? <ErrorAlert error={base.error} title={t("تعذّر تحميل بيانات المعاينة", "Couldn't load preview data")} /> : null}
               <PreviewFrame base={liveBase} document={previewDocument} kind={kind} device={device} readme={readmeText} focusBlockId={{ id: "contents", at: 0 }} />
+            </section>
+          ) : null}
+        </div>
+      ) : null}
+
+      {subPage === "bundle" && kind === "bundle" ? (
+        <div className={cn("ma-studio", "ma-studio--workspace", !showPreview && "is-no-preview")}>
+          <section className="ma-studio__canvas" style={{ overflowY: "auto", maxHeight: "calc(100vh - 170px)", padding: "var(--space-2) var(--space-3)" }}>
+            <BundleTab productRef={productRef} productId={initial.links.b2c_product_id ?? null} studio editable={editable} />
+          </section>
+          {showPreview ? (
+            <section className="ma-studio__preview" aria-label={t("المعاينة", "Preview")}>
+              {base.isError ? <ErrorAlert error={base.error} title={t("تعذّر تحميل بيانات المعاينة", "Couldn't load preview data")} /> : null}
+              <PreviewFrame base={liveBase} document={previewDocument} kind={kind} device={device} focusBlockId={{ id: "contents", at: 0 }} />
             </section>
           ) : null}
         </div>

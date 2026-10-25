@@ -59,7 +59,8 @@ export const navigation: NavModule[] = [
         items: [
           { title: { ar: "الكوبونات", en: "Coupons" }, href: "/sales/coupons", permission: "coupons.read" },
           { title: { ar: "قسائم الرصيد", en: "Vouchers" }, href: "/sales/vouchers", permission: "coupons.read" },
-          { title: { ar: "قوائم الأسعار", en: "Price lists" }, href: "/sales/price-lists", permission: "pricing.read" },
+          { title: { ar: "التسعير", en: "Pricing" }, href: "/sales/pricing", permission: "pricing.read" },
+          { title: { ar: "قوائم الأسعار (قديم)", en: "Price lists (legacy)" }, href: "/sales/price-lists", permission: "pricing.read" },
           { title: { ar: "العروض", en: "Offers" }, href: "/sales/offers", permission: "pricing.read" },
         ],
       },
@@ -209,6 +210,7 @@ export const navigation: NavModule[] = [
         items: [
           { title: { ar: "العملاء", en: "Customers" }, href: "/customers", permission: "customers.read" },
           { title: { ar: "الاستعلام عن مشترك", en: "Account lookup" }, href: "/customers/accounts", permission: "customers.read" },
+          { title: { ar: "وصول العملاء", en: "Customer access" }, href: "/customers/entitlements", permission: "subscribers.read" },
           { title: { ar: "الشرائح", en: "Segments" }, href: "/customers/segments", permission: "customers.read" },
         ],
       },

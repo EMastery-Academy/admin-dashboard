@@ -78,6 +78,12 @@ import {
   listCountries,
   listCustomerSegments,
   listCustomers,
+  listAdminEntitlements,
+  listCustomerEntitlements,
+  getAdminEntitlement,
+  getProductPriceHistory,
+  listPriceBatches,
+  previewBulkPriceChange,
   listExtensionPackages,
   listImportIssues,
   listInstructorApplications,
@@ -617,6 +623,39 @@ function liveEndpointTests(): LiveTest[] {
     { name: "GET /admin/catalog/categories", run: async () => { await listCategories({ limit: 5 }); } },
     { name: "GET /admin/catalog/price-lists", run: async () => { await listPriceLists({ limit: 5 }); } },
     { name: "GET /admin/catalog/extension-packages", run: async () => { await listExtensionPackages({ limit: 5 }); } },
+
+    // -- customer access and pricing (read-only; previews write nothing)
+    {
+      name: "GET /admin/entitlements[/{id}]",
+      run: async () => {
+        const page = await listAdminEntitlements({ limit: 5, expiring_within_days: 365 });
+        const first = page.items[0] ?? (await listAdminEntitlements({ limit: 1 })).items[0];
+        if (!first) throw new SkipTest("no entitlements");
+        const detail = await getAdminEntitlement(first.entitlement_id);
+        assert(Array.isArray(detail.extensions) && Array.isArray(detail.events), "expected extensions and events");
+      },
+    },
+    {
+      name: "GET /admin/customers/{ref}/entitlements",
+      run: async (ctx) => {
+        if (!ctx.customerRef) throw new SkipTest("no customer");
+        await listCustomerEntitlements(ctx.customerRef, { limit: 5 });
+      },
+    },
+    {
+      name: "GET /admin/pricing/products/{id}/history + POST /admin/pricing/bulk/preview",
+      run: async (ctx) => {
+        if (!ctx.b2cProductId) throw new SkipTest("no B2C product");
+        await getProductPriceHistory(ctx.b2cProductId);
+        const preview = await previewBulkPriceChange({
+          selector: { product_ids: [ctx.b2cProductId] },
+          operation: { field: "amount", type: "percent", value: 10, rounding: "x99" },
+          currency_code: "USD",
+        });
+        assert(preview.total <= 1, "expected at most the one selected product");
+      },
+    },
+    { name: "GET /admin/pricing/batches", run: async () => { await listPriceBatches({ limit: 5 }); } },
     { name: "GET /admin/catalog/certificates", run: async () => { await listCertificateTemplates({ limit: 5 }); } },
     { name: "GET /admin/catalog/ratings", run: async () => { await listRatings({ limit: 5 }); } },
 

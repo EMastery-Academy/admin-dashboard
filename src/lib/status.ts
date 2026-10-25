@@ -231,3 +231,19 @@ export function slotStateBadge(state: string | null | undefined): BadgeDef | nul
       return state ? { label: { ar: state, en: state } } : null;
   }
 }
+
+/** A customer's access to a product (`active` past its expiry is reported as `expired` by the API). */
+export function entitlementStatusBadge(status: string | null | undefined): BadgeDef | null {
+  switch (status) {
+    case "active":
+      return { label: { ar: "فعّال", en: "Active" }, tone: "success" };
+    case "expired":
+      return { label: { ar: "منتهٍ", en: "Expired" }, tone: "neutral" };
+    case "suspended":
+      return { label: { ar: "موقوف مؤقتاً", en: "Suspended" }, tone: "warning" };
+    case "revoked":
+      return { label: { ar: "مسحوب", en: "Revoked" }, tone: "danger" };
+    default:
+      return status ? { label: { ar: status, en: status } } : null;
+  }
+}

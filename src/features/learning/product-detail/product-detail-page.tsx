@@ -30,6 +30,8 @@ import { BundleTab } from "./tabs/bundle-tab";
 import { ConsultationTab } from "./tabs/consultation-tab";
 import { LiveDiplomaTab } from "./tabs/live-diploma-tab";
 import { PackageTab } from "./tabs/package-tab";
+import { EntitlementDirectory } from "@/features/entitlements/components/entitlement-lists";
+import { can } from "@/lib/permissions";
 
 export function ProductDetailPage() {
   const t = useT();
@@ -117,6 +119,7 @@ export function ProductDetailPage() {
   const searchDetail = searchDetailQuery.data;
   const searchObj = useMemo(() => searchDetail as Record<string, unknown> | undefined, [searchDetail]);
 
+  const isB2c = Boolean(productData?.b2c);
   const tabs: DetailTabDef[] = useMemo(() => {
     const overview: DetailTabDef = { id: "overview", labelAr: "نظرة عامة", labelEn: "Overview" };
     const orders: DetailTabDef = {
@@ -135,19 +138,22 @@ export function ProductDetailPage() {
         (searchDetail?.related?.packages?.length || 0) +
         (searchDetail?.related?.consultations?.length || 0),
     };
+    // Who holds this product (B2C products only): extend, suspend, reinstate or revoke each customer's access.
+    const access: DetailTabDef[] =
+      isB2c && can("subscribers.read") ? [{ id: "access", labelAr: "وصول العملاء", labelEn: "Customer access" }] : [];
     const legacy: DetailTabDef | null = hasLegacy
       ? { id: "legacy", labelAr: "محتوى النظام القديم", labelEn: "Legacy content" }
       : null;
 
     switch (productType) {
       case "package":
-        return [overview, { id: "package", labelAr: "الحزمة", labelEn: "Package" }, orders, related];
+        return [overview, { id: "package", labelAr: "الحزمة", labelEn: "Package" }, orders, ...access, related];
       case "bundle":
-        return [overview, { id: "bundle", labelAr: "باقة الدورات", labelEn: "Bundle contents" }, orders, related];
+        return [overview, { id: "bundle", labelAr: "باقة الدورات", labelEn: "Bundle contents" }, orders, ...access, related];
       case "consultation":
-        return [overview, { id: "consultation", labelAr: "الاستشارة", labelEn: "Consultation" }, orders, related];
+        return [overview, { id: "consultation", labelAr: "الاستشارة", labelEn: "Consultation" }, orders, ...access, related];
       case "live_diploma":
-        return [overview, { id: "live_diploma", labelAr: "الدبلوم المباشر", labelEn: "Live diploma" }, orders, related];
+        return [overview, { id: "live_diploma", labelAr: "الدبلوم المباشر", labelEn: "Live diploma" }, orders, ...access, related];
       default: {
         const content: DetailTabDef = {
           id: "content",
@@ -171,12 +177,13 @@ export function ProductDetailPage() {
           { id: "resources", labelAr: "المصادر والمحتوى", labelEn: "Resources" },
           instructors,
           orders,
+          ...access,
           related,
           ...(legacy ? [legacy] : []),
         ];
       }
     }
-  }, [productType, hasLegacy, units, totalOrdersCount, searchDetail, searchObj]);
+  }, [productType, hasLegacy, isB2c, units, totalOrdersCount, searchDetail, searchObj]);
 
   useEffect(() => {
     if (!tabs.some((tab) => tab.id === activeTab)) {
@@ -273,6 +280,8 @@ export function ProductDetailPage() {
           {activeTab === "live_diploma" && <LiveDiplomaTab slug={item.slug} />}
 
           {activeTab === "orders" && <OrdersTab productRef={productRef} />}
+
+          {activeTab === "access" && item?.product_id ? <EntitlementDirectory productId={item.product_id} /> : null}
 
           {activeTab === "related" && <RelatedTab productRef={productRef} detail={searchDetail} />}
 

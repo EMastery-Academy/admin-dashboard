@@ -133,8 +133,9 @@ export function Shell() {
                     event.preventDefault();
                     return;
                   }
-                  // Clicking a different root domain reveals the contextual panel again.
-                  if (m.id !== activeModule.id) setCollapsed(false);
+                  // Any domain click reveals the contextual panel again, including the active one,
+                  // so a collapsed sidebar can always be reopened from the rail.
+                  setCollapsed(false);
                   setNavOpen(false);
                 }}
                 aria-current={current ? "true" : undefined}
@@ -147,17 +148,14 @@ export function Shell() {
           })}
           <span className="ma-rail__spacer" />
           <ThemeToggle />
-          <IconButton
-            icon="panel"
-            label={collapsed ? t("توسيع القائمة الجانبية", "Expand sidebar") : t("طيّ القائمة الجانبية", "Collapse sidebar")}
-            aria-expanded={!collapsed}
-            aria-keyshortcuts="Control+B"
-            onClick={() => setCollapsed((v) => !v)}
-          />
         </nav>
 
         {/* Sidebar */}
-        <nav className="ma-sidebar" aria-label={translate(useLangStore.getState().lang, activeModule.title.ar, activeModule.title.en)}>
+        <nav
+          id="admin-sidebar"
+          className="ma-sidebar"
+          aria-label={translate(useLangStore.getState().lang, activeModule.title.ar, activeModule.title.en)}
+        >
           <Sidebar module={activeModule} activeHref={active?.href} onCollapse={() => setCollapsed(true)} />
         </nav>
       </div>
@@ -169,6 +167,18 @@ export function Shell() {
           <span className="ma-topbar__mobile">
             <IconButton iconNode={<MenuIcon size={22} />} label={t("فتح القائمة", "Open menu")} onClick={() => setNavOpen(true)} />
           </span>
+          {studio ? null : (
+            <IconButton
+              className="ma-topbar__sidebar"
+              icon="panel"
+              dirIcon
+              label={collapsed ? t("توسيع القائمة الجانبية", "Expand sidebar") : t("طيّ القائمة الجانبية", "Collapse sidebar")}
+              aria-expanded={!collapsed}
+              aria-controls="admin-sidebar"
+              aria-keyshortcuts="Control+B"
+              onClick={() => setCollapsed((v) => !v)}
+            />
+          )}
           <nav className="ma-topbar__crumbs ma-breadcrumbs" aria-label={t("مسار التنقل", "Breadcrumb")}>
             <ol>
               {crumbs.map(([label, href], index) => {
@@ -346,9 +356,10 @@ function Sidebar({ module, activeHref, onCollapse }: { module: NavModule; active
         {onCollapse ? (
           <IconButton
             icon="panel"
+            dirIcon
             label={t("طيّ القائمة الجانبية", "Collapse sidebar")}
             aria-expanded
-            aria-controls="main"
+            aria-controls="admin-sidebar"
             aria-keyshortcuts="Control+B"
             onClick={onCollapse}
           />

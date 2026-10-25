@@ -5,3 +5,8 @@ docs/contract/
 admin_demo
 .env*
 !.env.example
+
+# Playwright
+e2e/.auth/
+test-results/
+playwright-report/

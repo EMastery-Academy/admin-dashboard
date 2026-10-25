@@ -13,7 +13,7 @@ import {
 } from "@/lib/api";
 import { formatDateTime, formatMinor, formatNumber } from "@/lib/format";
 import { useT } from "@/lib/i18n";
-import { customerStatusBadge, orderStatusBadge, paymentStatusBadge } from "@/lib/status";
+import { customerStatusBadge, entitlementStatusBadge, orderStatusBadge, paymentStatusBadge } from "@/lib/status";
 import { AppLink } from "@/components/ui/app-link";
 import { Badge, Button, Card, Dl, Empty, ErrorAlert, Field, FormActions, Kpi, Loading, PageHead } from "@/components/ui/kit";
 import { DataTable, type Column } from "@/components/ui/data-table";
@@ -21,7 +21,9 @@ import { PageState } from "@/components/ui/primitives";
 import { SearchBox } from "@/components/ui/paged-list";
 import { SelectField } from "@/components/ui/select";
 import { SourceBadge } from "@/components/ui/source-badge";
-import { isLegacy } from "@/lib/refs";
+import { can } from "@/lib/permissions";
+import { isLegacy, productHref } from "@/lib/refs";
+import { CustomerEntitlementsCard } from "@/features/entitlements/components/entitlement-lists";
 import {
   CustomerAvatarCard,
   CustomerGrantsCard,
@@ -169,7 +171,11 @@ export default function CustomerDetailPage() {
 
             {!readOnly ? <CustomerGrantsCard customerRef={profile.ref} /> : null}
             <RecentOrders orders={customer360.data?.recent_orders} loading={customer360.isLoading} />
-            <Entitlements entitlements={customer360.data?.entitlements} loading={customer360.isLoading} />
+            {!readOnly && can("subscribers.read") ? (
+              <CustomerEntitlementsCard customerRef={profile.ref} />
+            ) : (
+              <Entitlements entitlements={customer360.data?.entitlements} loading={customer360.isLoading} />
+            )}
             {!readOnly ? (
               <div className="ma-section-gap">
                 <CustomerHistoryCard customerRef={profile.ref} />
@@ -286,13 +292,13 @@ function Entitlements({ entitlements, loading }: { entitlements?: AdminEntitleme
       key: "product",
       header: t("المنتج", "Product"),
       cell: (row) => (
-        <AppLink to={`/learning/catalog/${row.product_id}`} className="ma-link ma-link--plain">
+        <AppLink to={productHref(`b2c:${row.product_id}`)} className="ma-link ma-link--plain">
           {row.product_title || <bdi>{row.product_id.slice(0, 8)}</bdi>}
         </AppLink>
       ),
     },
     { key: "source", header: t("المصدر", "Source"), cell: (row) => row.source_type },
-    { key: "status", header: t("الحالة", "Status"), cell: (row) => <Badge def={{ label: { ar: row.status, en: row.status } }} /> },
+    { key: "status", header: t("الحالة", "Status"), cell: (row) => <Badge def={entitlementStatusBadge(row.status)} /> },
     { key: "starts", header: t("البداية", "Starts"), cell: (row) => formatDateTime(row.starts_at) },
     { key: "expires", header: t("الانتهاء", "Expires"), cell: (row) => formatDateTime(row.expires_at) },
   ];

@@ -33,7 +33,7 @@ export default function BundleNewPage() {
   const t = useT();
   const navigate = useNavigate();
   const options = useCatalogOptions();
-  const { cards, isLoading: cardsLoading } = useProductCards(["course", "diploma", "consultation"]);
+  const { cards, isLoading: cardsLoading } = useProductCards(["course", "diploma", "consultation", "package"]);
 
   const [title, setTitle] = useState("");
   const [shortDescription, setShortDescription] = useState("");
@@ -118,8 +118,8 @@ export default function BundleNewPage() {
       <PageHead
         title={t("إنشاء حزمة", "Create a package")}
         sub={t(
-          "حزمة تجمع دورات ودبلومات واستشارات بسعر واحد مع ترتيب العناصر.",
-          "Sell courses, diplomas and consultations together for one price, in a set order.",
+          "حزمة تجمع دورات ودبلومات واستشارات وباقات بسعر واحد مع ترتيب العناصر.",
+          "Sell courses, diplomas, consultations and packages together for one price, in a set order.",
         )}
         back={{ href: "/learning/packages", label: t("المنتجات", "Products") }}
       />
@@ -206,7 +206,7 @@ export default function BundleNewPage() {
             </div>
           </Card>
 
-          <Card title={t("عناصر الباقة", "Bundle items")}>
+          <Card title={t("عناصر الحزمة", "Bundle items")}>
             <div className="ma-form">
               {members.length > 0 ? (
                 <div className="ma-members">
@@ -268,7 +268,7 @@ export default function BundleNewPage() {
               ) : null}
               <CheckPicker
                 id="bundle-members"
-                label={t("أضف منتجات إلى الباقة", "Add products to the bundle")}
+                label={t("أضف منتجات إلى الحزمة", "Add products to the bundle")}
                 options={memberOptions}
                 selected={members.map((member) => member.product_id)}
                 onToggle={(value) =>

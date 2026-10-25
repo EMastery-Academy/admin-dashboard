@@ -21,6 +21,8 @@ import VoucherDetailPage from "@/features/marketing/pages/voucher-detail-page";
 import CustomersPage from "@/features/customers/pages/customers-page";
 import CustomerDetailPage from "@/features/customers/pages/customer-detail-page";
 import AccountsPage from "@/features/customers/pages/accounts-page";
+import EntitlementsPage from "@/features/entitlements/pages/entitlements-page";
+import PricingPage from "@/features/pricing/pages/pricing-page";
 import TicketsPage from "@/features/customers/pages/tickets-page";
 import TicketDetailPage from "@/features/customers/pages/ticket-detail-page";
 import TeamPage from "@/features/settings/pages/team-page";
@@ -125,6 +127,7 @@ export const ROUTER = createBrowserRouter([
       { path: "sales/vouchers", element: <VouchersPage /> },
       { path: "sales/vouchers/new", element: <VoucherIssuePage /> },
       { path: "sales/vouchers/:voucherId", element: <VoucherDetailPage /> },
+      { path: "sales/pricing", element: <PricingPage /> },
       { path: "sales/price-lists", element: <PriceListsPage /> },
       { path: "sales/offers", element: <OffersPage /> },
 
@@ -197,6 +200,7 @@ export const ROUTER = createBrowserRouter([
       { path: "customers", element: <CustomersPage /> },
       { path: "customers/:id", element: <CustomerDetailPage /> },
       { path: "customers/accounts", element: <AccountsPage /> },
+      { path: "customers/entitlements", element: <EntitlementsPage /> },
       { path: "customers/segments", element: <SegmentsPage /> },
       { path: "customers/tickets", element: <TicketsPage /> },
       { path: "customers/tickets/:ticketId", element: <TicketDetailPage /> },

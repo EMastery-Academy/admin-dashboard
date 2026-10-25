@@ -147,6 +147,7 @@ svg.ma-icon--fill { fill: currentColor; stroke: none; }
 }
 .ma-topbar__crumbs { flex: 1; min-width: 0; }
 .ma-topbar__mobile { display: none; }
+.ma-topbar__sidebar { display: inline-flex; }
 .ma-content { width: 100%; max-width: 1440px; margin-inline: auto; padding: var(--space-6); flex: 1; }
 .ma-content--wide { max-width: none; }
 .ma-content:focus { outline: none; }
@@ -174,6 +175,7 @@ svg.ma-icon--fill { fill: currentColor; stroke: none; }
   .ma-shell.is-nav-open .ma-scrim { display: block; position: fixed; inset: 0; z-index: 55; background: var(--backdrop); }
   .ma-topbar { padding-inline: var(--space-4); }
   .ma-topbar__mobile { display: inline-flex; }
+  .ma-topbar__sidebar { display: none; }
   .ma-topbar__desktop { display: none; }
   .ma-content { padding: var(--space-4); }
   .ma-breadcrumbs li:not(:nth-last-child(-n + 2)) { display: none; }

@@ -8,7 +8,10 @@ type GetBundleOp = "get_bundle_api_v1_admin_bundles__product_id__get";
 type UpdateBundleOp = "update_bundle_api_v1_admin_bundles__product_id__put";
 
 export type BundleUpsertRequest = RequestBody<CreateBundleOp>;
-export type BundleDetail = SuccessResponse<CreateBundleOp>;
+export type BundleDetail = SuccessResponse<CreateBundleOp> & {
+  category_ids: string[];
+  cpd_eligible: boolean;
+};
 export type BundleMember = BundleDetail["members"][number];
 
 export const bundlesPaths = {
