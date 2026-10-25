@@ -30,6 +30,14 @@ const COMMISSION: Record<string, BadgeDef> = {
   rejected: def("مرفوضة", "Rejected", "neutral"),
   refunded: def("مستردة", "Refunded", "neutral"),
 };
+const PAYOUT: Record<string, BadgeDef> = {
+  requested: def("بانتظار المراجعة", "Requested", "warning"),
+  approved: def("معتمد للدفع", "Approved", "info"),
+  paid: def("مدفوع", "Paid", "success"),
+  partially_paid: def("مدفوع جزئياً", "Partly paid", "success"),
+  rejected: def("مرفوض", "Rejected", "danger"),
+  cancelled: def("ألغاه المسوّق", "Cancelled", "neutral"),
+};
 const REWARD: Record<string, BadgeDef> = {
   pending: def("فترة انتظار", "Holding", "info"),
   granted: def("مُنحت", "Granted", "success"),
@@ -44,3 +52,14 @@ export const syncStatusBadge = pick(SYNC);
 export const conversionStatusBadge = pick(CONVERSION);
 export const commissionStatusBadge = pick(COMMISSION);
 export const rewardStatusBadge = pick(REWARD);
+export const payoutStatusBadge = pick(PAYOUT);
+
+const METHOD: Record<string, { ar: string; en: string }> = {
+  paypal: { ar: "PayPal", en: "PayPal" },
+  bank_transfer: { ar: "تحويل بنكي", en: "Bank transfer" },
+  wise: { ar: "Wise", en: "Wise" },
+  other: { ar: "طريقة أخرى", en: "Other" },
+};
+
+export const payoutMethodLabel = (method: string | null | undefined, lang: "ar" | "en"): string =>
+  METHOD[method ?? ""]?.[lang] ?? method ?? "—";

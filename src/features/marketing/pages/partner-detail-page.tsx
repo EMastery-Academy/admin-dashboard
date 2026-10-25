@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams, useSearchParams } from "react-router-dom";
 
@@ -32,10 +32,24 @@ import { PageState } from "@/components/ui/primitives";
 
 import { CouponForm } from "../components/coupon-form";
 import { PartnerForm } from "../components/partner-form";
+import { PartnerPayouts } from "../components/partner-payouts";
 import { commissionStatusBadge, conversionStatusBadge, partnerStatusBadge, syncStatusBadge } from "../lib/affiliates";
 import { couponStatusBadge, couponValueLabel } from "../lib/coupons";
 
-type Tab = "overview" | "customers" | "sales" | "commissions" | "coupons" | "settings";
+const PLATFORM_LABELS: Record<string, string> = {
+  instagram: "Instagram",
+  tiktok: "TikTok",
+  x: "X (Twitter)",
+  youtube: "YouTube",
+  snapchat: "Snapchat",
+  facebook: "Facebook",
+  linkedin: "LinkedIn",
+  telegram: "Telegram",
+  whatsapp: "WhatsApp",
+  website: "Website / blog",
+};
+
+type Tab = "overview" | "customers" | "sales" | "commissions" | "payouts" | "coupons" | "settings";
 
 function Overview({ partner }: { partner: Partner }) {
   const t = useT();
@@ -77,7 +91,25 @@ function Overview({ partner }: { partner: Partner }) {
                   "—"
                 ),
               ],
+              ...Object.entries(((partner.application as { links?: Record<string, string> }).links ?? {})).map(
+                ([platform, url]) =>
+                  [
+                    PLATFORM_LABELS[platform] ?? platform,
+                    <a key={platform} className="ma-link" href={url} target="_blank" rel="noopener noreferrer nofollow" dir="ltr" style={{ wordBreak: "break-all" }}>
+                      {url}
+                    </a>,
+                  ] as [string, ReactNode],
+              ),
               [t("حجم الجمهور", "Audience Size"), (partner.application as Record<string, string>).audience_size || "—"],
+              [
+                t("سياسة البرنامج", "Programme policy"),
+                (partner.application as Record<string, string>).policy_accepted_at
+                  ? t(
+                      `وافق في ${formatDateTime((partner.application as Record<string, string>).policy_accepted_at)}`,
+                      `Accepted ${formatDateTime((partner.application as Record<string, string>).policy_accepted_at)}`,
+                    )
+                  : "—",
+              ],
               [
                 t("الخطة التسويقية المقترحة", "Marketing Plan"),
                 <div key="plan" style={{ whiteSpace: "pre-wrap", lineHeight: 1.6 }}>
@@ -98,6 +130,14 @@ function Overview({ partner }: { partner: Partner }) {
         <Dl
           rows={[
             [t("النوع", "Type"), partner.kind === "student" ? t("طالب (برنامج الإحالة)", "Student (referral program)") : t("مسوّق", "Marketer")],
+            [
+              t("حساب المتجر", "Store account"),
+              partner.customer_id ? (
+                <AppLink key="acct" className="ma-link" to={`/customers/${partner.customer_id}`}>{t("مرتبط", "Linked")}</AppLink>
+              ) : (
+                t("غير مرتبط بعد — يرتبط عند تسجيل الدخول بنفس البريد", "Not linked yet — links when they sign in with this email")
+              ),
+            ],
             [t("الجوال", "Phone"), partner.phone ?? "—"],
             [t("الدولة", "Country"), partner.country_code ?? "—"],
             [t("معرّف Tolt", "Tolt ID"), partner.tolt_partner_id ?? "—"],
@@ -180,8 +220,8 @@ export function CommissionsList({ partnerId }: { partnerId?: string }) {
     ...(partnerId ? [] : [{ key: "partner", header: t("المسوّق", "Affiliate"), exportValue: (r: AffiliateCommission) => r.partner_name ?? "", cell: (r: AffiliateCommission) => (r.partner_id ? <AppLink className="ma-link" to={`/marketing/affiliates/${r.partner_id}`}>{r.partner_name ?? "—"}</AppLink> : "—") } as Column<AffiliateCommission>]),
     { key: "order", header: t("الطلب", "Order"), exportValue: (r) => r.order_id ?? "", cell: (r) => (r.order_id ? <AppLink className="ma-link ma-num" to={`/sales/orders/${r.order_id}`}>{r.order_id.slice(0, 8)}</AppLink> : "—") },
     { key: "amount", header: t("العمولة", "Amount"), align: "end", exportKind: "number", exportValue: (r) => r.amount_minor / 100, cell: (r) => <span className="ma-num">{formatMinor(r.amount_minor)}</span> },
-    { key: "status", header: t("الحالة", "Status"), exportValue: (r) => r.status, cell: (r) => <Badge def={commissionStatusBadge(r.status)} /> },
-    { key: "payout", header: t("الدفعة", "Payout"), exportValue: (r) => r.payout_id ?? "", cell: (r) => r.payout_id ?? "—" },
+    { key: "status", header: t("الحالة", "Status"), exportValue: (r) => r.effective_status, cell: (r) => <Badge def={commissionStatusBadge(r.effective_status)} /> },
+    { key: "payout", header: t("الدفعة", "Payout"), exportValue: (r) => r.settled_payout_id ?? r.payout_id ?? "", cell: (r) => (r.settled_at ? formatDateTime(r.settled_at) : r.payout_id ?? "—") },
     { key: "at", header: t("التاريخ", "Date"), exportKind: "datetime", exportValue: (r) => r.tolt_created_at ?? null, cell: (r) => formatDateTime(r.tolt_created_at) },
     {
       key: "actions", header: "", exportable: false, align: "end",
@@ -283,6 +323,7 @@ export default function PartnerDetailPage() {
     ["customers", t("العملاء", "Customers")],
     ["sales", t("المبيعات", "Sales")],
     ["commissions", t("العمولات", "Commissions")],
+    ...(p?.kind === "marketer" ? ([["payouts", t("الصرف", "Payouts")]] as [Tab, string][]) : []),
     ["coupons", t("الكوبونات", "Coupons")],
     ...(canWrite ? ([["settings", t("تعديل", "Edit")]] as [Tab, string][]) : []),
   ];
@@ -334,6 +375,7 @@ export default function PartnerDetailPage() {
         {p && tab === "customers" ? <Customers partner={p} /> : null}
         {p && tab === "sales" ? <SalesList partnerId={p.partner_id} /> : null}
         {p && tab === "commissions" ? <CommissionsList partnerId={p.partner_id} /> : null}
+        {p && tab === "payouts" && p.kind === "marketer" ? <PartnerPayouts partner={p} /> : null}
         {p && tab === "coupons" ? <Coupons partner={p} /> : null}
         {p && tab === "settings" && canWrite ? <Settings partner={p} /> : null}
       </PageState>

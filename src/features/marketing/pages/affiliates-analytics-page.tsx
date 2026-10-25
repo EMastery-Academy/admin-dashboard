@@ -47,6 +47,15 @@ export default function AffiliatesAnalyticsPage() {
               <Kpi label={t("عمولات مدفوعة", "Paid commission")} value={formatMinor(n(totals.c_paid))} icon="card" />
               <Kpi label={t("مكافآت الطلاب", "Student rewards")} value={formatNumber(n(totals.rewards))} meta={t(`${formatMinor(n(totals.rewards_value))} مُنحت`, `${formatMinor(n(totals.rewards_value))} granted`)} icon="tag" />
             </div>
+            <div className="ma-kpis">
+              <Kpi
+                label={t("طلبات صرف مفتوحة", "Open payout requests")}
+                value={formatNumber(n(totals.payouts_open))}
+                meta={<AppLink className="ma-link" to="/marketing/payouts">{formatMinor(n(totals.payouts_open_value))}</AppLink>}
+                icon="clock"
+              />
+              <Kpi label={t("صُرف للمسوقين في الفترة", "Paid to marketers")} value={formatMinor(n(totals.payouts_paid))} icon="card" />
+            </div>
             <div className="ma-cols ma-cols--main-side">
               <Card title={t("المبيعات اليومية", "Daily sales")}>
                 {d.daily.length ? (

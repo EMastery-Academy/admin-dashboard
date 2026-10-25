@@ -22,6 +22,12 @@ type AnalyticsOp = "affiliate_analytics_api_v1_admin_affiliates_analytics_get";
 type CustomerReferralsOp = "customer_referrals_api_v1_admin_affiliates_customers__customer_id__get";
 type AffiliateProgramOp = "get_affiliate_program_settings_api_v1_admin_affiliates_program_get";
 type SaveAffiliateProgramOp = "save_affiliate_program_settings_api_v1_admin_affiliates_program_put";
+type PayoutsOp = "list_payouts_api_v1_admin_affiliates_payouts_get";
+type PayoutsSummaryOp = "payouts_summary_api_v1_admin_affiliates_payouts_summary_get";
+type PayoutOp = "get_payout_api_v1_admin_affiliates_payouts__payout_id__get";
+type PayPayoutOp = "pay_payout_api_v1_admin_affiliates_payouts__payout_id__pay_post";
+type PartnerBalanceOp = "partner_balance_api_v1_admin_affiliates_partners__partner_id__balance_get";
+type PartnerLedgerOp = "partner_ledger_api_v1_admin_affiliates_partners__partner_id__ledger_get";
 
 export type PartnersParams = QueryParams<ListPartnersOp>;
 export type PartnerPage = SuccessResponse<ListPartnersOp>;
@@ -46,6 +52,15 @@ export type AssignInput = RequestBody<AssignOp>;
 export type CustomerReferrals = SuccessResponse<CustomerReferralsOp>;
 export type AffiliateProgramSettings = SuccessResponse<AffiliateProgramOp>;
 export type AffiliateProgramSettingsInput = RequestBody<SaveAffiliateProgramOp>;
+export type PayoutsParams = QueryParams<PayoutsOp>;
+export type PayoutPage = SuccessResponse<PayoutsOp>;
+export type AffiliatePayout = PayoutPage["items"][number];
+export type PayoutsSummary = SuccessResponse<PayoutsSummaryOp>;
+export type PayoutReview = SuccessResponse<PayoutOp>;
+export type PayoutPayInput = RequestBody<PayPayoutOp>;
+export type PartnerBalance = SuccessResponse<PartnerBalanceOp>;
+export type LedgerPage = SuccessResponse<PartnerLedgerOp>;
+export type LedgerEntry = LedgerPage["items"][number];
 
 export const affiliatesPaths = {
   partners: "admin/affiliates/partners",
@@ -70,6 +85,14 @@ export const affiliatesPaths = {
   legacyPush: "admin/affiliates/import/legacy/push",
   analytics: "admin/affiliates/analytics",
   customerReferrals: "admin/affiliates/customers/{customer_id}",
+  payouts: "admin/affiliates/payouts",
+  payoutsSummary: "admin/affiliates/payouts/summary",
+  payout: "admin/affiliates/payouts/{payout_id}",
+  payoutApprove: "admin/affiliates/payouts/{payout_id}/approve",
+  payoutReject: "admin/affiliates/payouts/{payout_id}/reject",
+  payoutPay: "admin/affiliates/payouts/{payout_id}/pay",
+  partnerBalance: "admin/affiliates/partners/{partner_id}/balance",
+  partnerLedger: "admin/affiliates/partners/{partner_id}/ledger",
 } as const;
 
 export const affiliatesKeys = {
@@ -86,6 +109,11 @@ export const affiliatesKeys = {
   rewards: (params?: RewardsParams) => [...affiliatesKeys.all, "rewards", params ?? {}] as const,
   analytics: (params?: object) => [...affiliatesKeys.all, "analytics", params ?? {}] as const,
   customerReferrals: (customerId: string) => [...affiliatesKeys.all, "customer-referrals", customerId] as const,
+  payouts: (params?: PayoutsParams) => [...affiliatesKeys.all, "payouts", params ?? {}] as const,
+  payoutsSummary: () => [...affiliatesKeys.all, "payouts-summary"] as const,
+  payout: (id: string) => [...affiliatesKeys.all, "payout", id] as const,
+  partnerBalance: (id: string) => [...affiliatesKeys.all, "partner-balance", id] as const,
+  partnerLedger: (id: string, params?: object) => [...affiliatesKeys.all, "partner-ledger", id, params ?? {}] as const,
 };
 
 /** `GET /admin/affiliates/partners` — marketers and student referrers (B2C, synced to Tolt). */
@@ -151,6 +179,28 @@ export const getAffiliateAnalytics = (params: QueryParams<AnalyticsOp> = {}): Pr
 export const getCustomerReferrals = (customer_id: string): Promise<CustomerReferrals> =>
   apiGet(affiliatesPaths.customerReferrals, { path: { customer_id } });
 
+/** `GET /admin/affiliates/payouts` — marketer payout requests (local ledger). `status` takes a status or `open`. */
+export const listAffiliatePayouts = (params: PayoutsParams = {}): Promise<PayoutPage> =>
+  apiGet(affiliatesPaths.payouts, { query: params });
+export const getPayoutsSummary = (): Promise<PayoutsSummary> => apiGet(affiliatesPaths.payoutsSummary);
+/** The request with full payout details, the marketer's balance and recent ledger entries. */
+export const getAffiliatePayout = (payout_id: string): Promise<PayoutReview> =>
+  apiGet(affiliatesPaths.payout, { path: { payout_id } });
+export const approveAffiliatePayout = (payout_id: string, note?: string): Promise<PayoutReview> =>
+  apiPost(affiliatesPaths.payoutApprove, { path: { payout_id }, body: { note: note || null } });
+/** The whole amount returns to the marketer's available balance. Audited. */
+export const rejectAffiliatePayout = (payout_id: string, reason: string): Promise<PayoutReview> =>
+  apiPost(affiliatesPaths.payoutReject, { path: { payout_id }, body: { reason } });
+/** Record a transfer made outside the platform, in full or in part (amount or percent). Audited. */
+export const payAffiliatePayout = (payout_id: string, body: PayoutPayInput): Promise<PayoutReview> =>
+  apiPost(affiliatesPaths.payoutPay, { path: { payout_id }, body });
+export const getPartnerBalance = (partner_id: string): Promise<PartnerBalance> =>
+  apiGet(affiliatesPaths.partnerBalance, { path: { partner_id } });
+export const listPartnerLedger = (
+  partner_id: string,
+  params: { limit?: number; offset?: number } = {},
+): Promise<LedgerPage> => apiGet(affiliatesPaths.partnerLedger, { path: { partner_id }, query: params });
+
 export const affiliatesQueries = {
   customerReferrals: (customerId: string) =>
     queryOptions({ queryKey: affiliatesKeys.customerReferrals(customerId), queryFn: () => getCustomerReferrals(customerId) }),
@@ -165,4 +215,8 @@ export const affiliatesQueries = {
     queryOptions({ queryKey: [...affiliatesKeys.all, "program-settings"] as const, queryFn: getAffiliateProgramSettings }),
   analytics: (params: QueryParams<AnalyticsOp> = {}) =>
     queryOptions({ queryKey: affiliatesKeys.analytics(params), queryFn: () => getAffiliateAnalytics(params) }),
+  payoutsSummary: () => queryOptions({ queryKey: affiliatesKeys.payoutsSummary(), queryFn: getPayoutsSummary }),
+  payout: (id: string) => queryOptions({ queryKey: affiliatesKeys.payout(id), queryFn: () => getAffiliatePayout(id) }),
+  partnerBalance: (id: string) =>
+    queryOptions({ queryKey: affiliatesKeys.partnerBalance(id), queryFn: () => getPartnerBalance(id) }),
 };

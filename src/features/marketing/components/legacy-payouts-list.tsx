@@ -3,7 +3,7 @@ import { listReferralPayouts, referralsKeys, type ReferralPayout } from "@/lib/a
 import { formatAmount, formatDateTime } from "@/lib/format";
 import { useLang, useT } from "@/lib/i18n";
 import { badgeLabel, dateValue } from "@/lib/export/columns";
-import { Badge, PageHead } from "@/components/ui/kit";
+import { Badge } from "@/components/ui/kit";
 import type { Column } from "@/components/ui/data-table";
 import { PagedList, type ListFilter } from "@/components/ui/paged-list";
 
@@ -12,7 +12,8 @@ const payoutStatus = (status: number) =>
     ? { label: { ar: "مدفوع", en: "Paid" }, tone: "success" as const }
     : { label: { ar: "مطلوب", en: "Requested" }, tone: "warning" as const };
 
-export default function PayoutsPage() {
+/** Payout requests of the legacy referral platform (`legacy.MAS_AFF_Payment`), read-only. */
+export function LegacyPayoutsList() {
   const t = useT();
   const lang = useLang();
 
@@ -39,33 +40,27 @@ export default function PayoutsPage() {
   );
 
   return (
-    <>
-      <PageHead
-        title={t("طلبات الصرف", "Payout requests")}
-        sub={t("طلبات صرف عمولات المسوقين وحالة الدفع.", "Referral partner payout requests and payment status.")}
-      />
-      <PagedList
-        queryKeyBase={referralsKeys.payouts()}
-        fetchPage={({ offset, limit, filters: selected, query }) =>
-          listReferralPayouts({ limit, offset }).then((res) => {
-            let items = res.items;
-            if (query) {
-              const q = query.toLowerCase();
-              items = items.filter((item) => item.partner_name?.toLowerCase().includes(q));
-            }
-            if (selected.status) {
-              const st = Number(selected.status);
-              items = items.filter((item) => item.status === st);
-            }
-            return { ...res, items };
-          })
-        }
-        columns={columns}
-        filters={filters}
-        searchPlaceholder={t("ابحث باسم المسوق…", "Search partner name…")}
-        empty={t("لا طلبات صرف.", "No payout requests.")}
-        exportConfig={{ filename: "payouts", title: t("طلبات الصرف", "Payouts"), pdf: true, fetchSize: 200 }}
-      />
-    </>
+    <PagedList
+      queryKeyBase={referralsKeys.payouts()}
+      fetchPage={({ offset, limit, filters: selected, query }) =>
+        listReferralPayouts({ limit, offset }).then((res) => {
+          let items = res.items;
+          if (query) {
+            const q = query.toLowerCase();
+            items = items.filter((item) => item.partner_name?.toLowerCase().includes(q));
+          }
+          if (selected.status) {
+            const st = Number(selected.status);
+            items = items.filter((item) => item.status === st);
+          }
+          return { ...res, items };
+        })
+      }
+      columns={columns}
+      filters={filters}
+      searchPlaceholder={t("ابحث باسم المسوق…", "Search partner name…")}
+      empty={t("لا طلبات صرف.", "No payout requests.")}
+      exportConfig={{ filename: "payouts-legacy", title: t("طلبات الصرف (النظام القديم)", "Payouts (legacy)"), pdf: true, fetchSize: 200 }}
+    />
   );
 }

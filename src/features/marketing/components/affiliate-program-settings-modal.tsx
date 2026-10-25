@@ -157,7 +157,10 @@ export function AffiliateProgramSettingsModal({
           <Field
             id="min-payout"
             label={t("الحد الأدنى للسحب ($)", "Minimum Payout ($)")}
-            hint={t("أقل مبلغ لتحويل العمولات (0 يعني بدون حد أدنى)", "Minimum amount to payout (0 = no minimum)")}
+            hint={t(
+              "أقل مبلغ يمكن للمسوّق طلب صرفه من رصيده (0 يعني بدون حد أدنى)",
+              "Smallest amount a marketer can request from their balance (0 = no minimum)",
+            )}
             required
           >
             <input

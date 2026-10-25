@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { CartesianGrid, Bar, BarChart, Line, LineChart, XAxis, YAxis } from "recharts";
 
 import {
+  affiliatesQueries,
   dashboardSummary,
   listOrders,
   listReferralPayouts,
@@ -308,7 +309,10 @@ function InboxList() {
   const t = useT();
   const tickets = useQuery({ queryKey: ["dashboard", "tickets"], queryFn: () => listSupportTickets({ limit: 1 }) });
   const payouts = useQuery({ queryKey: ["dashboard", "payouts"], queryFn: () => listReferralPayouts({ limit: 100 }) });
-  const pendingPayouts = (payouts.data?.items ?? []).filter((row) => row.status === 1).length;
+  const affiliatePayouts = useQuery(affiliatesQueries.payoutsSummary());
+  const pendingPayouts =
+    (payouts.data?.items ?? []).filter((row) => row.status === 1).length +
+    (affiliatePayouts.data ? affiliatePayouts.data.requested_count + affiliatePayouts.data.approved_count : 0);
 
   const items: { n: number; icon: string; label: string; href: string }[] = [
     { n: tickets.data?.total ?? 0, icon: "ticket", label: t("تذاكر دعم", "Support tickets"), href: "/customers/tickets" },

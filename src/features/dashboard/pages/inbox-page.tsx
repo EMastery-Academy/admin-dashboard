@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 
-import { listPaymentFailures, listReferralPayouts, listSupportTickets } from "@/lib/api";
+import { affiliatesQueries, listPaymentFailures, listReferralPayouts, listSupportTickets } from "@/lib/api";
 import { formatNumber } from "@/lib/format";
 import { useT } from "@/lib/i18n";
 import { Card, PageHead } from "@/components/ui/kit";
@@ -12,9 +12,12 @@ export default function InboxPage() {
 
   const tickets = useQuery({ queryKey: ["dashboard", "inbox", "tickets"], queryFn: () => listSupportTickets({ limit: 1 }) });
   const payouts = useQuery({ queryKey: ["dashboard", "inbox", "payouts"], queryFn: () => listReferralPayouts({ limit: 100 }) });
+  const affiliatePayouts = useQuery(affiliatesQueries.payoutsSummary());
   const failures = useQuery({ queryKey: ["dashboard", "inbox", "failures"], queryFn: () => listPaymentFailures({ limit: 1 }) });
 
-  const pendingPayouts = (payouts.data?.items ?? []).filter((row) => row.status === 1).length;
+  const pendingPayouts =
+    (payouts.data?.items ?? []).filter((row) => row.status === 1).length +
+    (affiliatePayouts.data ? affiliatePayouts.data.requested_count + affiliatePayouts.data.approved_count : 0);
 
   const items = [
     { n: tickets.data?.total ?? 0, icon: "ticket", label: t("تذاكر دعم", "Support tickets"), href: "/customers/tickets" },
