@@ -1,9 +1,9 @@
 const API_PREFIX = "/api/v1";
 
 /**
- * Everything goes same-origin: the dev server proxies `/api` to the backend, and in production
- * the admin app is served behind a reverse proxy on the backend's domain. This is what makes the
- * backend's httpOnly admin cookies (`b2c_admin_access_token` / `b2c_admin_refresh_token`) work.
+ * Everything goes same-origin: Vite proxies `/api` in development and a Pages Function proxies it
+ * in production. This makes the backend's httpOnly admin cookies
+ * (`b2c_admin_access_token` / `b2c_admin_refresh_token`) work.
  */
 
 type QueryValue = string | number | boolean | null | undefined;
@@ -56,6 +56,17 @@ function canRecover(path: string): boolean {
 }
 
 export async function apiRequest<T>(method: string, path: string, options: ApiRequestOptions = {}): Promise<T> {
+  const response = await apiRaw(method, path, options);
+
+  if (response.status === 204 || !hasJsonBody(response)) {
+    return undefined as T;
+  }
+
+  return (await response.json()) as T;
+}
+
+/** Like `apiRequest`, but returns the raw response (HTML previews, PDF downloads). Throws `ApiError` when not ok. */
+export async function apiRaw(method: string, path: string, options: ApiRequestOptions = {}): Promise<Response> {
   const { body, headers: requestHeaders, path: pathParams, query, ...requestOptions } = options;
   const headers = buildHeaders(requestHeaders);
   const url = buildUrl(path, pathParams, query);
@@ -87,11 +98,7 @@ export async function apiRequest<T>(method: string, path: string, options: ApiRe
     throw await createApiError(response, url);
   }
 
-  if (response.status === 204 || !hasJsonBody(response)) {
-    return undefined as T;
-  }
-
-  return (await response.json()) as T;
+  return response;
 }
 
 export function apiGet<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
