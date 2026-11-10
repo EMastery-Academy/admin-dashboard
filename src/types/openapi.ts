@@ -23261,15 +23261,23 @@ export interface components {
             ticket_id: string;
             /** Ticket Number */
             ticket_number: string;
-            /**
-             * Customer Id
-             * Format: uuid
-             */
-            customer_id: string;
+            /** Customer Id */
+            customer_id?: string | null;
             /** Customer Name */
             customer_name?: string | null;
             /** Customer Email */
             customer_email?: string | null;
+            /** Guest Name */
+            guest_name?: string | null;
+            /** Guest Email */
+            guest_email?: string | null;
+            /**
+             * Is Guest
+             * @default false
+             */
+            is_guest?: boolean;
+            /** Email Verified At */
+            email_verified_at?: string | null;
             /**
              * Category Id
              * Format: uuid

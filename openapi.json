@@ -86600,8 +86600,15 @@
             "title": "Ticket Number"
           },
           "customer_id": {
-            "type": "string",
-            "format": "uuid",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Customer Id"
           },
           "customer_name": {
@@ -86625,6 +86632,45 @@
               }
             ],
             "title": "Customer Email"
+          },
+          "guest_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Guest Name"
+          },
+          "guest_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Guest Email"
+          },
+          "is_guest": {
+            "type": "boolean",
+            "title": "Is Guest",
+            "default": false
+          },
+          "email_verified_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email Verified At"
           },
           "category_id": {
             "type": "string",
