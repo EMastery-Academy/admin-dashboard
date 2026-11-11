@@ -18,6 +18,8 @@ import InvoicesPage from "@/features/sales/pages/invoices-page";
 import CouponsPage from "@/features/marketing/pages/coupons-page";
 import CouponNewPage from "@/features/marketing/pages/coupon-new-page";
 import CouponDetailPage from "@/features/marketing/pages/coupon-detail-page";
+import { AnnouncementBarEditorPage } from "@/features/marketing/announcements/pages/announcement-bar-editor-page";
+import { AnnouncementBarsPage } from "@/features/marketing/announcements/pages/announcement-bars-page";
 import VouchersPage from "@/features/marketing/pages/vouchers-page";
 import VoucherIssuePage from "@/features/marketing/pages/voucher-issue-page";
 import VoucherDetailPage from "@/features/marketing/pages/voucher-detail-page";
@@ -77,6 +79,9 @@ import AnalyticsSalesPage, {
   ProductsReportPage,
 } from "@/features/analytics/pages/reports-page";
 import BannersPage from "@/features/marketing/pages/banners-page";
+import BlogPostsPage from "@/features/marketing/blog/pages/blog-posts-page";
+import BlogStudioPage from "@/features/marketing/blog/pages/blog-studio-page";
+import BlogSubscribersPage from "@/features/marketing/blog/pages/blog-subscribers-page";
 import PoliciesPage from "@/features/marketing/pages/policies-page";
 import BehaviorOverviewPage from "@/features/analytics/pages/behavior-page";
 import FunnelsPage from "@/features/analytics/pages/funnels-page";
@@ -86,7 +91,6 @@ import SearchPage from "@/features/dashboard/pages/search-page";
 import { CertificatesPage as IssuedCertificatesPage } from "@/features/certificates/pages/certificates-page";
 import {
   AffiliatesReportPage,
-  AnnouncementsPage,
   CategoriesPage,
   CertificatesPage,
   CommissionsPage,
@@ -231,9 +235,13 @@ export const ROUTER = createBrowserRouter([
       { path: "marketing/commissions/legacy", element: <CommissionsPage /> },
       { path: "marketing/referral-program", element: <ReferralProgramPage /> },
       { path: "marketing/payouts", element: <PayoutsPage /> },
-      { path: "marketing/announcements", element: <AnnouncementsPage /> },
+      { path: "marketing/announcements", element: <RequireScope permission="marketing.read"><AnnouncementBarsPage /></RequireScope> },
+      { path: "marketing/announcements/:barId", element: <RequireScope permission="marketing.read"><AnnouncementBarEditorPage /></RequireScope> },
       { path: "marketing/policies", element: <PoliciesPage /> },
       { path: "marketing/banners", element: <BannersPage /> },
+      { path: "marketing/blog", element: <RequireScope permission="marketing.read"><BlogPostsPage /></RequireScope> },
+      { path: "marketing/blog/subscribers", element: <RequireScope permission="marketing.read"><BlogSubscribersPage /></RequireScope> },
+      { path: "marketing/blog/:postId/studio", element: <RequireScope permission="marketing.write"><BlogStudioPage /></RequireScope>, handle: { studio: true } },
 
       // Analytics
       { path: "analytics/sales", element: <AnalyticsSalesPage /> },
@@ -261,7 +269,10 @@ export const ROUTER = createBrowserRouter([
       // Settings
       { path: "settings/general", element: <GeneralSettingsPage /> },
       { path: "settings/team", element: <Navigate to="/access/users" replace /> },
-      { path: "settings/integrations", element: ph("التكاملات", "Integrations") },
+      // The runtime-settings dashboard is hidden: environment variables are the single
+      // source of truth for secrets and configuration. Visiting the old URL lands on
+      // Settings -> General instead of a dead page.
+      { path: "settings/integrations", element: <Navigate to="/settings/general" replace /> },
       { path: "settings/notifications", element: <NotificationsPage /> },
       { path: "settings/audit", element: <AuditPage /> },
 

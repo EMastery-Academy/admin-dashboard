@@ -56,6 +56,8 @@ export * from "@/lib/api/marketing/vouchers";
 export * from "@/lib/api/marketing/affiliates";
 export * from "@/lib/api/marketing/referrals";
 export * from "@/lib/api/marketing/content";
+export * from "@/lib/api/marketing/blog";
+export * from "@/lib/api/marketing/announcements";
 
 // Analytics & reporting
 export * from "@/lib/api/analytics/reports";
@@ -66,5 +68,6 @@ export * from "@/lib/api/search/search";
 
 // Settings & system
 export * from "@/lib/api/settings/settings";
+export * from "@/lib/api/settings/integrations";
 export * from "@/lib/api/system/health";
 export * from "@/lib/api/system/fx";
